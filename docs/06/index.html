@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 6: Convenient Coordinate Systems</h1>
+		</header>
+		<div class="content post__content clearfix"><p>A <em>Key Idea of Computer Graphics:</em> <strong>Work in Convenient Coordinate Systems</strong></p>
+<p>Transformations give us the ability to control what coordinate system we work in. We have no excuse not to use them to work in one that is convenient for us.</p>
+<p>I want to get this point across early. Even though we only have translate and scale, we can still see some useful examples. As the transformations become more complex, we will see even more possibilities.</p>
+<h2 id="example-1-do-a-flip">Example 1: Do a Flip</h2>
+<p>With Canvas, the &ldquo;given&rdquo; coordinate system has its origin in the top left, with Y going downwards and the X axis going to the right.</p>
+<p>In math classes, we usually put the origin in the lower left corner and have y going upwards. Y-up is easier for me to think about (perhaps because I am used to it).</p>
+<p>We can flip the Y axis so that it goes upwards by scaling it by -1. This is a non-uniform scale (we still want the X axis to go to the right). The center of the coordinate system is still at the top of the canvas, so if we have positive Y values, it will be above the top. This is easy to fix by shifting the whole thing downward. Since down is negative (because of the scale), we can do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e">// assumes the canvas is canvas, and the context is ctx
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>                    <span style="color:#75715e">// flip Y
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#111">);</span>    <span style="color:#75715e">// move downwards
+</span></span></span></code></pre></div>
+<p>Of course, we could have done the scale and translate in a different order. What would that look like?</p>
+<p>Translate by: <input type="text" id="fliptx" class="" placeholder="Type Here...">
+, <input type="text" id="flipty" class="" placeholder="Type Here...">
+<br/>
+Scale by: <input type="text" id="flipsx" class="" placeholder="Type Here...">
+, <input type="text" id="flipsy" class="" placeholder="Type Here...">
+</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">For the answer (and explanation)</summary>
+    <div class="markdown-inner myexpand-content">
+      The translation is in the positive Y axis (it starts out in the original coordinate system where Y is down), so it is <code>canvas.height</code>.
+    </div>
+</details>
+</div>
+<p>
+If you want to see this on a real example, I will draw the same picture three ways.
+The first with the regular canvas coordinate system, the second scaling and translating, and the third translating and scaling. Read the code 
+<a href="../../for_students/02-06-01.js" class="box-html" data-tag="eg-flip">02-06-01.js</a>
+) and notice how the values for the translation change depending on the order. If you want, you can make a more interesting picture.</p>
+
+<div id="box-02-06-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-06-01</span>&nbsp;
+    <input type="checkbox" id="check-02-06-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-06-01.html class="boxtitlelink">02-06-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-06-01.js" class="boxtitlelink">02-06-01.js</a>
+    <iframe
+        title="eg-flip"
+        src="../../for_students/02-06-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-06-01"
+    ></iframe>
+</div>
+<h2 id="example-2-fill-the-box-1">Example 2: Fill the Box 1</h2>
+<p>If we want to make something in the canvas, we need to know how big the canvas is. Sometimes we just want to fill the canvas. Rather than measuring in pixels, we measure in &ldquo;percentage of the canvas&rdquo; so that 50% (.5) is halfway.</p>
+<p>We can scale the coordinate system to use &ldquo;percentage coordinates.&rdquo; We can even combine this with a flip.</p>
+<p>
+
+<div id="box-02-06-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-06-02</span>&nbsp;
+    <input type="checkbox" id="check-02-06-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-06-02.html class="boxtitlelink">02-06-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-06-02.js" class="boxtitlelink">02-06-02.js</a>
+    <iframe
+        title="ex-fill"
+        src="../../for_students/02-06-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-06-02"
+    ></iframe>
+</div></p>
+<p>You should have guessed these lines:
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#f92672">?</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#f92672">?</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div></p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">JavaScript tip: What&#39;s up with the ?</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>If you notice, in this code, I wrote <code>context?.scale</code> (and other method calls on context). This is JavaScript&rsquo;s &ldquo;Chaining Operator&rdquo;: the method call only happens if the variable is defined (it isn&rsquo;t null).</p>
+<p>This is used in cases where we need to protect against errors - that the code doesn&rsquo;t stop execution if something isn&rsquo;t defined (for example, if the program didn&rsquo;t find the Canvas).</p>
+<p>To be honest, I only put the ? in this example so that Visual Studio Code gave me fewer warning messages.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="example-3-fill-the-box-2-your-turn">Example 3: Fill the Box 2: Your Turn</h2>
+<p>In computer graphics, we often like to have a coordinate system with the origin in the center of the &ldquo;window&rdquo; (in our case, the Canvas we&rsquo;re working in), and the x and y coordinates ranging from -1 to 1. That way, we can draw things with the same coordinates no matter how big the window is. These are sometimes known as &ldquo;normalized coordinates.&rdquo;</p>
+<p>For pedagogical reasons, in class we prefer -100 to 100 (integers are easier to type and read). In the old days, some web browsers had problems with floating point numbers in their Canvas engines.</p>
+<p>
+
+
+
+
+You can create the coordinate system for canvas using a translation and a scale (in either order). In 
+<a href="../../for_students/02-06-03.js" class="box-html" data-tag="ex-range-scale">02-06-03.js</a>
+, replace the &ldquo;Student will replace this line&rdquo; lines to set the coordinate system so it goes from -100 to 100 in x and y. The picture is a diamond shape that touches the edges, a plus at the center, and a T near the top left. You should only add translate and scale commands to set the coordinate system. If you do it correctly, you will fill each of the boxes below in a similar way.</p>
+
+<div id="box-02-06-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-06-03</span>&nbsp;
+    <input type="checkbox" id="check-02-06-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-06-03.html class="boxtitlelink">02-06-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-06-03.js" class="boxtitlelink">02-06-03.js</a>
+    <iframe
+        title="ex-range-scale"
+        src="../../for_students/02-06-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-06-03"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-06-03-0"></td>
+                <td>standard</td>
+                <td></td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>When you&rsquo;re done, it should look like</p>
+
+    
+    <figure class="">
+        <a href="../../docs/06/range-scale.png">
+            <img src="../../docs/06/range-scale_hu_61765e14d342733b.png" alt="range-scale.png" />
+        </a>
+    </figure>
+
+<p><strong>HINTS:</strong> you can access <code>canvas.width</code> and <code>canvas.height</code>. You only need to add two lines of code to the <code>picture</code> function within <code>part5</code>. The picture has a T in the top left corner, and a red plus in the middle; you cannot see the T and can see only part of the plus in the initial code.</p>
+<h2 id="example-4-design-in-place">Example 4: Design in Place</h2>
+<p>If I want to make an object that is made up of different objects, it can be convenient to define the coordinate system in terms of the &ldquo;whole&rdquo; and have the parts be positioned relative to that.</p>
+<p>For example, consider making a face. I could put the face where it is supposed to go, and then put the eyes where they need to go. Or, I could make a coordinate system for the face, place the eyes in that coordinate system</p>
+<div id="div-canvas-1" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <canvas id="canvas-1" height="150" width="150"></canvas><div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">75</span><span style="color:#111">,</span><span style="color:#ae81ff">75</span><span style="color:#111">);</span> <span style="color:#75715e">// where I want the center of the face
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// draw the face at the origin
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">arc</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">30</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span><span style="color:#111">);</span>    <span style="color:#75715e">// the face is centered
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">stroke</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">arc</span><span style="color:#111">(</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span><span style="color:#111">);</span>    <span style="color:#75715e">// right eye
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fill</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">arc</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span><span style="color:#111">);</span>   <span style="color:#75715e">// left eye
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fill</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">arc</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#ae81ff">15</span><span style="color:#111">,</span><span style="color:#ae81ff">0.5</span><span style="color:#111">,</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span><span style="color:#f92672">-</span><span style="color:#111">.</span><span style="color:#ae81ff">5</span><span style="color:#111">);</span>       <span style="color:#75715e">// mouth
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">stroke</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{
+    const canvas = document.getElementById('canvas-1');
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.lineJoin = "round";
+ctx.translate(75,75); // where I want the center of the face
+// draw the face at the origin
+ctx.beginPath();
+ctx.arc(0,0,30,0,2*Math.PI);    // the face is centered
+ctx.stroke();
+ctx.beginPath();
+ctx.arc(10,-10,5,0,2*Math.PI);    // right eye
+ctx.fill();
+ctx.beginPath();
+ctx.arc(-10,-10,5,0,2*Math.PI);   // left eye
+ctx.fill();
+ctx.beginPath();
+ctx.arc(0,2,15,0.5,Math.PI-.5);       // mouth
+ctx.stroke();
+}
+</script>
+<p>Was this easier? It&rsquo;s clear that left (-10) and right (10) are relative to the center of the face. And that the mouth is part of a circle that is centered in X, and close to the center in Y. For this simple case, we probably could have used the numbers directly.</p>
+<p>A big advantage is that we can define the face (in a way that&rsquo;s convenient), and then figure out where it goes later. In this example we can adjust that initial translate.</p>
+<p>The concept here is that we&rsquo;ve defined a coordinate system for the face. We create the object in this coordinate system. And then we place this coordinate system in the world (that first translate in the program). This will have many advantages as we&rsquo;ll see later in the workbook.</p>
+<p>To give you a preview&hellip;</p>
+<ol>
+<li>We can define an object once in its own coordinate system. And then make multiple copies, using transformations to move these copies to different places. We call these copies <strong>instances</strong>.</li>
+<li>We can place objects relative to their &ldquo;parent&rdquo;. For example, we can design a wheel in &ldquo;wheel&rdquo; coordinates. Then we place the wheel into &ldquo;car&rdquo; coordinates (positioning it relative to the body). As the car moves, the wheel stays attached. Of course, we could place the car on the road, the road in the city, the city on the planet, the planet in the solar system, and so on. This idea of building things by putting child pieces relative to their parents (recursively) is called <strong>hierarchical modeling</strong>.</li>
+</ol>
+<a href="../../docs/07/" class="Next__Page">Next: Page &nbsp;7&nbsp;-&nbsp;More Transformations</a>
+<div id="box-02-06-04" style="border: 2px solid black; padding: 0px; margin: 0;border-radius: 5px; display: inline-block;">
+    <div class="box-rubric-container">
+      <table class="frame-rubric-table">
+        <thead><tr>
+            <td></td>
+            <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+            <td>Description</td>
+        </tr></thead>
+      <tbody><tr>
+            <td><input type="checkbox" class="sitekey" id="check-02-06-04-i"></td>
+            <td>standard</td>
+            <td>Convenient Coordinate System Type-ins</td>
+        </tr></tbody>
+      </table>
+    </div>  
+</div>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Selected"> 6: Convenient Coordinate Systems </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p06",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

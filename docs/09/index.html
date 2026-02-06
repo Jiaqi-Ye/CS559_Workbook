@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 9: Translate Transformations (Again)</h1>
+		</header>
+		<div class="content post__content clearfix">
+<p>On this page we discuss translation transformations again. The idea is to repeat the basics, but to use them as a way to introduce more connections to the code and math. This page goes over concepts from the previous pages, but explains them in a different way.</p>
+<p>Each box on this page has an html file and a javascript file (so the first box is <a href="../../for_students/02-09-01.html" class="box-html" data-tag="eg-transformation-idea">02-09-01.html</a> and 
+<a href="../../for_students/02-09-01.js" class="box-html" data-tag="eg-transformation-idea">02-09-01.js</a>
+).</p>
+<h2 id="the-idea-of-transformation">The idea of transformation</h2>
+<p>Let&rsquo;s start with a really simple example.</p>
+<p>Let&rsquo;s draw a simple object: a square with a triangle inside it. Notice that this shape involves two primitives (a square and a triangle), 7 &ldquo;points&rdquo; (the corners of the 2 polygons), and a whole bunch of pixels (all the pixels that get colored when things get drawn). This first box is <a href="../../for_students/02-09-01.html" class="box-html" data-tag="eg-transformation-idea">02-09-01.html</a> and 
+<a href="../../for_students/02-09-01.js" class="box-html" data-tag="eg-transformation-idea">02-09-01.js</a>
+.</p>
+
+<div id="box-02-09-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-01</span>&nbsp;
+    <input type="checkbox" id="check-02-09-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-01.html class="boxtitlelink">02-09-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-01.js" class="boxtitlelink">02-09-01.js</a>
+    <iframe
+        title="eg-transformation-idea"
+        src="../../for_students/02-09-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-01"
+    ></iframe>
+</div>
+<p>The object is drawn with relatively simple code:
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;goldenrod&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;red&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#ae81ff">25</span><span style="color:#111">,</span> <span style="color:#ae81ff">25</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">25</span><span style="color:#111">,</span> <span style="color:#ae81ff">35</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">35</span><span style="color:#111">,</span> <span style="color:#ae81ff">30</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fill</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></div></p>
+<p>Now, suppose that we want to move this shape around with a slider. We need to redraw it in different positions. We don&rsquo;t need to move all the pixels (since we figure them out from the points), but we do need to move all the points.</p>
+<p>Let&rsquo;s look at two ways to do this. Be sure to look at the JavaScript file as well.</p>
+<p>When you do look at 
+<a href="../../for_students/02-09-01.js" class="box-html" data-tag="eg-transformation-idea">02-09-01.js</a>
+, you should notice that the actual drawing code is in another file. The <code>drawTriSquare</code> function is in a <strong>module</strong> (so it can be used in other examples). Make sure you can find that file. It&rsquo;s &ldquo;TriSquare.js&rdquo; in the libs/CS559 folder.</p>
+<h3 id="way-1-parametric-geometry">Way 1, Parametric Geometry</h3>
+
+<p>The obvious way to do this is to replace every position in our code with a parameter so we can move it around: (<a href="../../for_students/02-09-02.html" class="box-html" data-tag="eg-parametric">02-09-02.html</a> and 
+<a href="../../for_students/02-09-02.js" class="box-html" data-tag="eg-parametric">02-09-02.js</a>
+)</p>
+<p>
+<div id="box-02-09-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-02</span>&nbsp;
+    <input type="checkbox" id="check-02-09-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-02.html class="boxtitlelink">02-09-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-02.js" class="boxtitlelink">02-09-02.js</a>
+    <iframe
+        title="eg-parametric"
+        src="../../for_students/02-09-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-02"
+    ></iframe>
+</div>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">drawTriSquareParameter</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">,</span> <span style="color:#75af00">xval</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;goldenrod&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span> <span style="color:#f92672">+</span> <span style="color:#75af00">xval</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;red&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#ae81ff">25</span> <span style="color:#f92672">+</span> <span style="color:#75af00">xval</span><span style="color:#111">,</span> <span style="color:#ae81ff">25</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">25</span> <span style="color:#f92672">+</span> <span style="color:#75af00">xval</span><span style="color:#111">,</span> <span style="color:#ae81ff">35</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">35</span> <span style="color:#f92672">+</span> <span style="color:#75af00">xval</span><span style="color:#111">,</span> <span style="color:#ae81ff">30</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fill</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div></p>
+<p>Notice that we have to (carefully) change every <code>x</code> coordinate in the code to use a new x value. Each coordinate <code>(x,y)</code> is changed to <code>(x+xval,y)</code>. This box is <a href="../../for_students/02-09-02.html" class="box-html" data-tag="eg-parametric">02-09-02.html</a> and 
+<a href="../../for_students/02-09-02.js" class="box-html" data-tag="eg-parametric">02-09-02.js</a>
+. For the rectangle, only its position is a &ldquo;coordinate&rdquo;; we do not have to change the size.</p>
+<h3 id="way-2-transformations">Way 2, Transformations</h3>
+<p>Instead, rather than moving the points, we move the coordinate system.</p>
+<p>
+
+<div id="box-02-09-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-03</span>&nbsp;
+    <input type="checkbox" id="check-02-09-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-03.html class="boxtitlelink">02-09-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-03.js" class="boxtitlelink">02-09-03.js</a>
+    <iframe
+        title="eg-transformations"
+        src="../../for_students/02-09-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-03"
+    ></iframe>
+</div></p>
+<p>This code deserves careful understanding, from the inside out. Look at  
+<a href="../../for_students/02-09-03.js" class="box-html" data-tag="eg-transformations">02-09-03.js</a>
+. The important part is:</p>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">drawTriSquareTransform</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">,</span> <span style="color:#75af00">xval</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">xval</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">trisquare</span><span style="color:#111">.</span><span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Things to understand:</p>
+<ul>
+<li>Notice that it calls <code>drawTriSquare</code> - the original drawing code which draws the shape at the &ldquo;default&rdquo; position. We don&rsquo;t need to change that code at all. It just draws things with the same coordinates as it used in the original example. Instead of moving where the triangle and square are drawn in the coordinate system, we move the coordinate system.</li>
+<li>The line that says <code>translate(xval,0)</code> moves the origin of the coordinate system <code>xval</code> units along the X axis of the coordinate system. This means that things that are drawn will be drawn into this (updated) coordinate system. The coordinate (0,0) is no longer the top left corner of the Canvas: it is <code>xval</code> units to the right (since the X axis is going to the right in the original coordinate system).</li>
+<li>We encountered <code>save</code> and <code>restore</code> in the last workbook. The coordinate system is part of the context (just like the styles we used in Workbook 1). We need to <code>save</code> the current context before we make changes so that we can return the context to its original state. Because <code>translate</code> tells how much to move the coordinate system, if we don&rsquo;t put it back to where we started, each time we apply the translation, the movements will add up.</li>
+</ul>
+<p>You can think of <code>translate</code> as applying an addition of the translation amount to each of the coordinates that are used for drawing. All drawing commands take coordinates and apply the &ldquo;current translation&rdquo; to it before using it. This is built in to all the drawing commands. Part of the context is to keep track of the &ldquo;current translation.&rdquo;</p>
+<p>More generally, translate is a specific type of <strong>transformation</strong>. A transformation is a function that takes a point and returns a new point. So, <code>translate(a,b)</code> can be thought of as a function <code>f(x,y) =&gt; (x+a,y+b)</code>. This function is applied to all coordinates when we&rsquo;re drawing.</p>
+<p>However, we can also think of <code>translate</code> (or any transformation) as changing the <em>coordinate system</em> that we use to interpret the coordinates for drawing. For various reasons (that may not be obvious until you&rsquo;ve been doing graphics for a while), this is a more convenient way to think about things.</p>
+<h3 id="not-a-box-but-important">Not a box, but important&hellip;</h3>
+<p>Learning to think about transformations as changing the coordinate system is important.</p>
+<p>When we say <code>translate(a,b)</code> we are saying &ldquo;move the origin of the coordinate system to (a,b).&rdquo; This means that when we draw the point (0,0) (in the current coordinate system), we will be drawing at the position (a,b) in the old coordinate system (the coordinate system that was current when we issued the <code>translate</code> command).</p>
+<p>You can think of this in terms of a sheet of graph paper on a table. When we draw, we always measure where we are relative to the piece of paper. (0,0) is the corner of the paper. The <code>translate</code> command moves the sheet of paper around. When we start out, the paper is at the corner of the table, so (0,0) is not only the corner of the paper, it is also the corner of the table. Issuing a <code>translate</code> command moves the paper, so (0,0) on the paper is no longer (0,0) on the table. The only thing that is weird about this analogy is that when we leave ink on the paper, it actually marks the table - so when I move the paper after drawing, the ink stays in place.</p>
+<p>The other important thing is that changing the coordinate system affects <strong>future</strong> drawing operations. Things that are already drawn stay where they were drawn.</p>
+<p>The concept of transformations (in this case translation) changing the coordinate system is very important. Make sure you understand it now, before we go on to more complex transformations.</p>
+<h2 id="repeat-after-me">Repeat after me&hellip;</h2>
+<p>Remember: <code>translate</code> moves the current coordinate system, relative to the current coordinate system. Understanding this idea is important. Try to understand it now, when we&rsquo;re dealing with a single, simple transformation (translation). Soon, we will add more types of transformations.</p>
+<p>Because transformations (including translate) change the <em>current</em> coordinate system, they combine (this is known as <em>composition</em>). If you move the coordinate system to the right, and then you move it to the right again, you&rsquo;ve moved it twice as much to the right.</p>
+<p>Also, because we can make many different coordinate systems, we can draw the same object multiple times. With translation, we can make it appear in different places. In the future, we can introduce other variations. Look at this example:</p>
+<p>
+
+<div id="box-02-09-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-04</span>&nbsp;
+    <input type="checkbox" id="check-02-09-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-04.html class="boxtitlelink">02-09-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-04.js" class="boxtitlelink">02-09-04.js</a>
+    <iframe
+        title="eg-repeat"
+        src="../../for_students/02-09-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-04"
+    ></iframe>
+</div></p>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">trisquare</span><span style="color:#111">.</span><span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">trisquare</span><span style="color:#111">.</span><span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">trisquare</span><span style="color:#111">.</span><span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">trisquare</span><span style="color:#111">.</span><span style="color:#75af00">drawTriSquare</span><span style="color:#111">(</span><span style="color:#75af00">context</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Notice how in the code (
+<a href="../../for_students/02-09-04.js" class="box-html" data-tag="eg-repeat">02-09-04.js</a>
+), the translations add (since we don&rsquo;t save and restore). We&rsquo;ll discuss this more below (
+<a href="#multiple-translations" class="anchorlink">Multiple Translations</a>
+).</p>
+<p>This idea of re-using the same &ldquo;object&rdquo; over and over is known as <strong>instancing</strong>. Here, the object is only represented in code, since we&rsquo;re using an immediate mode API. Later, we&rsquo;ll see it in a retained mode API. Either way, we define it once, and reuse it repeatedly.</p>
+<p>You should notice that this example uses JavaScript modules. The triangle/square drawing code is in a separate file (&ldquo;TriSquare.js&rdquo; in libs/CS559 folder) so we don&rsquo;t need to keep repeating it. This is a good opportunity to learn about modules. Read about them in your favorite JavaScript book, or try <a href="https://github.com/nzakas/understandinges6/blob/master/manuscript/13-Modules.md" target="_blank">this chapter in Understanding ES6</a>.</p>
+<h2 id="using-transformations-for-convenient-coordinates">Using Transformations for Convenient Coordinates</h2>
+<p>From the beginning we saw the advantages of working in convenient coordinates. The fact that we program in Canvas relative to the Canvas element (instead of the coordinate system of the window) means we don&rsquo;t need to worry about where on the screen the Canvas element is.</p>
+<p>Don&rsquo;t take this concept for granted: the ability to work in convenient coordinate systems is very important. It becomes <em>useful</em> because we can change coordinate systems easily.</p>
+<p>Often, it is useful to define objects such that the object origin is at 0,0. This way, all coordinates in the object&rsquo;s definition are relative to the object. When the object is placed into some other coordinate system, things will get moved appropriately.</p>
+<p>So, from the original example, you might notice that the &ldquo;object&rdquo; of the triangle in the square is positioned at 20,20. The insides had to be positioned relative to that. We had to know 25,25 was the corner of the triangle.</p>
+<p>Instead, we have a convention that all objects are drawn with their origin at 0,0. This makes it easier to define objects, and also easier to use. There is still a question of where the &ldquo;origin&rdquo; should be. For this example, we&rsquo;ll say it&rsquo;s the upper left of the square. So, we can do:</p>
+<p>
+
+<div id="box-02-09-05" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-05</span>&nbsp;
+    <input type="checkbox" id="check-02-09-05">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-05.html class="boxtitlelink">02-09-05.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-05.js" class="boxtitlelink">02-09-05.js</a>
+    <iframe
+        title="eg-convenient"
+        src="../../for_students/02-09-05.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-05"
+    ></iframe>
+</div></p>
+<p>For this one, you must examine the code.
+You can find it in <a href="../../for_students/02-09-05.html" class="box-html" data-tag="eg-convenient">02-09-05.html</a> and 
+<a href="../../for_students/02-09-05.js" class="box-html" data-tag="eg-convenient">02-09-05.js</a>
+.
+Make sure, however, that you understand why this one uses save and restore, while the previous example did not.</p>
+<h2 id="multiple-translations">Multiple Translations</h2>
+<p>We aren&rsquo;t limited to one translation. After we do a first translation, we can do a second translation, and a third, and so forth.</p>
+<p>The way to think about this: The first translation moves the initial coordinate system. The second translation moves that coordinate system (the result of the first movement). The third translation moves that coordinate system. And so forth.
+Using the paper analogy, each translation moves the piece of paper from wherever it is. When we draw, we draw on the piece of paper wherever it is.</p>
+<p>We already took advantage of that in the code 
+<a href="#repeat-after-me" class="anchorlink">Repeat after me...</a>
+, where we translated, drew something, translated again, drew some more. You can think of this as keeping your pen in the same place and moving the piece of paper.</p>
+<p>The process of combining transformations is called <strong>composition</strong>. When we apply one transformation after the other, the result is the composition of the two.</p>
+<p>When the transformations are translations, the composition process is simple: we just add things up. Since addition is commutative (remember that word from high school algebra?), the order that we do the additions (or translations) doesn&rsquo;t matter. However, this is not true for transformations in general. When we start to combine transformations we will see cases where order matters.</p>
+<h2 id="exercise-1-fix-the-code">Exercise 1, Fix the code</h2>
+<p>
+
+
+
+</p>
+<p>The canvas has a triangle in it. When the button is pressed, the triangle should move to the right.
+When the button is released, the triangle should move to its original position. Right now, each time it jumps farther to the right!</p>
+<p>Understand why the initial code is wrong (it&rsquo;s in <a href="../../for_students/02-09-06.html" class="box-html" data-tag="ex-fix">02-09-06.html</a> and 
+<a href="../../for_students/02-09-06.js" class="box-html" data-tag="ex-fix">02-09-06.js</a>
+) and why it behaves as it does.
+Fix it without using negative numbers. Note: if you move the mouse outside the button, the <code>mouseup</code> event is missed. You don&rsquo;t have to fix that problem.</p>
+
+<div id="box-02-09-06" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-09-06</span>&nbsp;
+    <input type="checkbox" id="check-02-09-06">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-09-06.html class="boxtitlelink">02-09-06.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-09-06.js" class="boxtitlelink">02-09-06.js</a>
+    <iframe
+        title="ex-fix"
+        src="../../for_students/02-09-06.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-09-06"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-09-06-0"></td>
+                <td>regular</td>
+                <td>triangle returns</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>You should only change the <code>draw</code> function, and not use negative numbers.</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">SPOILER HINT: (read this only after trying to fix it yourself)</summary>
+    <div class="markdown-inner myexpand-content">
+      Remember that the translation is part of the drawing context. We need to consider save and restore. Alternatively, we could apply a negative translation to &ldquo;undo&rdquo; the first one.
+    </div>
+</details>
+</div>
+<h2 id="scale-transformations">Scale Transformations</h2>
+<p>The prior pages already discussed scale transformations. I won&rsquo;t repeat that here, but make sure that you remember the concept of center of scale.</p>
+<h2 id="summary---transformations-and-coordinate-systems">Summary - Transformations and Coordinate Systems</h2>
+<p>Hopefully, you now have an idea of what we mean by using transformations to change the coordinate system.
+We only did simple changes (moving the coordinate system with <code>translate</code>), but we&rsquo;ll see some other transformations next, and why these transformations are so useful.</p>
+<p>On to <a href="../../docs/10/" class="Next__Page">Next: Page &nbsp;10&nbsp;-&nbsp;Composition</a></p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Selected"> 9: Translate Transformations (Again) </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p09",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 27: Optional: Lots of Walking Objects</h1>
+		</header>
+		<div class="content post__content clearfix"><p><strong>THIS PAGE IS OPTIONAL FOR SPRING 2026</strong></p>
+<p>We are not doing this exercise in Spring 2026 because of the change in timing.</p>
+<p>We include it in case you are curious. It&rsquo;s a challenging but fun assignment. It is good practice with graphics programming. But it is not essential for practicing the concepts of this workbook.</p>
+<p><strong>WE WILL NOT GRADE THIS PAGE</strong></p>
+<h2 id="the-boids-assignment">The &ldquo;Boids&rdquo; Assignment</h2>
+<p>This page and its exercise and advanced problems are more about graphics programming than fundamental graphics concepts.</p>
+<p>Basically, the methods you&rsquo;re going to experiment with involve a bunch of simple objects that each make individual &ldquo;steering&rdquo; decisions and maintain their speeds. This is sometimes referred to as &ldquo;flocking.&rdquo; The first person to really write about it in the graphics literature was <a href="http://www.red3d.com/cwr/" target="_blank">Craig Reynolds</a> who not only wrote the original <a href="https://dl.acm.org/citation.cfm?id=37406" target="_blank">flocking paper</a>, but also maintains a good <a href="http://www.red3d.com/cwr/boids/" target="_blank">page</a> with information about it. The &ldquo;creatures&rdquo; that flock are sometimes referred to as &ldquo;boids&rdquo; since they aren&rsquo;t always birds (sometimes they are fish, or pedestrians, or &hellip;).</p>
+<p>Boids are a fun programming project, and thus there are a number of implementations on the web. If you want, check out this pretty <a href="https://hughsk.io/boids/" target="_blank">Online Boids Demo</a> or this fun <a href="https://www.youtube.com/watch?v=bqtqltqcQhw&amp;" target="_blank">YouTube video by Sebastian Lague</a>.</p>
+<p>See also <a href="https://cs559.github.io/2008Boids/" target="_blank">2008 Boids Demo</a> for a more interactive demo. You can see the source code, but it&rsquo;s so archaic that it probably won&rsquo;t help you - we don&rsquo;t recommend looking at it.</p>
+<p>Creating flocking was a project in the old games class. Some of those old 2010 projects still run (the joy of web programming!)</p>
+<ul>
+<li><a href="http://graphics.cs.wisc.edu/Courses/Games10/proj1/RaeShei/" target="_blank">Ian and Irene&#39;s Asteroids Game</a></li>
+<li><a href="http://graphics.cs.wisc.edu/Courses/Games10/proj1/HugoMills/" target="_blank">Jeff and Chris&#39; Sheep Herder Game</a></li>
+</ul>
+<p>Those projects were multi-week assignments, completed by pairs of students. This assignment has lower ambitions. But if you want to learn more about flocking, it can be fun.</p>
+<h2 id="walking-boids">Walking Boids</h2>
+<p>
+
+
+
+</p>
+<p>As an initial step, we&rsquo;ll keep a collection of objects. Each one has a position and a velocity. Unlike in previous workbooks, we will create this using an actual JavaScript class. The code is in 
+<a href="../../for_students/02-27-01.js" class="box-html" data-tag="ex-boid">02-27-01.js</a>
+ - you will do this exercise by changing this file (and possibly <a href="../../for_students/02-27-01.html" class="box-html" data-tag="ex-boid">02-27-01.html</a>).</p>
+<p>Throughout this assignment, we&rsquo;ll maintain that each object (1) stays within the Canvas, and (2) has a constant speed (the magnitude of the velocity vector should remain constant). We&rsquo;ll do this by making the velocity vector always be a unit vector. Note: the real speed of movement will depend on the browser&rsquo;s redraw speed, so it might not actually be constant. It should be close enough.</p>
+<p>Right now, this is really simple. The initial boids just fly straight and wrap around. But you can make it cooler.</p>
+<p>These changes are for &ldquo;basic points&rdquo; - we recommend that you do them in order as they are designed to help you learn the code. The rubric (bottom of the page) tells you how many points each is worth.</p>
+<ol>
+<li>Change the &ldquo;Add&rdquo; button so that when it is clicked, 10 new boids are placed at random locations with random directions. Remember, the velocity vectors must have unit magnitude.</li>
+<li>Change the &ldquo;Clear&rdquo; button so that when it is clicked, all the boids are removed. This will be useful for starting over.</li>
+<li>Change the drawing method so that the boids are not drawn just as circles or squares. The objects should point in the direction they are going. You could add a marker to the circles, or change the shape to a triangle (that points in the direction of the velocity), or something fancier.</li>
+<li>Right now, the objects &ldquo;wrap around&rdquo; when they hit the edge. Change it so they &ldquo;bounce&rdquo; off the edge instead. So, for example, when an object hits the right edge, its velocity changes so that it is moving to the left instead. If it hits a side wall, only the horizontal component of the velocity needs to change. Hint: while technically the &ldquo;collision&rdquo; happens in the middle of the step, it is OK to treat it as if it happens at the beginning of the step. That is, you can check if a Boid would go off the screen in the next step and change its direction before it takes that step. And if a Boid does go off screen, you can move it back to the edge and change its direction.</li>
+<li>Objects bounce when they collide. When two boids hit, they change direction. Remember: the velocities stay constant. You don&rsquo;t need to get the physics exact (since we&rsquo;re maintaining velocities) - a simple version is to draw a line between the center of the two objects, and have the objects move away from each other along the line connecting their centers. This should go into the <code>steer</code> method of the boids.</li>
+<li>After a boid hits something, it changes color briefly. For example, it turns red after hitting something. They should stay the &ldquo;alternate&rdquo; color for a few frames. One type of collision is when they hit a wall. You also get points for having them change color when they hit another boid. For checking collisions between boids, it is OK to treat the boids as small circles or squares - rather than checking for collisions between complex shapes (which is much harder).</li>
+</ol>
+<p>Now, let’s make these boids/ants/spiders walk:</p>
+<ol start="7">
+<li>Add at least 4 legs (6 legs for ants, 8 legs for spiders) to the boids. A leg can just be one rectangle or two connected rectangles.</li>
+<li>The legs should be moving while the boids are moving. They can just rotate like the propellers on the quadcopters, but if you do that it will not count towards the next item.</li>
+<li>The legs should be moving in a way that resembles walking ants or spiders: they should be rotating in a symmetric way and the rotation angle should be clamped between two numbers (i.e. not 360-degree rotations).</li>
+<li>These boids could leave a trail, for example, footprints or marks that fade over time and eventually disappear.</li>
+<li>The movement could involve some randomness, for example, by making a small random change in direction, while maintaining velocity, every few frames. The changes should not be too frequent and the random change in direction should not be too large.</li>
+</ol>
+<p>The remaining features are more advanced. You can implement as many (or as few) as you like. <strong>You must list and explain the advanced items you believe you have implemented in the Workbook Form</strong>.</p>
+<ol>
+<li>
+<p>Add obstacles to the scene. You could put shapes into the Canvas (circles or rectangles are good enough), and have the boids stay outside of these regions. This means you need to have the boids collide with the edges (just as they do with the boundaries of the Canvas). You also need to make sure your method for randomly placing boids doesn&rsquo;t put things inside the shapes.</p>
+</li>
+<li>
+<p>Implement &ldquo;steering&rdquo; behaviors (outlined below). They are implemented by having a boid on each step make a small adjustment to its direction vector. These decisions are completely local: there is no planning (it only decides what to do immediately), there is no central decision making (each boid decides on its own), and the boid can only make small changes to its direction (it keeps its velocity and cannot turn too sharply). Despite the fact that these steering behaviors are so limited, interesting effects (like flock formation) can emerge. All of these can be added to the <code>steer</code> method of the boids.</p>
+<p>Note that you get some points for getting &ldquo;some steering to create interesting behavior&rdquo; - you will get this from picking some of the things on the list below, and getting them so they provide some decent looking behavior (grader&rsquo;s discretion). If you implement steering behaviors, list them in the Workbook Form submission. The advanced items are completed for each steering behavior that you (1) describe in the Workbook Form and (2) the grader thinks it looks like it works.</p>
+<p>We aren&rsquo;t telling you how to do steering (like cohesion)&hellip; if you want to figure it out you will need to look at the hints and the references.</p>
+</li>
+</ol>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">Steering Behaviors - Advanced Items</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The steering behaviors are detailed in the references, but past students have made really cool things based just on these descriptions and some experimentation.</p>
+<p>The steering behaviors have the boids look at their &ldquo;neighbors&rdquo; (other boids within a radius) and adjust their direction based on what they see.</p>
+<ul>
+<li>Implement &ldquo;alignment&rdquo; steering. On each step, the boid looks at the other nearby boids and turns to go in the same direction as the average. This works best if the average is weighted (nearby ones have more weight).</li>
+<li>Implement &ldquo;separation&rdquo; steering. On each step, the boid tries to turn away from its neighbors to avoid hitting them.</li>
+<li>Implement &ldquo;cohesion&rdquo; steering. On each step, the boid looks at its neighbors and tries to steer to be in the middle of them.</li>
+<li>Mouse attraction - have boids turn towards the mouse. They should turn gradually (there should be a limit to how fast they turn).</li>
+<li>Implement some other steering behavior based on some of the references above.</li>
+</ul>
+<p>The steering behaviors require tweaking - you need to tune the parameters to get them to work well. Try it with the old demo. You will probably want to add sliders to help you experiment with the parameters. For example, in my testing (to try out the assignment), I limited the turning to 1 or 2 degrees per step. Also, the steering behaviors are most interesting when you combine different ones (e.g., alignment and separation).</p>
+<p>If you implement steering behaviors, you can add sliders to tune them, but have the default values for the sliders be set to things that look nice. Being able to switch off a steering behavior (or set its strength to 0) using a slider or checkbox is a good way to test things (and helps us check that things work).</p>
+<p>Note that the behaviors &ldquo;count twice&rdquo; in the scoring scheme. For example, if you correctly implement alignment or separation, you will get the points for &ldquo;alignment&rdquo; but also &ldquo;visually obvious flocking behavior&rdquo; (assuming it is visually obvious - which it should be). You can get the &ldquo;visually obvious&rdquo; points only once (see rubric).</p>
+
+    </div>
+</details>
+</div>
+<p>You should do this exercise by editing <a href="../../for_students/02-27-01.html" class="box-html" data-tag="ex-boid">02-27-01.html</a> and 
+<a href="../../for_students/02-27-01.js" class="box-html" data-tag="ex-boid">02-27-01.js</a>
+. The graders will look at these files.</p>
+
+<div id="box-02-27-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-27-01</span>&nbsp;
+    <input type="checkbox" id="check-02-27-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">optional<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-27-01.html class="boxtitlelink">02-27-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-27-01.js" class="boxtitlelink">02-27-01.js</a>
+    <iframe
+        title="ex-boid"
+        src="../../for_students/02-27-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-27-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-27-01-0"></td>
+                <td>optional</td>
+                <td>The Boids page will not be graded</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">Hints</summary>
+    <div class="markdown-inner myexpand-content">
+      <ol>
+<li>Do the required changes in the order suggested. This will help you learn the code.</li>
+<li>Read the references on Craig Reynolds&rsquo;s pages for ideas on how to do steering. <a href="http://www.red3d.com/cwr/steer/gdc99/" target="_blank">Craig Reynolds Steering Behavior</a> is an advanced article (that includes the basic ideas).</li>
+<li>Many of the steering behaviors are easier if you represent the velocity as orientation and speed (rather than as x velocity, y velocity). You could change all of the code. I found I was converting back and forth within the steer function. <code>Math.atan2</code> is your friend (see the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2" target="_blank">Mozilla <code>atan2</code> documentation</a>).</li>
+<li>When working with angles, be careful about wraparound! (angle + 360 degrees = angle)</li>
+<li>Be sure to document what you are trying to do so we appreciate what you did! (Give a list of which requirements you did and which advanced things you did.)</li>
+<li>You are allowed to change the starter code as much as you want (for example, to add or remove things from the constructor).</li>
+<li>You can use whatever canvas drawing commands (functions) you think are appropriate (you can use <code>transform</code>, <code>rotate</code>, <code>translate</code> and/or any of the others). There is no requirement that you use the transformation functions.</li>
+<li>To combine multiple steering behaviors, the standard approach is to blend them (weighted addition). However, there are other things you can do as well.</li>
+</ol>
+
+    </div>
+</details>
+</div>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Selected"> 27: Optional: Lots of Walking Objects </li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p27",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 19: Projective (Homogeneous) Transformations</h1>
+		</header>
+		<div class="content post__content clearfix"><p>To help you see what the bottom row of the matrix does, here&rsquo;s a demo that will let you experiment. Try making the bottom middle element negative.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-1">
+    <script type="module">
+        import { demoMatrixProjective } from "/TransformDemos/matrixDrivenDemo.js";
+        demoMatrixProjective('tdemo-1',{width:640,layout:'horizontal'});
+    </script>
+</div>    
+<p>If the bottom middle element is negative, you get a 3D effect. Preview of things to come: this is how we are going to transform 3D objects to our screen with perspective.</p>
+<p>But for now, you should notice that we can change parallel lines into lines that intersect (unlike affine transformations). In fact, you can turn a square into any other quadrilateral. It might create a really weird transformation, but it is possible. Try it:</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-2">
+    <script type="module">
+        import { demoProjective } from "/TransformDemos/transformDemo.js";
+        demoProjective('tdemo-2');
+    </script>
+</div>
+<p>Sometimes, the projection gets so weird that the code to draw the grid doesn&rsquo;t know how to handle it.</p>
+<p>But notice: it does preserve straight lines. If something is straight before the transformation, it is straight after the transformation.</p>
+<h2 id="projective-coordinates">Projective Coordinates</h2>
+<p>Homogeneous coordinates are sometimes called projective because we need to project points from the higher dimensional space back to our original space. This will be useful when we get to 3D since it will let us do perspective transformation (which involves a projection).</p>
+<p>If the bottom row of the projective transformation (the one we apply to homogeneous coordinates) is zero except for a 1 in the lower right corner, the transformation is affine in the original space. If the point we transform starts out with a 1 for its w coordinate, it will end up with a 1 for its w coordinate.</p>
+<p>However, if the bottom row of the matrix is not 0,0,1, or the w of the point is not 1, we will end up with a number other than 1 for the new w, and we need to remember to &ldquo;divide by w&rdquo; to convert back to 2D when the time comes.</p>
+<p>To illustrate how this can work, consider the scaling transformation. We can write it two different ways:
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>s</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>s</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mi>o</mi><mi>r</mi><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>s</mi></mrow></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} s &amp; 0 &amp; 0 \\ 0 &amp; s &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix} or \begin{bmatrix} 1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1/s \end{bmatrix} </annotation></semantics></math></span>
+Notice that these give the same result. If we transform the 2D point x,y using the first matrix we get (sx,sy,1) or (sx,sy). If we use the second matrix, we get (x,y,1/s), which after division by w (to convert back to 2D) gives us (sx,sy).</p>
+<h2 id="reading-matrices">Reading Matrices</h2>
+<p>It is important to understand how the matrices work so we can &ldquo;read&rdquo; them to understand what a specific matrix does. This will also let us &ldquo;write&rdquo; matrices directly (without having to compose them from multiple simple transformations).</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>w</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>y</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>y</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} x&#x27;_x \\ x&#x27;_y \\ x&#x27;_w \end{bmatrix} = \begin{bmatrix} a_{xx}&amp;a_{xy}&amp;t_x \\ a_{yx}&amp;a_{yy}&amp;t_y \\0&amp;0&amp;1 \end{bmatrix} \begin{bmatrix} x_x\\x_y\\1 \end{bmatrix} </annotation></semantics></math></span>
+<p>We can read this matrix as follows:</p>
+<ol>
+<li>The first column ( <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><mn>0</mn></mrow><annotation encoding="application/x-tex"> a_{xx}, a_{yx}, 0 </annotation></semantics></math></span> ) tells us the new direction and scale of the x axis. For every unit of x (in <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">x_x</annotation></semantics></math></span>), this vector defines the movement in the new space.</li>
+<li>The second column ( <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub><mo separator="true">,</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a_{yx}, a_{yy}, 0</annotation></semantics></math></span> ) tells us the new direction and scale of the y axis.</li>
+<li>The third column ( <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>x</mi></msub><mo separator="true">,</mo><msub><mi>t</mi><mi>y</mi></msub><mo separator="true">,</mo><mn>1</mn></mrow><annotation encoding="application/x-tex"> t_x, t_y, 1 </annotation></semantics></math></span> ) tells us the new position of the origin. It&rsquo;s where the zero vector will go.</li>
+</ol>
+<p>So, we can use this in reverse: if we know the transformation we want, we can create the matrix that achieves that transformation. Consider trying to transform the red box into the blue box:</p>
+
+    
+    <figure class="">
+        <a href="../../docs/19/A04-1-5-1.png">
+            <img src="../../docs/19/A04-1-5-1_hu_41698239d69d09cb.png" alt="A04-1-5-1.png" />
+        </a>
+    </figure>
+
+<p>From the picture, we can see that we want the origin to go to (2,1), we want the x axis to go to (4,2) and we want the y axis to go to (-1,3). We can use this to create the matrix:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>1</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} 4 &amp; -1 &amp; 2 \\ 2 &amp; 3 &amp; 1 \\ 0 &amp; 0 &amp; 1 \end{bmatrix} </annotation></semantics></math></span>
+<p>We could have created this matrix as the composition of basic transformations. But in this case, it was easier just to build the matrix by looking where things went.</p>
+<p>Make sure that you can do this! It makes for a good exam question, but it&rsquo;s also useful when you need to construct matrices to put objects in particular places.</p>
+<h2 id="matrices-and-transformations">Matrices and Transformations</h2>
+<p>If we look at the matrix:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} 2 &amp; 0 &amp; 5 \\ 0 &amp; 2 &amp; 5 \\ 0 &amp; 0 &amp; 1 \end{bmatrix} </annotation></semantics></math></span>
+<p>We should be able to see that this scales both x and y by a factor of 2, and translates things by 5 in each direction.</p>
+<p>We could &ldquo;apply&rdquo; this matrix with the code:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Any points we draw after these transformations, would be affected by the matrix. Canvas actually builds the matrix by multiplying two transformations together:</p>
+<p>For computers, it&rsquo;s easier to multiply matrices. For thinking about transformations, sometimes it is easier to think about what the transformation does and create the matrix. For example, if we want to consider what happens when we reverse the order of the transformations:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We could multiply the matrices together (and get a different result):</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>⋅</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>10</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>10</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+\begin{bmatrix} 2 &amp; 0 &amp; 0 \\ 0 &amp; 2 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
+\cdot
+\begin{bmatrix} 1 &amp; 0 &amp; 5 \\ 0 &amp; 1 &amp; 5 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}  =
+\begin{bmatrix} 2 &amp; 0 &amp; 10 \\ 0 &amp; 2 &amp; 10 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
+</annotation></semantics></math></span>
+<p>Or, we could think about how the translation now applies in the scaled coordinate system, so it moves things farther. Or we could think about how the translation is applied to the points first, and then scaled (so the translation amount is multiplied). With either of these, we could then build up the new matrix.</p>
+<h2 id="summary">Summary</h2>
+<p>We have made the connection between transformations and matrices. This will allow you to read the books (which discuss transformations in terms of matrices).</p>
+<p>Often, this happens inside the graphics API. We compose simple, built-in transformations. However, we can use the matrices in our code, which we will start to do on <a href="../../docs/20/" class="Next__Page">Next: Page &nbsp;20&nbsp;-&nbsp;Matrices in Code</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Selected"> 19: Projective (Homogeneous) Transformations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p19",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

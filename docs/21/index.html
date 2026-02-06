@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 21: Matrix Exercises</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Over the past few pages, you saw the connection between the math of transformations and the code we write to draw using Canvas. On this page, you&rsquo;ll get to try writing some code to test it out.</p>
+<p>Hint: remember that the canvas <code>transform</code> allows you to specify an affine transformation as a matrix. It&rsquo;s up to you to figure out what the matrix should be and put it into the 6 values that are passed to <code>transform</code>. You may want to review the required readings to see the standard forms of the matrices. You can often figure out what the entries of the resulting matrix are using the methods in &ldquo;Reading Matrices&rdquo; on page 2, without having to build the matrix up from simple transformations.</p>
+<p>In cases where you do need to figure out the transformations, the JavaScript Math library has a useful function that does a 2-argument arctangent. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2"><code>Math.atan2</code></a>. Given <code>x</code> and <code>y</code>, it tells you the angle needed for rotation.</p>
+<h2 id="box-1-exercise-1-two-dots-with-translate-rotate-and-scale">Box 1: Exercise 1, Two Dots with Translate, Rotate, and Scale</h2>
+<p>
+
+
+
+
+For this box, you should edit 
+<a href="../../for_students/02-21-01.js" class="box-html" data-tag="ex-two-dots-sequence">02-21-01.js</a>
+ (for <a href="../../for_students/02-21-01.html" class="box-html" data-tag="ex-two-dots-sequence">02-21-01.html</a>). The function you have to change is at the beginning of the file. Feel free to read the rest of the code - but please don&rsquo;t change it.
+
+<div id="box-02-21-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-21-01</span>&nbsp;
+    <input type="checkbox" id="check-02-21-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-21-01.html class="boxtitlelink">02-21-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-21-01.js" class="boxtitlelink">02-21-01.js</a>
+    <iframe
+        title="ex-two-dots-sequence"
+        src="../../for_students/02-21-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-21-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-01-0"></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via translate, rotate, and scale</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div></p>
+<p>I wrote some UI code that draws the square, draws a red dot for the first point and a black dot for the second point, and lets you move the points around. All you need to do is fill in the function <code>twoDots</code> in 
+<a href="../../for_students/02-21-01.js" class="box-html" data-tag="ex-two-dots-sequence">02-21-01.js</a>
+ with the code that performs the transformation. It should consist of calls to <code>context.translate</code>, <code>context.rotate</code>, and <code>context.scale</code>. I put in a <code>context.translate</code> just to get you started. You can drag around the dots to make sure your code works (the graders will do it).</p>
+<p>Here are some snapshots of what this should look like when it is working:</p>
+<div class="multifigure">
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-one-one.png">
+                <img src="../../docs/21/ex-two-dots-one-one_hu_bf8709f5a449a95f.png" alt="ex-two-dots-one-one.png" />
+            </a>
+        </figure>
+
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-one-two.png">
+                <img src="../../docs/21/ex-two-dots-one-two_hu_71e0828c55929c23.png" alt="ex-two-dots-one-two.png" />
+            </a>
+        </figure>
+
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-one-three.png">
+                <img src="../../docs/21/ex-two-dots-one-three_hu_ab0121c4d3eede39.png" alt="ex-two-dots-one-three.png" />
+            </a>
+        </figure>
+
+</div>
+<h2 id="box-2-exercise-2-two-dots-with-transform">Box 2: Exercise 2, Two Dots with Transform</h2>
+<p>
+
+
+
+
+Now, do that again, but this time do it using <code>context.transform</code> - compute the 6 numbers that need to be passed. Do this in the <code>twoDots</code> function in 
+<a href="../../for_students/02-21-02.js" class="box-html" data-tag="ex-two-dots-transform">02-21-02.js</a>
+ (<a href="../../for_students/02-21-02.html" class="box-html" data-tag="ex-two-dots-transform">02-21-02.html</a>). I put some example values in that don&rsquo;t work correctly. (The same example images above apply here.)
+
+<div id="box-02-21-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-21-02</span>&nbsp;
+    <input type="checkbox" id="check-02-21-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-21-02.html class="boxtitlelink">02-21-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-21-02.js" class="boxtitlelink">02-21-02.js</a>
+    <iframe
+        title="ex-two-dots-transform"
+        src="../../for_students/02-21-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-21-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-02-0"></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via transform</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div></p>
+<h2 id="box-3-exercise-3-two-dots-a-little-harder">Box 3: Exercise 3, Two Dots a Little Harder</h2>
+<p>
+
+
+
+
+This is the same as box 2 - except that the corner opposite the upper left (e.g., the 10,10 corner) should appear at the green dot. That is, the corner of the square closest to the green square should be close to the green dot. You may choose how you make the transformation - but make sure it keeps the square a square. The function to edit is <code>twoDots</code> in 
+<a href="../../for_students/02-21-03.js" class="box-html" data-tag="ex-two-dots-harder">02-21-03.js</a>
+ (<a href="../../for_students/02-21-03.html" class="box-html" data-tag="ex-two-dots-harder">02-21-03.html</a>).</p>
+
+<div id="box-02-21-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-21-03</span>&nbsp;
+    <input type="checkbox" id="check-02-21-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-21-03.html class="boxtitlelink">02-21-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-21-03.js" class="boxtitlelink">02-21-03.js</a>
+    <iframe
+        title="ex-two-dots-harder"
+        src="../../for_students/02-21-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-21-03"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-03-0"></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and green dot stays in green corner as dots are dragged; square remains square</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Here are some snapshots of what this should look like when it is working:</p>
+<div class="multifigure">
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-three-one.png">
+                <img src="../../docs/21/ex-two-dots-three-one_hu_e72fda833424b4a8.png" alt="two dots box 3 example 1" />
+            </a>
+        </figure>
+
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-three-two.png">
+                <img src="../../docs/21/ex-two-dots-three-two_hu_286a60e0bdf581f6.png" alt="two dots box 3 example 2" />
+            </a>
+        </figure>
+
+    
+        
+        <figure class="">
+            <a href="../../docs/21/ex-two-dots-three-three.png">
+                <img src="../../docs/21/ex-two-dots-three-three_hu_d54cae6f66801e9d.png" alt="two dots box 3 example 3" />
+            </a>
+        </figure>
+
+</div>
+<h2 id="box-4-exercise-4-convert-to-transform">Box 4: Exercise 4, Convert to Transform</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>In the code for this box (<a href="../../for_students/02-21-04.html" class="box-html" data-tag="ex-convert-transform">02-21-04.html</a> and 
+<a href="../../for_students/02-21-04.js" class="box-html" data-tag="ex-convert-transform">02-21-04.js</a>
+), each of the squares in the top Canvas is placed by a sequence of rotate, translate, and scale commands.</p>
+<p>Your job is to figure out what the transformation is for each of the squares, and write it as a matrix (the 6 numbers that <code>setTransform</code> takes). You should edit the file <code>for_students/ex-convert-transform.js</code> and fill in the appropriate values in the array <code>matrices</code>.</p>
+
+<div id="box-02-21-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-21-04</span>&nbsp;
+    <input type="checkbox" id="check-02-21-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-21-04.html class="boxtitlelink">02-21-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-21-04.js" class="boxtitlelink">02-21-04.js</a>
+    <iframe
+        title="ex-convert-transform"
+        src="../../for_students/02-21-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-21-04"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-04-0"></td>
+                <td>regular</td>
+                <td>parameters changed so that square 1 matches</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-04-1"></td>
+                <td>regular</td>
+                <td>parameters changed so that square 2 matches (freebie!)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-04-2"></td>
+                <td>regular</td>
+                <td>parameters changed so that square 3 matches</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-04-3"></td>
+                <td>regular</td>
+                <td>parameters changed so that square 4 matches</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-04-4"></td>
+                <td>regular</td>
+                <td>parameters changed so that square 5 matches</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<h2 id="box-5-exercise-5-shear">Box 5: Exercise 5, Shear</h2>
+<p>
+
+
+
+</p>
+<p>Shear (sometimes called skew) is a fundamental linear transformation. It is discussed in the textbook, specifically FCG4 Chapter 6. Unfortunately, Canvas doesn&rsquo;t have it.</p>
+<p>Implement the &ldquo;shear-x&rdquo; transformation in the <code>shearX</code> function in 
+<a href="../../for_students/02-21-05.js" class="box-html" data-tag="ex-shear">02-21-05.js</a>
+ (<a href="../../for_students/02-21-05.html" class="box-html" data-tag="ex-shear">02-21-05.html</a>). The following Canvas code calls that function to test it. Since the <code>shearX</code> does nothing right now, you see squares here. If you implement things correctly, you should see sheared boxes. The test code does save and restore - you should make <code>shearX</code> work like <code>context.rotate</code>, except that it is a function not a method.</p>
+
+<div id="box-02-21-05" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-21-05</span>&nbsp;
+    <input type="checkbox" id="check-02-21-05">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-21-05.html class="boxtitlelink">02-21-05.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-21-05.js" class="boxtitlelink">02-21-05.js</a>
+    <iframe
+        title="ex-shear"
+        src="../../for_students/02-21-05.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-21-05"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-21-05-0"></td>
+                <td>regular</td>
+                <td>shear-x implemented to draw sheared squares</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Here is what it should look like when you are done:</p>
+
+    
+    <figure class="">
+        <a href="../../docs/21/ex-shear-one.png">
+            <img src="../../docs/21/ex-shear-one_hu_59a1fd0926b7ed25.png" alt="box 5 example" />
+        </a>
+    </figure>
+
+<p>Hint: using <code>context.transform</code> is the easiest way to do this.</p>
+<h2 id="summary">Summary</h2>
+<p>That was a bit of math programming. Now on to <a href="../../docs/22/" class="Next__Page">Next: Page &nbsp;22&nbsp;-&nbsp;Robots! (Kinematics and Inverse Kinematics)</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Selected"> 21: Matrix Exercises </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p21",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

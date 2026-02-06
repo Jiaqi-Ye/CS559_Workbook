@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 1: Introduction</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Transformations are a key idea in Computer Graphics.</p>
+<p>We use transformations to make objects. We use transformations to put objects into the right places. We use transformations to put pieces together to make complex objects. We use transformations to put things in the right place on the screen. We use transformations to map 3D scenes to 2D pictures. The uses go on and on.</p>
+<p>In this workbook, we&rsquo;ll explore the basic ideas of transformations. We&rsquo;ll focus on 2D. We&rsquo;ll also focus on <em>linear</em> transformations. We&rsquo;ll explain what that means later.</p>
+<p>We&rsquo;re going to start by playing with some demonstrations to get the intuitions first. Then we&rsquo;ll look at code and math.</p>
+<h2 id="thinking-about-transformations">Thinking About Transformations</h2>
+<p>Here&rsquo;s a quick and simple demo: rather than sliding all these objects (and the points on them) around, you can grab the dot and move the whole thing.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-1">
+    <script type="module">
+        import { demoTranslate } from "/TransformDemos/transformDemo.js";
+        demoTranslate('tdemo-1');
+    </script>
+</div>
+<p>Here are a few different ways to think about it:</p>
+<ol>
+<li>We move each and every point on all the objects to their new location.</li>
+<li>We&rsquo;ve painted the objects onto a sheet (the graph paper) and are moving the graph paper around.</li>
+<li>We move the graph paper into place, and then place the objects into their position on the graph paper.</li>
+</ol>
+<p>The red square (for example), has its top left corner 1 unit to the right and 1 unit down from the origin of the grid. It always gets drawn in the same place. The grid moves, so that where it appears on the screen might be different.</p>
+<p>For various reasons, if you think about transformations as #3 - moving the coordinate system (the &ldquo;graph paper&rdquo; as we are drawing it) and then placing the objects in their positions on it, a lot of other things will be easier.</p>
+<h2 id="some-other-transformations">Some Other Transformations</h2>
+<p>The previous transformation was <strong>translation</strong>; we just moved the coordinate system (shifting each point by the same amount). That is an extremely simple transformation.</p>
+<p>Here is a less simple transformation: we allow translation, rotation, and uniform scaling. <strong>Rotation</strong> spins around a point. <strong>Scale</strong> multiplies everything by a constant factor. We&rsquo;ll discuss these more on future pages. You can control this demo by moving the two points.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-2">
+    <script type="module">
+        import { demoSimilarity } from "/TransformDemos/transformDemo.js";
+        demoSimilarity('tdemo-2');
+    </script>
+</div>
+<p>This is shown as one transformation that translates, rotates, and scales. We could build this transformation with its simpler parts (we&rsquo;ll get to that).</p>
+<p>If you&rsquo;re curious, this transformation has a name: it is a similarity transformation. It allows things to move, spin, and change size, but it preserves shape. We&rsquo;ll explain it in more detail in future pages.</p>
+<p>Here is a different transformation: a grid warp with a cubic Hermite basis. I won&rsquo;t explain what it is until a later workbook.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-3">
+    <script type="module">
+        import { demoWarpBicubic } from "/TransformDemos/transformDemo.js";
+        demoWarpBicubic('tdemo-3');
+    </script>
+</div>
+<p>This is an example of a more complex transformation. But, the basic idea is the same: we transform the coordinate system (grid, graph paper, or however you want to think of it). This tells our points where to go. Our &ldquo;graph paper&rdquo; is now a stretchy sheet that we can pull all over the place. But there is still a &ldquo;grid,&rdquo; so we can still place our objects on it.
+The corner of the red square is still at 1,1. It&rsquo;s just that 1,1 can be moved to a different place by stretching the coordinate system.</p>
+<p>The point: it&rsquo;s still changing the coordinate system. We change the &ldquo;grid&rdquo; that we draw on, and then we draw on it.</p>
+<h2 id="coordinate-systems-and-transformations">Coordinate Systems and Transformations</h2>
+<p>Coordinate systems and transformations are an important concept, so let me repeat it another way with a different demo.</p>
+<p>The idea is that our &ldquo;object&rdquo; (the points we draw) live in their &ldquo;local&rdquo; coordinate system. Their positions are relative to this coordinate system.</p>
+<p>We then place that coordinate system in an appropriate place.</p>
+<p>Here&rsquo;s a demo&hellip; you can click points on the left. You are placing them in this coordinate system. You can place one at the origin (0,0), or anywhere else. To distinguish this coordinate system, I&rsquo;ve drawn the &ldquo;graph paper&rdquo; in blue.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-4">
+    <script type="module">
+        import { demoTwoCanvas } from "/TransformDemos/transformDemo.js";
+        demoTwoCanvas('tdemo-4');
+    </script>
+</div>
+<p>On the right is a different coordinate system; I&rsquo;m showing its grid in gray. We&rsquo;ve placed the first coordinate system in it - I&rsquo;m drawing its &ldquo;graph paper&rdquo; in blue. The <em>transformation</em> specifies where the blue coordinate system appears in the gray one. You can change the transformation (try dragging the black dots). We&rsquo;ll explain the specific kind of transformation later.</p>
+<p><em>Make sure you understand this idea:</em> we have &ldquo;local coordinates&rdquo; that we draw in (the blue coordinate system), and then there are some transformations that convert from this coordinate system into the &ldquo;final&rdquo; coordinate system. In fact, there is a similar transformation going on all the way to the position on the screen.</p>
+<h2 id="more-than-two">More Than Two</h2>
+<p>Of course, we don&rsquo;t need to stop at two coordinate systems. Consider this one with three:</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-5">
+    <script type="module">
+        import { demoThreeCanvas } from "/TransformDemos/transformDemo.js";
+        demoThreeCanvas('tdemo-5');
+    </script>
+</div>
+<p>Just like last time, we place the blue points into the blue coordinate system. The blue coordinate system is placed into the purple one (you can control it with the dots). The blue points have a place in the purple coordinate system.</p>
+<p>We then place the purple coordinate system into the black one. In the demo, you can control the transformation with the dots. Everything in the purple coordinate system - including the blue one - gets transformed.</p>
+<p>Notice how we have combined transformations. A point in the blue coordinate system gets transformed twice to figure out where it ends up in the black coordinate system. We can combine these into a single &ldquo;big&rdquo; transformation that is the transformation from blue to black.</p>
+<p>The term for combining transformations is <strong>composing.</strong> If we have a sequence of transformations, we can <strong>compose</strong> them to make a transformation that does the same thing. This will be clearer when we write it in equations later in the workbook.</p>
+<h2 id="moving-on">Moving On</h2>
+<p>On the next page, we&rsquo;ll start with the simplest transformation and introduce a tool we&rsquo;ll use in this workbook to experiment with transformations.</p>
+<a href="../../docs/02/" class="Next__Page">Next: Page &nbsp;2&nbsp;-&nbsp;Translation 1: Intuitions</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Selected"> 1: Introduction </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p01",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 8: TransformToy</h1>
+		</header>
+		<div class="content post__content clearfix"><p>
+
+
+
+
+</p>
+<p>This page is a &ldquo;tutorial&rdquo; for <strong>TransformToy</strong> - it covers the basic transformations. It will show some of the transformations we haven&rsquo;t seen yet. But it is basically an optional review. Feel free to go on to <a href="../../docs/09/" class="Next__Page">Next: Page &nbsp;9&nbsp;-&nbsp;Translate Transformations (Again)</a>, and come back here if you want to see something in <strong>TransformToy</strong>.</p>
+<p>Because we haven&rsquo;t discussed all of these transformations yet, the discussion might not make sense.</p>
+<h2 id="translation">Translation</h2>
+<p>Here is a simple tool to help us explore how transformations work.
+Below, we can see a simple example of a coordinate frame.
+The frame has its origin (0,0) in the center of the canvas, its x-axis pointing to the right, and its y-axis pointing down (i.e., its x-axis grows larger as we move to the right and its y-axis grows larger as we move down).</p>
+<p>When you click &ldquo;Next&rdquo;, the animation will move one step forward, drawing a blue square at (0,0).</p>
+<p>Click &ldquo;Next&rdquo; again and the coordinate frame is <strong>translated</strong> by (20,20) so that its origin is now at (20,20).</p>
+<p>When you click &ldquo;Next&rdquo; a third time, a red square will be drawn at the new origin (20,20).</p>
+<p>Notice that, when you click &ldquo;Next&rdquo; until you reach the end, we did not have to offset the red square: the translation took care of that for us.
+This means that for more complex drawings, we can assume we are drawing around (0,0) and let the transformations handle where things actually end up on the canvas.
+This is especially useful when we want to draw something complex without having to do all the math to move it around the screen correctly—if we can draw it around (0,0) then we can draw it anywhere.</p>
+<p>To replay the animation, you can either press the &ldquo;Previous&rdquo; button to go back one step at a time or the &ldquo;First&rdquo; button to go back to the beginning.
+You can also press the &ldquo;Last&rdquo; button to go to the end of the animation.</p>
+<p>You should also notice that there are several instructions listed beneath the canvas.
+These instructions are what tell the animation what to do at each step.
+The next step in the animation is colored red.</p>
+<p>If you use the slider, you can slide around the animation to see its state at different points in time.</p>
+<p>All instructions listed below can be executed in JavaScript by calling the corresponding functions such as <code>context.translate(x,y)</code>, <code>context.rotate(angle)</code>, and <code>context.scale(sx,sy)</code> where <code>context</code> is a 2D context gotten from <code>canvas.getContext('2d')</code>.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Translation&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Translation&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Translation&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="scaling">Scaling</h2>
+<p>Besides translation, there are several other types of transformations we can use, such as scaling and rotating.</p>
+<p>Below is an example of <strong>scaling</strong>.</p>
+<p>As you step through the animation, a blue 20x20 square is drawn at (0,0), the coordinate frame is scaled by a factor of 2 in both the x and y directions, and a red 20x20 square is drawn at (0,0).</p>
+<p>Notice that the red square appears larger than the blue square even though both squares were drawn with the same dimensions.
+The red square appears larger because the coordinate frame was scaled before it was drawn.</p>
+<p>This means that anything you draw can be made arbitrarily larger or smaller by scaling the coordinate frame before it is drawn.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Scaling&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Scaling&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Scaling&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="rotation">Rotation</h2>
+<p>Now let&rsquo;s see an example of <strong>rotation</strong>.</p>
+<p>In this example, a blue box is drawn at (0,0), the coordinate frame is rotated by 45 degrees, and then a red box is drawn at (0,0).</p>
+<p>Without changing the dimensions or position of the red box, we have drawn it at a 45 degree angle simply by rotating the coordinate frame before drawing it.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Rotation&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Rotation&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Rotation&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="composition">Composition</h2>
+<p>Transformations can be combined to create more complex effects.
+In this example, we first scale the coordinate frame by a factor of 4 in both the x and y directions and then translate it by (10,10).
+After these two transformations, we draw a red box at (0,0).
+Because of the scaling, the red box is drawn much larger than if it were drawn without any transformations.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Multiple&#43;Simple&#43;Scales&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Multiple&#43;Simple&#43;Scales&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Multiple&#43;Simple&#43;Scales&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Here is an example where we combine translation, rotation, and scaling.
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Combined&#43;Transformations&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Combined&#43;Transformations&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Combined&#43;Transformations&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<h2 id="shearing">Shearing</h2>
+<p>Shearing is another type of transformation that skews the coordinate frame along a given axis.
+This example shows how shearing works by first drawing a blue box at (0,0), then shearing the coordinate frame along the x-axis by a factor of 1, and finally drawing a red box at (0,0).</p>
+<p>JavaScript does not have a built-in function for shearing, but we can achieve the same effect by using the <code>context.transform(a, b, c, d, e, f)</code> function where the parameters correspond to the following transformation matrix:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>a</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>c</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>e</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>b</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>d</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>f</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} a &amp; c &amp; e \\ b &amp; d &amp; f \\ 0 &amp; 0 &amp; 1 \end{bmatrix} </annotation></semantics></math></span>
+<p>We&rsquo;ll learn more about transformation matrices later.</p>
+<p>For now, just know that to shear along the x-axis by a factor of <code>shx</code>, we can use the following parameters:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>s</mi><mi>h</mi><mi>x</mi></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} 1 &amp; shx &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix} </annotation></semantics></math></span>
+<p>Here it is in action:</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=ShearingX&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=ShearingX&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=ShearingX&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>To shear along the y-axis by a factor of <code>shy</code>, we can use the following parameters:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>s</mi><mi>h</mi><mi>y</mi></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} 1 &amp; 0 &amp; 0 \\ shy &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix} </annotation></semantics></math></span>
+<p>Here it is in action:</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=ShearingY&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=ShearingY&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=ShearingY&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="save-and-restore">Save and Restore</h2>
+<p>When working with transformations, it is often useful to save and restore the coordinate frame.
+This allows us to make temporary changes to the coordinate frame without permanently affecting it.</p>
+<p>In this example, we first draw a blue box at (0,0).
+We then save the current coordinate frame, translate it by (30,30), and draw a red box at (0,0).
+After drawing the red box, we restore the coordinate frame to its previous state, rotate 45 degrees, and draw a green box at (0,0).</p>
+<p>This allows us to do arbitrarily complex transformations for drawing the red box without affecting the coordinate frame used to draw the green box.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Save&#43;and&#43;Restore&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Save&#43;and&#43;Restore&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Save&#43;and&#43;Restore&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="putting-it-all-together">Putting It All Together</h2>
+<p>Now that we&rsquo;ve seen how translation, scaling, rotation, and shearing work individually, let&rsquo;s see an example that combines all of these transformations to draw a house that is standing on one corner.</p>
+<p>Take a moment to recognize how each command and each transformation contributes to the final drawing.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Draw%20a%20House&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Draw a House&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Draw%20a%20House&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="your-turn-to-play-with-it">Your Turn to Play With It</h2>
+<p>Here is a version of TransformToy where you can create your own transformations and see how they work.
+Type them into the text box and then click &ldquo;Run&rdquo; when you want to see the result.
+After you see the result, you can click &ldquo;Edit&rdquo; to go back and change your transformations.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?demo=Your&#43;turn&#43;to&#43;play&#43;with&#43;it&amp;showHeader=false" class="boxtitlelink">/TransformToy/index.html</a>
+    <iframe
+        title="/TransformToy/index.html?demo=Your&#43;turn&#43;to&#43;play&#43;with&#43;it&amp;showHeader=false"
+        src="../../TransformToy/index.html?demo=Your&#43;turn&#43;to&#43;play&#43;with&#43;it&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<a href="../../docs/09/" class="Next__Page">Next: Page &nbsp;9&nbsp;-&nbsp;Translate Transformations (Again)</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Selected"> 8: TransformToy </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p08",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 4: Something Bigger: Scale</h1>
+		</header>
+		<div class="content post__content clearfix"><p>
+
+
+
+
+</p>
+<h2 id="scale-transformations">Scale Transformations</h2>
+<p>The <strong>scale</strong> transformation is another simple transformation.
+It makes things bigger or smaller by multiplying all positions by a constant value (the <em>scale</em>).</p>
+<p>Here you can try it out:</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-scale.html" class="boxtitlelink">/TransformDemos/demo-scale.html</a>
+    <iframe
+        title="/TransformDemos/demo-scale.html"
+        src="../../TransformDemos/demo-scale.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>An important thing to notice: the center (the origin in this example) does not change. This is called the &ldquo;center-of-scaling&rdquo;. Scaling <em>multiplies</em> the points by the scale factor. Therefore the origin (zero) does not change.</p>
+<p>We can try this in <strong>TransformToy</strong> to see how it compares to translation. Notice how we change the coordinate system, and then we place the points in the coordinate system.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Scale1&amp;showHeader=false" class="boxtitlelink">TransformToy?Scale1</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Scale1&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Scale1&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The square&rsquo;s corner at 0,0 ends up in the same place. In contrast, notice what happens if the square isn&rsquo;t at the origin - it effectively is &ldquo;moved&rdquo; by the scale to a new place.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Scale2&amp;showHeader=false" class="boxtitlelink">TransformToy?Scale2</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Scale2&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Scale2&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>This one might make it clearer. It just draws a square before we change the coordinate system. Remember, once something is drawn, it stays where it is.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Scale3&amp;showHeader=false" class="boxtitlelink">TransformToy?Scale3</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Scale3&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Scale3&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>This example is worth reiterating to emphasize some key concepts. Notice that the two <code>fillRect</code> commands have the same position and size (but different colors). The squares are in different places because the coordinate system changes in between the commands. Also notice that once the first rectangle is drawn, it stays where it was placed. The current coordinate system is used for <em>new</em> objects, it doesn&rsquo;t go back to change old objects.</p>
+<p>Another small detail: notice that the scale command in <strong>TransformToy</strong> takes two parameters. This allows us to have a separate scale in both the X and the Y directions. You can try it out:</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-nuscale.html" class="boxtitlelink">/TransformDemos/demo-nuscale.html</a>
+    <iframe
+        title="/TransformDemos/demo-nuscale.html"
+        src="../../TransformDemos/demo-nuscale.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>When X and Y are scaled by different amounts, we call it a <strong>non-uniform scale</strong>. Scales where X and Y are the same are called <strong>uniform</strong> scales. But this is the most common case.</p>
+<p>The HTML5 Canvas function also takes two parameters, allowing for non-uniform scale. Like the other transformation commands, it modifies the current transformation.</p>
+<h2 id="combining-scales">Combining Scales</h2>
+<p>As with any transformation, we can have a sequence of scales that combine to make a combined transformation. Scales (like translations) are <strong>closed</strong>. Any sequence of scales can be represented by one &ldquo;combined&rdquo; scale. Translations also have this property.</p>
+<p>Here&rsquo;s an example to try&hellip;</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Scale4&amp;showHeader=false" class="boxtitlelink">TransformToy?Scale4</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Scale4&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Scale4&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Notice that scales combine by multiplying. If you double something, and then double it again, you have multiplied it by 4. This is different than translation.</p>
+<h2 id="center-of-scaling">Center of Scaling</h2>
+<p>Having the center of scaling be at the center of the coordinate system is often inconvenient. We might want the object to grow/shrink from a different place.</p>
+<p>Here&rsquo;s an example. I&rsquo;m going to make a &ldquo;sculpture&rdquo; out of blocks and place it on a table (a black rectangle). Since I want to change the size of my sculpture, I&rsquo;ll use a scale on it. The variable <code>val</code> has the value of the slider. Before moving the slider, see if you can figure out what will happen when you change its value.</p>
+<div id="div-canvas-1" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <div style="display: flex; align-items: start;">
+        <canvas id="canvas-1" height="200" width="300"></canvas>
+        <div class="canvas-slider-controls" style="height: 200px;">
+            <label for="slider-1">scale</label>
+            <div class="canvas-slider-input-container" style="flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="slider-1" class="canvas-slider" 
+                    min="0" 
+                    max="2" 
+                    step="0.1" 
+                    value="1"
+                    style="width: 160px; transform: rotate(-90deg);">
+            </div>
+            <span id="value-1">1</span>
+        </div>
+    </div>
+    <div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">tableTop</span><span style="color:#f92672">=</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#111">,</span><span style="color:#ae81ff">200</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">val</span><span style="color:#111">,</span><span style="color:#75af00">val</span><span style="color:#111">);</span>  <span style="color:#75715e">// val is slider
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;blue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;green&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">150</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;red&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">125</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{const canvas = document.getElementById('canvas-1');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider-1');
+    const valueDisplay = document.getElementById('value-1');
+
+    function draw() {
+        const val = Number(slider.value);
+        valueDisplay.innerText = val;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+const tableTop=canvas.height-50
+ctx.fillRect(50,tableTop,200,50);
+ctx.scale(val,val);  // val is slider
+ctx.fillStyle="blue";
+ctx.fillRect(100,tableTop-50,50,50);
+ctx.fillStyle="green";
+ctx.fillRect(150,tableTop-50,50,50);
+ctx.fillStyle="red";
+ctx.fillRect(125,tableTop-100,50,50);
+
+        ctx.restore();
+    }
+    slider.oninput = draw;
+    draw();}
+</script>
+<p>On the next page, we&rsquo;ll see how we can fix this by combining <code>translate</code> and <code>scale</code>. But to give you a preview, here&rsquo;s a version that behaves better. We&rsquo;ll explain the code on the next page&hellip;</p>
+<div id="div-canvas-2" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <div style="display: flex; align-items: start;">
+        <canvas id="canvas-2" height="200" width="300"></canvas>
+        <div class="canvas-slider-controls" style="height: 200px;">
+            <label for="slider-2">scale</label>
+            <div class="canvas-slider-input-container" style="flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="slider-2" class="canvas-slider" 
+                    min="0" 
+                    max="2" 
+                    step="0.1" 
+                    value="1"
+                    style="width: 160px; transform: rotate(-90deg);">
+            </div>
+            <span id="value-2">1</span>
+        </div>
+    </div>
+</div><script type="module">
+{const canvas = document.getElementById('canvas-2');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider-2');
+    const valueDisplay = document.getElementById('value-2');
+
+    function draw() {
+        const val = Number(slider.value);
+        valueDisplay.innerText = val;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+const tableTop=canvas.height-50
+ctx.fillRect(50,tableTop,200,50);
+ctx.translate(150,tableTop);
+ctx.scale(val,val);  // val is slider
+ctx.translate(-150,-tableTop);
+ctx.fillStyle="blue";
+ctx.fillRect(100,tableTop-50,50,50);
+ctx.fillStyle="green";
+ctx.fillRect(150,tableTop-50,50,50);
+ctx.fillStyle="red";
+ctx.fillRect(125,tableTop-100,50,50);
+
+        ctx.restore();
+    }
+    slider.oninput = draw;
+    draw();}
+</script>
+<p>What I&rsquo;ve done here is made the center of scaling to be at the bottom center of the sculpture. We&rsquo;ll learn how to do it on the next page.</p>
+<h2 id="before-we-move-on">Before We Move On</h2>
+<p>Scales are simple, but there are a few key points I want to emphasize before we move on:</p>
+<ol>
+<li>There is a <em>center of scaling</em> (the origin) that does not move. All other points move. Sometimes this can be inconvenient.</li>
+<li>Transformations change the current coordinate system. Things that are already drawn are not affected.</li>
+</ol>
+<p>To make scales more useful, we will put them together with translations.</p>
+<a href="../../docs/05/" class="Next__Page">Next: Page &nbsp;5&nbsp;-&nbsp;Combining Transformations 1: Center of Scale</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Selected"> 4: Something Bigger: Scale </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p04",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

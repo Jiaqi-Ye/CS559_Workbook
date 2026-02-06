@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 20: Matrices in Code</h1>
+		</header>
+		<div class="content post__content clearfix"><h2 id="vectors-and-matrices-in-javascript">Vectors and Matrices in JavaScript</h2>
+<p>By itself, JavaScript doesn&rsquo;t deal with matrices very well. We will almost always want to use a library that implements matrices. However, for now, we will do it ourselves. Part of this is so that we don&rsquo;t need to take the time to learn about a matrix library until later in the class, when we&rsquo;ll get one as part of a graphics API. Part of this is so that we can understand what happens inside.</p>
+<p>Part of the problem is that arrays in JavaScript are very flexible. You can use them to store sets of numbers, but they aren&rsquo;t necessarily optimized to do that: they are designed to be very flexible.</p>
+<p>For 1D arrays of numbers (that we use to represent points and vectors), we can just use JavaScript arrays. There are some efficiency reasons why we might prefer something fancier, but for now, this will be fine. (If you&rsquo;re curious, check out <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray" target="_blank">TypedArray objects</a>).</p>
+<p>Note that we could make a proper class for 2D points/vectors. But we&rsquo;re not going to yet.</p>
+<p>For 2D arrays of numbers (matrices), the choice is less obvious. JavaScript doesn&rsquo;t actually have 2D arrays. Arrays are 1D. You can make an array of arrays, but this can be cumbersome. Instead, we&rsquo;ll put the numbers into a 1D array. This is common practice in many situations because ultimately, the numbers are going to be stored as a 1D array in memory anyway.</p>
+<p>When we put a matrix into a 1D array, we have to choose what order to put the elements in. The most common choice is <strong>row major</strong> format, which basically puts the elements in the order that we would read them (across rows, then down). So the matrix:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>7</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>8</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>9</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{bmatrix} </annotation></semantics></math></span>
+<p>will become the array <code>[ 1,2,3,4,5,6,7,8,9 ]</code></p>
+<p>The other choice is <strong>column major</strong> format, where we read things down the columns first, then across. So the array would be <code>[1,4,7,2,5,8,3,6,9]</code></p>
+<p>Historically, people used this (it is the way Fortran worked). But in the modern era, row major is more common. We mention column major because it will come up when we have to consider legacy systems (like OpenGL).</p>
+<p>Even modern systems mix row and column major formats. When we get to using THREE.js, we&rsquo;ll see that it uses column major internally, but row major in its documentation and certain commands.</p>
+<h2 id="transformations-in-canvas">Transformations in Canvas</h2>
+<p>Internally, Canvas uses matrices to represent coordinate systems. You can access the transformation matrix in modern web browsers using the <code>getTransform</code> method of the 2D context (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getTransform">this</a> for documentation).</p>
+<p>When we perform a transformation function on a Canvas, it changes the current transformation to be the composition of the current transformation with the transformation from the command. The old transformation goes away; this is why it is so important to save (so you can restore).</p>
+<p>When we start out with Canvas, the current transformation is the identity matrix: when we draw, the coordinates are used directly as Canvas coordinates.</p>
+<p>Each transformation function we apply (<code>translate</code>, <code>rotate</code>, <code>scale</code>, and the generic <code>transform</code> we will see in a moment) changes the current transformation such that it includes the new one as well. It multiplies the current transformation matrix with what the command provides, and makes this the new current matrix. The current transformation is the transformation between the coordinate system we&rsquo;re working in (how coordinates in the drawing command are interpreted), and the Canvas coordinate system.</p>
+<p>The <code>transform</code> method of the Canvas allows us to give a transformation as a matrix. Because Canvas only supports affine transformations, the bottom row of the 3x3 matrix is always (0,0,1), and we only need to pass the <code>transform</code> function 6 numbers (not 9). Note that the order that the parameters are passed is not row-major. (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform" target="_blank">Canvas Transform</a>).</p>
+<p>So the command <code>context.transform(a,b,c,d,e,f)</code> multiplies the current transformation matrix with the transformation:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>a</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>c</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>e</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>b</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>d</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>f</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} a &amp; c &amp; e \\ b &amp; d &amp; f \\ 0 &amp; 0 &amp; 1 \end{bmatrix}</annotation></semantics></math></span>
+<p>So, for example, e and f are the translation. Notice that this is different than the row-major convention we had above.</p>
+<p>Canvas does allow us to replace the current transformation: this is via the <code>setTransform</code> method. Even <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform" target="_blank">the setTransform documentation</a> describes this as first setting the transformation to the identity, and then applying the new transformation.</p>
+<h2 id="trying-the-transformations-in-canvas">Trying the transformations in Canvas</h2>
+<p>If we want to confirm that the transformations inside of Canvas match what you expect, we can try it out: we can perform the transformations, get the matrix, and look at it.</p>
+<p>Here is a really boring example. I checked that</p>
+<ol>
+<li>the initial matrix is the identity;</li>
+<li>translate, rotate and scale are the matrices I expect; and</li>
+<li>when I compose these matrices, they compose as we expect.</li>
+</ol>
+<p>To look at the matrices, we can just write them to the page or to the console.</p>
+<p>
+
+<div id="box-02-20-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-20-01</span>&nbsp;
+    <input type="checkbox" id="check-02-20-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-20-01.html class="boxtitlelink">02-20-01.html</a>
+    <iframe
+        title="eg-matrix-combine"
+        src="../../for_students/02-20-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-20-01"
+    ></iframe>
+</div></p>
+<p>Here are some sequences of transformations. You need to figure out what the corresponding matrix is, and put it into the &ldquo;canvas transform matrix&rdquo; (6 number form) as 6 type-in boxes. You could do this by writing programs like we did in <a href="../../for_students/02-20-01.html" class="box-html" data-tag="eg-matrix-combine">02-20-01.html</a>, but for practice, try to write out what the matrix is and figure out the numbers - this will help you understand how matrices work.</p>
+<p><code>translate(3,0); translate(0,2);</code><br>
+is <code>transform</code>(<input type="text" id="1-1" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="1-2" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="1-3" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="1-4" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="1-5" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="1-6" class="" placeholder="Type Here..." size="4">
+);</p>
+<p><code>scale(2,3); translate(1,1);</code><br>
+is transform(<input type="text" id="2-1" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="2-2" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="2-3" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="2-4" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="2-5" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="2-6" class="" placeholder="Type Here..." size="4">
+);</p>
+<p><code>translate(1,1); scale(2,3);</code><br>
+is <code>transform</code>(<input type="text" id="3-1" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="3-2" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="3-3" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="3-4" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="3-5" class="" placeholder="Type Here..." size="4">
+, <input type="text" id="3-6" class="" placeholder="Type Here..." size="4">
+);</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answers</summary>
+    <div class="markdown-inner myexpand-content">
+      <ul>
+<li><code>translate(3,0); translate(0,2);</code> is <code>transform(1, 0, 0, 1, 3, 2)</code>;</li>
+<li><code>scale(2,3); translate(1,1);</code> is <code>transform(2, 0, 0, 3, 2, 3)</code>;</li>
+<li><code>translate(1,1); scale(2,3);</code> is <code>transform(2, 0, 0, 3, 1, 1)</code>;</li>
+</ul>
+
+    </div>
+</details>
+</div>
+<h2 id="composing-transformations">Composing Transformations</h2>
+<p>Hopefully, you understand from the last page the idea that we combine transformations by composing them, and we compose linear transformations by multiplying the matrices.</p>
+<p>In practice, the API usually takes care of doing these multiplications for us. The <a href="https://youtu.be/4iNJdWXsFQ4" target="_blank">Hierarchical Modeling in 5 Minutes</a> video introduces this well, connecting it to the concepts of hierarchical modeling we discussed in class. If you haven&rsquo;t already watched the video, now is a good time.</p>
+<h2 id="summary-matrices-in-canvas-and-code">Summary: Matrices in Canvas and Code</h2>
+<p>That hopefully explains how we turn the matrices that we see in the textbook into something we can use in our Canvas code.</p>
+<p>On the <a href="../../docs/21/" class="Next__Page">Next: Page &nbsp;21&nbsp;-&nbsp;Matrix Exercises</a> we&rsquo;ll try using it.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Selected"> 20: Matrices in Code </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p20",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

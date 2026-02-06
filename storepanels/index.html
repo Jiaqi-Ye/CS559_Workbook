@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../css/workbook.css">
+        <script src="../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page Localstore: Local Storage Interface</h1>
+		</header>
+		<div class="content post__content clearfix"><p>This page provides access to the local store interface. It duplicates what is on other pages.</p>
+<p><div class="netid">
+<label for="netid">NetID:</label>
+<input 
+  type="text" 
+  id="netid" 
+  class="netid-input sitekey" 
+  placeholder="e.g. bbadger123" 
+  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
+  title="NetID must start with a letter and contain only letters and numbers."
+  required
+  oninput="validateNetID(this)"
+> <span id="netid-error" class="netid-error"></span>
+<script>
+  function validateNetID(input) {
+    const errorSpan = document.getElementById("netid-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "NetID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "NetID can only contain letters and numbers.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div class="netid">
+<label for="github">GithubID (user name):</label>
+<input 
+  type="text" 
+  id="github" 
+  class="netid-input sitekey" 
+  placeholder="e.g. octocat" 
+  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
+  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
+  required
+  oninput="validateGithubID(this)"
+> <span id="github-error" class="netid-error"></span>
+<script>
+  function validateGithubID(input) {
+    const errorSpan = document.getElementById("github-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "Github ID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+</p>
+<p><div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span id="sheets-status-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+<div id="sheets-status-div" class="status-box">
+<strong>Checkpoint Upload:&nbsp;</strong><span id="sheets-status-span">waiting for check</span>
+<br>
+<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
+<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+</div></p>
+<p>The debug button write out the contents of the local store to the console:
+<button class="debug" onclick="write_test()">Workbook LocalStore to Console</button>
+</p>
+                        
+<div class="page-rubric-container">
+<details class="page__rubric">
+<summary>List of Boxes</summary>
+<table  style="background-color: #f0f0f0;">
+    <thead>
+        <tr>
+            <th><span class="boxframekind tooltip-trigger">Box<span class="tooltip-box" style="text-align:left">
+The box name links back to the box.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Check<span class="tooltip-box" style="text-align:left">
+These checkboxes indicate whether you have checked the checkbox for the box.
+If you didn't check the box, go back to it, make sure the work is completed, and check it.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Tag (internal)<span class="tooltip-box" style="text-align:left">
+This is our "internal code name" for the box.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span></th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><a href="../docs/06/#box-02-06-01" class="boxlink">02-06-01</a></td>
+        <td><span id="wbsp26_02_p06_check-02-06-01" class="localcheck"></span></td>
+        <td>eg-flip</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/06/#box-02-06-02" class="boxlink">02-06-02</a></td>
+        <td><span id="wbsp26_02_p06_check-02-06-02" class="localcheck"></span></td>
+        <td>ex-fill</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/06/#box-02-06-03" class="boxlink">02-06-03</a></td>
+        <td><span id="wbsp26_02_p06_check-02-06-03" class="localcheck"></span></td>
+        <td>ex-range-scale</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-01" class="boxlink">02-09-01</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-01" class="localcheck"></span></td>
+        <td>eg-transformation-idea</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-02" class="boxlink">02-09-02</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-02" class="localcheck"></span></td>
+        <td>eg-parametric</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-03" class="boxlink">02-09-03</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-03" class="localcheck"></span></td>
+        <td>eg-transformations</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-04" class="boxlink">02-09-04</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-04" class="localcheck"></span></td>
+        <td>eg-repeat</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-05" class="boxlink">02-09-05</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-05" class="localcheck"></span></td>
+        <td>eg-convenient</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/09/#box-02-09-06" class="boxlink">02-09-06</a></td>
+        <td><span id="wbsp26_02_p09_check-02-09-06" class="localcheck"></span></td>
+        <td>ex-fix</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/10/#box-02-10-01" class="boxlink">02-10-01</a></td>
+        <td><span id="wbsp26_02_p10_check-02-10-01" class="localcheck"></span></td>
+        <td>eg-scale-translate</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/10/#box-02-10-02" class="boxlink">02-10-02</a></td>
+        <td><span id="wbsp26_02_p10_check-02-10-02" class="localcheck"></span></td>
+        <td>eg-scale-center</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/10/#box-02-10-03" class="boxlink">02-10-03</a></td>
+        <td><span id="wbsp26_02_p10_check-02-10-03" class="localcheck"></span></td>
+        <td>ex-grid</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/11/#box-02-11-01" class="boxlink">02-11-01</a></td>
+        <td><span id="wbsp26_02_p11_check-02-11-01" class="localcheck"></span></td>
+        <td>eg-rotation-center</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/11/#box-02-11-02" class="boxlink">02-11-02</a></td>
+        <td><span id="wbsp26_02_p11_check-02-11-02" class="localcheck"></span></td>
+        <td>eg-windmill</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/11/#box-02-11-03" class="boxlink">02-11-03</a></td>
+        <td><span id="wbsp26_02_p11_check-02-11-03" class="localcheck"></span></td>
+        <td>eg-arm</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/12/#box-02-12-01" class="boxlink">02-12-01</a></td>
+        <td><span id="wbsp26_02_p12_check-02-12-01" class="localcheck"></span></td>
+        <td>eg-arms-legs</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/13/#box-02-13-01" class="boxlink">02-13-01</a></td>
+        <td><span id="wbsp26_02_p13_check-02-13-01" class="localcheck"></span></td>
+        <td>ex-quad-copter</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/20/#box-02-20-01" class="boxlink">02-20-01</a></td>
+        <td><span id="wbsp26_02_p20_check-02-20-01" class="localcheck"></span></td>
+        <td>eg-matrix-combine</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/21/#box-02-21-01" class="boxlink">02-21-01</a></td>
+        <td><span id="wbsp26_02_p21_check-02-21-01" class="localcheck"></span></td>
+        <td>ex-two-dots-sequence</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/21/#box-02-21-02" class="boxlink">02-21-02</a></td>
+        <td><span id="wbsp26_02_p21_check-02-21-02" class="localcheck"></span></td>
+        <td>ex-two-dots-transform</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/21/#box-02-21-03" class="boxlink">02-21-03</a></td>
+        <td><span id="wbsp26_02_p21_check-02-21-03" class="localcheck"></span></td>
+        <td>ex-two-dots-harder</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/21/#box-02-21-04" class="boxlink">02-21-04</a></td>
+        <td><span id="wbsp26_02_p21_check-02-21-04" class="localcheck"></span></td>
+        <td>ex-convert-transform</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/21/#box-02-21-05" class="boxlink">02-21-05</a></td>
+        <td><span id="wbsp26_02_p21_check-02-21-05" class="localcheck"></span></td>
+        <td>ex-shear</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/23/#box-02-23-01" class="boxlink">02-23-01</a></td>
+        <td><span id="wbsp26_02_p23_check-02-23-01" class="localcheck"></span></td>
+        <td>eg-svg</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/23/#box-02-23-02" class="boxlink">02-23-02</a></td>
+        <td><span id="wbsp26_02_p23_check-02-23-02" class="localcheck"></span></td>
+        <td>eg-svg-animation</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/23/#box-02-23-03" class="boxlink">02-23-03</a></td>
+        <td><span id="wbsp26_02_p23_check-02-23-03" class="localcheck"></span></td>
+        <td>eg-svg-hierarchy</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/23/#box-02-23-04" class="boxlink">02-23-04</a></td>
+        <td><span id="wbsp26_02_p23_check-02-23-04" class="localcheck"></span></td>
+        <td>eg-svg-hierarchy-animation</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/23/#box-02-23-05" class="boxlink">02-23-05</a></td>
+        <td><span id="wbsp26_02_p23_check-02-23-05" class="localcheck"></span></td>
+        <td>eg-svg-group</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/24/#box-02-24-01" class="boxlink">02-24-01</a></td>
+        <td><span id="wbsp26_02_p24_check-02-24-01" class="localcheck"></span></td>
+        <td>ex-svg</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/25/#box-02-25-01" class="boxlink">02-25-01</a></td>
+        <td><span id="wbsp26_02_p25_check-02-25-01" class="localcheck"></span></td>
+        <td>mascot</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../docs/27/#box-02-27-01" class="boxlink">02-27-01</a></td>
+        <td><span id="wbsp26_02_p27_check-02-27-01" class="localcheck"></span></td>
+        <td>ex-boid</td>
+        <td>optional</td>
+    </tr>
+    </tbody>
+</table>
+</details>
+</div>
+
+                        <div class="page-rubric-container">
+<details class="page__rubric">
+    <summary>Workbook Rubric</summary>
+    <br/>
+    <table class="page-rubric-table" style="background-color: #f0f0f0;">
+        <thead>
+            <tr>
+                <th style="min-width: 6em;"><span class="boxframekind tooltip-trigger">Box<span class="tooltip-box" style="text-align:left">
+The box name links back to the box.
+</span>
+</span></span></th>
+                <th><span class="boxframekind tooltip-trigger"><span class="tooltip-box" style="text-align:left">
+These checkboxes indicate whether you have checked the box for the rubric item.
+If you didn't check the box, go back to it, make sure the work is completed, and then check the checkbox.
+</span>
+</span></span></th>
+                <th><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody><tr>
+                <td><a href="../docs/05/#box-02-05-01"  class="boxlink">02-05-01</a></td>
+                <td><span id="wbsp26_02_check-02-05-01-i" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Page 05 Items</td>
+            </tr><tr>
+                <td><a href="../docs/06/#box-02-06-03"  class="boxlink">02-06-03</a></td>
+                <td><span id="wbsp26_02_check-02-06-03-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td></td>
+            </tr><tr>
+                <td><a href="../docs/06/#box-02-06-04"  class="boxlink">02-06-04</a></td>
+                <td><span id="wbsp26_02_check-02-06-04-i" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Convenient Coordinate System Type-ins</td>
+            </tr><tr>
+                <td><a href="../docs/09/#box-02-09-06"  class="boxlink">02-09-06</a></td>
+                <td><span id="wbsp26_02_check-02-09-06-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>triangle returns</td>
+            </tr><tr>
+                <td><a href="../docs/10/#box-02-10-03"  class="boxlink">02-10-03</a></td>
+                <td><span id="wbsp26_02_check-02-10-03-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>add transformations to make images look the same</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>quadcopter has a front and 4 arms</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-1" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>four attached propellers that spin</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-2" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>propellers spin at different rates</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-3" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>goes around a circle</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-4" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>points forward while going around circle</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-5" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>multiple vehicles types (all must have spinning parts)</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-6" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>complex paths (at least one &#39;copter must be a circle)</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-7" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>cool looking vehicles</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-8" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>interaction (be sure to document)</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-9" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>quadcopters do something beyond move in a path</td>
+            </tr><tr>
+                <td><a href="../docs/13/#box-02-13-01"  class="boxlink">02-13-01</a></td>
+                <td><span id="wbsp26_02_check-02-13-01-10" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>other articulated object</td>
+            </tr><tr>
+                <td><a href="../docs/18/#box-02-18-01"  class="boxlink">02-18-01</a></td>
+                <td><span id="wbsp26_02_check-02-18-01-i" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Page 18 Items</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-01"  class="boxlink">02-21-01</a></td>
+                <td><span id="wbsp26_02_check-02-21-01-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via translate, rotate, and scale</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-02"  class="boxlink">02-21-02</a></td>
+                <td><span id="wbsp26_02_check-02-21-02-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via transform</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-03"  class="boxlink">02-21-03</a></td>
+                <td><span id="wbsp26_02_check-02-21-03-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>red dot stays in red corner and green dot stays in green corner as dots are dragged; square remains square</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-04"  class="boxlink">02-21-04</a></td>
+                <td><span id="wbsp26_02_check-02-21-04-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>parameters changed so that square 1 matches</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-04"  class="boxlink">02-21-04</a></td>
+                <td><span id="wbsp26_02_check-02-21-04-1" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>parameters changed so that square 2 matches (freebie!)</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-04"  class="boxlink">02-21-04</a></td>
+                <td><span id="wbsp26_02_check-02-21-04-2" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>parameters changed so that square 3 matches</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-04"  class="boxlink">02-21-04</a></td>
+                <td><span id="wbsp26_02_check-02-21-04-3" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>parameters changed so that square 4 matches</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-04"  class="boxlink">02-21-04</a></td>
+                <td><span id="wbsp26_02_check-02-21-04-4" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>parameters changed so that square 5 matches</td>
+            </tr><tr>
+                <td><a href="../docs/21/#box-02-21-05"  class="boxlink">02-21-05</a></td>
+                <td><span id="wbsp26_02_check-02-21-05-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>shear-x implemented to draw sheared squares</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-0" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>a picture using SVG</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-1" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>at least one path with an arc</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-2" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>at least one polygon that is not a rectangle</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-3" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>a hierarchy using grouping</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-4" class="localcheck sitekey">X</span></td>
+                <td>regular</td>
+                <td>repeated instancing via use</td>
+            </tr><tr>
+                <td><a href="../docs/24/#box-02-24-01"  class="boxlink">02-24-01</a></td>
+                <td><span id="wbsp26_02_check-02-24-01-5" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>artistic merit (grader&#39;s discretion)</td>
+            </tr><tr>
+                <td><a href="../docs/25/#box-02-25-01"  class="boxlink">02-25-01</a></td>
+                <td><span id="wbsp26_02_check-02-25-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Articulated thing (pieces, joints)</td>
+            </tr><tr>
+                <td><a href="../docs/25/#box-02-25-01"  class="boxlink">02-25-01</a></td>
+                <td><span id="wbsp26_02_check-02-25-01-1" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Articulated motion</td>
+            </tr><tr>
+                <td><a href="../docs/25/#box-02-25-01"  class="boxlink">02-25-01</a></td>
+                <td><span id="wbsp26_02_check-02-25-01-2" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Character (multiple chains, ...)</td>
+            </tr><tr>
+                <td><a href="../docs/25/#box-02-25-01"  class="boxlink">02-25-01</a></td>
+                <td><span id="wbsp26_02_check-02-25-01-3" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Creativity in character design or motion</td>
+            </tr><tr>
+                <td><a href="../docs/27/#box-02-27-01"  class="boxlink">02-27-01</a></td>
+                <td><span id="wbsp26_02_check-02-27-01-0" class="localcheck sitekey">X</span></td>
+                <td>optional</td>
+                <td>The Boids page will not be graded</td>
+            </tr>
+        </tbody>
+    </table>
+</details>
+</div>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Selected">Local Storage Interface</li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "Localstore",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "string",
+            solution: false
+        };
+</script><script src="../js/localstore.js"></script><script src="../js/check-protocol.js"></script>
+    </body>
+</html>

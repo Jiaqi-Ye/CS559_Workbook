@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crab Canvas</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: white;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="crabCanvas" width="350" height="250"></canvas>
+    <script type="module" defer />
+        import * as crab from './crab.js';
+        const canvas = document.getElementById('crabCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // degrees to radians
+        function d2r(rads) {
+            return (rads * Math.PI) / 180;
+        }
+
+        function loop(time) {
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+            crab.draw(ctx,{
+                    y:125,x:175,
+                    l_eye: d2r(10)*Math.cos(time/1000),
+                    r_eye: -d2r(10)*Math.cos(time/1000 + d2r(45)),
+                    l_arm: -d2r(20)*Math.cos(time/500), 
+                    l_elbow:-d2r(20)*Math.cos(time/500), 
+                    l_wrist:-d2r(20)*Math.cos(time/500), 
+                    l_thumb: d2r(20)*Math.cos(time/300),
+                    r_arm: -d2r(20)*Math.cos(time/500), 
+                    r_elbow:-d2r(20)*Math.cos(time/500+d2r(180)), 
+                    r_wrist:-d2r(20)*Math.cos(time/500), 
+                    r_thumb: d2r(20)*Math.cos(time/300),
+
+                });
+            requestAnimationFrame(loop);
+        }
+        loop(0);
+
+   </script>
+</body>
+</html>

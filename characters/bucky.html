@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!--
+    This code was written by Gemini 3 Pro from the prompts:
+    
+    (this is after it had made many of the other characters)
+
+    Can you make a bucky badger (U Wisconsin Mascot) character in the style of these assignments? 
+
+    Please improve it as follows: His sweater should have a Red W on it. His head, ears and hands which are white should have a black stroke so they stand out against a white background. 
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Updated Bucky</title>
+    <style>
+        body { background: #eee; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { background: white; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <canvas id="c" width="400" height="400"></canvas>
+<script>
+    const ctx = document.getElementById('c').getContext('2d');
+    
+    // Standard Helper
+    function drawBone(ctx, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.roundRect(-w/2, 0, w, h, w/2); ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.1)";
+        ctx.beginPath(); ctx.arc(0,0, w/3, 0, Math.PI*2); ctx.fill();
+    }
+
+    function renderBucky(t) {
+        ctx.clearRect(0,0,400,400);
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.scale(1.5, 1.5);
+
+        // TORSO
+        ctx.translate(0, Math.sin(t*8)*2); 
+        ctx.fillStyle = "#fff"; 
+        ctx.fillRect(-20, -35, 40, 70);
+        
+        ctx.fillStyle = "#c5050c"; 
+        for(let i=0; i<4; i++) {
+            ctx.fillRect(-20, -35 + (i*18), 40, 8);
+        }
+        
+        // RED W
+// ... inside the render function ...
+
+        // The "Red W" (With stroke for contrast)
+        ctx.font = "bold 28px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        
+        // 1. Draw a thick white outline first
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 4;
+        ctx.strokeText("W", 0, -5);
+
+        // 2. Draw the red letter on top
+        ctx.fillStyle = "#c5050c";
+        ctx.fillText("W", 0, -5);
+
+        // HEAD
+        ctx.save();
+        ctx.translate(0, -35); 
+        ctx.rotate(Math.sin(t*2)*0.05); 
+        
+        // Ears
+        [-1, 1].forEach(dir => {
+            ctx.save(); ctx.translate(15 * dir, -28); ctx.rotate(dir * 0.5);
+            ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0,0, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            ctx.restore();
+        });
+
+        // Face
+        ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(0, -15, 24, 22, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        
+        // Stripe
+        ctx.fillStyle = "#000"; ctx.beginPath(); ctx.roundRect(-6, -30, 12, 25, 5); ctx.fill();
+        
+        // Snout
+        ctx.fillStyle = "#333"; ctx.beginPath(); ctx.ellipse(0, -5, 8, 5, 0, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+
+        // ARMS
+        [-1, 1].forEach(dir => {
+            ctx.save(); ctx.translate(20 * dir, -25); 
+            let armSwing = Math.sin(t*4 + (dir===1 ? Math.PI : 0)) * 0.8;
+            ctx.rotate(armSwing);
+            drawBone(ctx, 12, 30, "#c5050c");
+            ctx.translate(0, 25);
+            ctx.rotate(Math.abs(armSwing)*0.5 + 0.5);
+            // Hand with Stroke
+            ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(-5, 0, 10, 25, 5); ctx.fill(); ctx.stroke();
+            ctx.restore();
+        });
+
+        // LEGS
+        [-1, 1].forEach(dir => {
+            ctx.save(); ctx.translate(10 * dir, 35); 
+            let legSwing = Math.sin(t*4 + (dir===-1 ? Math.PI : 0));
+            ctx.rotate(legSwing * 0.6);
+            drawBone(ctx, 12, 35, "#8d6e63");
+            ctx.translate(0, 30);
+            let kneeBend = Math.max(0, legSwing); 
+            ctx.rotate(kneeBend); 
+            drawBone(ctx, 10, 35, "#8d6e63");
+            ctx.translate(0, 35); ctx.rotate(Math.PI/2);
+            ctx.fillStyle = "#333"; ctx.fillRect(0, -5, 15, 10);
+            ctx.restore();
+        });
+
+        ctx.restore();
+        requestAnimationFrame(() => renderBucky(performance.now()/1000));
+    }
+    
+    renderBucky(0);
+</script>
+</body>
+</html>

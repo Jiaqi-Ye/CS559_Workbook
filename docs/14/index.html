@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 14: Transformations as Math vs. Code</h1>
+		</header>
+		<div class="content post__content clearfix"><p>When working with Canvas, we write lots of code that refers to the positions of points using things such as <code>context.moveTo(x,y)</code>, <code>context.lineTo(x,y)</code>, or <code>context.fillRect(x,y,w,h)</code>. In these cases, we pass points as a pair of numbers (<code>x,y</code>).</p>
+<p>When thinking about points, it is easier to use notation that writes points directly. So we can use a variable <strong>p</strong> to refer to a point. In terms of implementation, we might represent <strong>p</strong> as an array (of length 2 for 2D), or as an object with members for x and y. Some APIs we will see later in the class will define their functions to take point objects, rather than a list of individual parameters.</p>
+<p>Points and vectors are not the same (see <a href="../../docs/15/">Points, Vectors, Co-Ordinate Systems</a>) if you need a reminder). However, in code (and notation), we often do not distinguish between them. In terms of representation, they store the same things (e.g., two numbers for a 2D point or a 2D vector).</p>
+<p>Generally, we write vectors or points as lowercase boldface (in print). We will try to be consistent with that. So, x is a scalar (number), <strong>x</strong> is a vector, and <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">x_x</annotation></semantics></math></span> is the x component of the <strong>x</strong> vector (which is a scalar). It might be more correct to write <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">x</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex"> \mathbf{x}_x </annotation></semantics></math></span> since <strong>x</strong> is a vector.</p>
+<p>A warning: you will see things x, <strong>x</strong>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex"> x </annotation></semantics></math></span> and <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex"> \mathbf x </annotation></semantics></math></span>. Sorry for the inconsistency in typesetting - getting math right on the web is a bit of a hassle. In text, variables will be x (scalar) or <strong>x</strong> (vector); in equations (that may appear inline), they will be <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex"> x </annotation></semantics></math></span> (scalar) or <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">\mathbf x </annotation></semantics></math></span> (vector).</p>
+<h2 id="transformations-as-functions">Transformations as Functions</h2>
+<p>Recall that we said that transformations are functions that change points into other points. So, for example, when we apply a translation <code>translate(a,b)</code> we are saying to use the function <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo separator="true">,</mo><mi>y</mi><mo>+</mo><mi>b</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> f(x,y) = (x+a, y+b) </annotation></semantics></math></span> on every point we encounter.</p>
+<p>Using vector notation (having the point be a vector variable), we could instead write this as <code>translate(t)</code> (for a vector <strong>t</strong>) is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="bold">x</mi><mo>+</mo><mi mathvariant="bold">t</mi></mrow><annotation encoding="application/x-tex"> f(\mathbf{x})=\mathbf{x}+\mathbf{t} </annotation></semantics></math></span>. If we were being picky about notation, the f should also be boldfaced since it is a function that returns a vector.</p>
+<p>The other transformations we have seen so far can also be written this way (as functions that take a point as input and produce a point as output). In fact, this might be a way to define a transformation: it is a function that takes a point as input and returns a new point as output.</p>
+<p>The only thing new here is a change of notation: we are writing <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> f(\mathbf x) </annotation></semantics></math></span> rather than <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> f(x,y) </annotation></semantics></math></span>. This makes it easier to write/type the math. And it also makes it easier to connect between what we see in the textbook and what we write as code.</p>
+<h2 id="transformation-composition-as-function-composition">Transformation Composition as Function Composition</h2>
+<p>On previous pages, we saw how we can use sequences of transformations to create <em>one</em> transformation that does a compound thing. For example, in order to scale about a particular point, we translate such that the center point is at the origin, we scale by the desired amount, and then we translate to return the center point from where it came. In code, this sequence would be written:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">c</span><span style="color:#111">.</span><span style="color:#75af00">x</span><span style="color:#111">,</span> <span style="color:#75af00">c</span><span style="color:#111">.</span><span style="color:#75af00">y</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">s</span><span style="color:#111">,</span><span style="color:#75af00">s</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#75af00">c</span><span style="color:#111">.</span><span style="color:#75af00">x</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#75af00">c</span><span style="color:#111">.</span><span style="color:#75af00">y</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">DRAW</span> <span style="color:#75af00">STUFF</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Where <em>draw stuff</em> includes drawing commands that provide points. Note that we have a point <strong>c</strong>, so in our Canvas code we have to refer to its specific parts.</p>
+<p>If we write this using function notation, we first have the &ldquo;last&rdquo; translate (which moves the point <strong>c</strong> to the origin, <code>translate(-c.x, -c.y)</code>). Let&rsquo;s call this function f, so the application of it to the points (in <em>draw stuff</em>) would be <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> f ( \mathbf x ) </annotation></semantics></math></span>. Call the second function (that does the scaling) g. This function is applied to the results of applying the first function to the point. Similarly, if we call the final translation h, that function is applied to the result of the second function (which was applied to the result of the first function).</p>
+<p>So, we could re-write the code in math as:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>h</mi><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">h ( g ( f ( \mathbf x))) </annotation></semantics></math></span>
+<p>When we think about applying functions to points, the first function we apply to a point (f) appears in the right of the list. The last function we apply appears first (on the left). Just like it does in the code. We can think of the functions as a &ldquo;machine&rdquo; where we pour points in on the right, and they come out on the left. They go in their &ldquo;local&rdquo; coordinate system, and come out in the final coordinate system on the left. This is the &ldquo;backwards&rdquo; model from <a href="../../docs/03/">Page &nbsp;3&nbsp; (Transformations Backwards)</a>.</p>
+<p>Function notation also lets us talk about combining the functions. The idea of creating a new function by putting two functions together is called <em>composition</em>. If we want to create a new function that does what the combination of f and g does (apply f to the input, then apply g to the result), we write <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>∘</mo><mi>f</mi></mrow><annotation encoding="application/x-tex"> g \circ f </annotation></semantics></math></span>. Note that this new function first applies f to the input, but f is still on the right of the expression (it is closest to the input). Or, to define a new function k as the sequence above, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mi>h</mi><mo>∘</mo><mi>g</mi><mo>∘</mo><mi>f</mi></mrow><annotation encoding="application/x-tex"> k = h \circ g \circ f </annotation></semantics></math></span>, which means that <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>h</mi><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> k(\mathbf x)=h(g(f(\mathbf x))) </annotation></semantics></math></span>.</p>
+<p>Understanding this is important since it helps explain the ordering. In code, points are &ldquo;issued&rdquo; at the bottom and move &ldquo;up&rdquo; through the transformations. In math notation, the points are on the right, and move through the transformations right to left. The transformations that are written last are applied to the points first.</p>
+<p>If you&rsquo;re wondering where the parameters to the transformation went (<strong>c</strong> and s in the code example), they were built into the functions that we defined. So g above was &ldquo;scale by s&rdquo;. We could have picked a different notation, for example calling the scaling function S (capital), and using a subscript to denote its parameters.</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="bold">T</mi><mi mathvariant="bold">c</mi></msub><mo stretchy="false">(</mo><msub><mi mathvariant="bold">S</mi><mi mathvariant="bold">s</mi></msub><mo stretchy="false">(</mo><msub><mi mathvariant="bold">T</mi><mrow><mo>−</mo><mi mathvariant="bold">c</mi></mrow></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{T}_{\mathbf{c}} ( \mathbf{S}_{\mathbf{s}} (\mathbf{T}_{\mathbf{-c}} (\mathbf{x}))) </annotation></semantics></math></span>
+<p>Again, notice how this reads like the code (left to right), with the points we draw (<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math></span>) coming last.</p>
+<h2 id="summary">Summary</h2>
+<p>Representing points using vector notation and using function notation for transformations should connect to the code for you. This kind of notation will make many things easier going forward.</p>
+<p>We&rsquo;ll use this notation to connect what we&rsquo;re doing to linear algebra on <a href="../../docs/15/" class="Next__Page">Next: Page &nbsp;15&nbsp;-&nbsp;Points, Vectors, Co-Ordinate Systems</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Selected"> 14: Transformations as Math vs. Code </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p14",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

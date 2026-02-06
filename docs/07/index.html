@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 7: More Transformations</h1>
+		</header>
+		<div class="content post__content clearfix">
+<p>First, a bit of terminology&hellip;</p>
+<p>I&rsquo;ve been using the term <strong>transformation</strong> for the noun describing the thing that transforms points. Notice that I used the verb <strong>transform</strong> for what a transformation does. We don&rsquo;t use transformation as a verb; we use transform.</p>
+<p>Sometimes, we use <strong>transform</strong> as a noun. It&rsquo;s fewer characters to type or syllables to say. The terms are somewhat equivalent - I won&rsquo;t be picky about the difference. Often <strong>transformation</strong> refers to the mathematical or conceptual operation, while <strong>transform</strong> (as a noun) refers to a specific operation.</p>
+<p>With that behind us, let&rsquo;s explore some other transformations.</p>
+<h2 id="a-gallery-of-basic-transformations">A Gallery of Basic Transformations</h2>
+<p>There are a few types of transformations that we consider &ldquo;basic&rdquo;. They have a common mathematical representation that we will describe later. I want to introduce them visually before we start talking about them mathematically.</p>
+<p>We&rsquo;ve already seen translation.
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-1">
+    <script type="module">
+        import { demoTranslate } from "/TransformDemos/transformDemo.js";
+        demoTranslate('tdemo-1');
+    </script>
+</div></p>
+<p>And we&rsquo;ve also discussed uniform and non-uniform scales.
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-scale.html" class="boxtitlelink">/TransformDemos/demo-scale.html</a>
+    <iframe
+        title="/TransformDemos/demo-scale.html"
+        src="../../TransformDemos/demo-scale.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-nuscale.html" class="boxtitlelink">/TransformDemos/demo-nuscale.html</a>
+    <iframe
+        title="/TransformDemos/demo-nuscale.html"
+        src="../../TransformDemos/demo-nuscale.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p><strong>Rotation</strong> is another important transformation in this same category. It is a &ldquo;rigid&rdquo; transformation in that it preserves the size and shape of objects; specifically, the distances between any two points are preserved. Like scaling, it also has a center (called the <em>center of rotation</em>) that is the only point not changed by the transformation. We&rsquo;ll discuss rotations a lot more over the rest of the workbook.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-rotation.html" class="boxtitlelink">/TransformDemos/demo-rotation.html</a>
+    <iframe
+        title="/TransformDemos/demo-rotation.html"
+        src="../../TransformDemos/demo-rotation.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The last of the basic transformations we&rsquo;ll introduce is <strong>shear</strong>. Shear slides points along the X direction by some amount determined by its position in Y. The new x position is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mi>x</mi><mo>+</mo><mi>s</mi><mo>∗</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x&#x27;=x+s*y</annotation></semantics></math></span> where s is the shear factor. Notice that for the X axis (Y=0), the points don&rsquo;t move. Horizontal shear does not change the y value.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-shearx.html" class="boxtitlelink">/TransformDemos/demo-shearx.html</a>
+    <iframe
+        title="/TransformDemos/demo-shearx.html"
+        src="../../TransformDemos/demo-shearx.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>There are two versions of shear. The one along the X axis we just described, and a corresponding one along the Y axis.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformDemos/demo-sheary.html" class="boxtitlelink">/TransformDemos/demo-sheary.html</a>
+    <iframe
+        title="/TransformDemos/demo-sheary.html"
+        src="../../TransformDemos/demo-sheary.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="combining-basic-types">Combining Basic Types</h2>
+<p>Some combinations of basic transformations are common, and get their own names.</p>
+<p>A <strong>rigid transformation</strong> is one that preserves the size and shape of an object. Rotations and translations are examples. Any combination of rotations and translations are rigid. Mathematically, rigidity preserves the distance between points. If you have two points, the distance between them is preserved before and after transformation. Because distances are preserved, angles are also preserved.</p>
+<p>A <strong>similarity transformation</strong> preserves the shape, but not the size of objects. It allows for translation, rotation, and uniform scale. Angles are preserved, but distances are not.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-2">
+    <script type="module">
+        import { demoSimilarity } from "/TransformDemos/transformDemo.js";
+        demoSimilarity('tdemo-2');
+    </script>
+</div>
+<p>All of the types of transformations so far on this page (and all combinations of them) are examples of <strong>affine transformations</strong>. Affine transformations are easier to define in terms of their mathematics (which we will do later). Affine transformations are a very important category of transformations in computer graphics. We&rsquo;ll discuss them more after we explain the math.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-3">
+    <script type="module">
+        import { demoAffine } from "/TransformDemos/transformDemo.js";
+        demoAffine('tdemo-3');
+    </script>
+</div>
+<p>Affine transformations have the property that they preserve parallel lines. So if two lines start out parallel, they will remain parallel after transformation. So, for example, a rectangle (the square in the example) can be transformed into a parallelogram, but the sides will always remain parallel.</p>
+<h2 id="linear-transformations">Linear Transformations</h2>
+<p>I have avoided describing transformations as <strong>linear</strong>. In part because it refers to the mathematics of the transformations (that we haven&rsquo;t discussed yet). But also, in part, it is ambiguous because it can refer to several different things.</p>
+<p>The common definition of a <strong>linear transformation</strong> is one that can be implemented by matrix multiplication in the current dimensions. We haven&rsquo;t discussed using matrices yet. Because any matrix times zero is zero, linear transformations cannot change the origin. Therefore, translation is not a linear transformation in 2D. This is why we need <strong>affine</strong> transformations: they combine linear transformations and translation - an important combination!</p>
+<p>However, later in the workbook we&rsquo;ll see that translation can be viewed as a linear operation in &ldquo;homogeneous coordinates&rdquo;. We&rsquo;ll explain this later. But it means that translation (or any affine transformation) can be viewed as a linear transformation in this other space.</p>
+<p>The set of all transformations that are linear in this more complicated space is sometimes called &ldquo;projective transformations&rdquo; or &ldquo;homogeneous transformations&rdquo;. They include affine transformations, and many others.</p>
+<p>Here is a demo. Notice that the rectangle of the points can be shaped into any quadrilateral; unlike affine transformations that preserve parallelism. If you play with this demo, you will notice that sometimes the grid gets weird. The transformation may have discontinuities (where things go off to infinity and back). This makes drawing the grid hard (so sometimes portions of the grid can&rsquo;t be seen).</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-4">
+    <script type="module">
+        import { demoProjective } from "/TransformDemos/transformDemo.js";
+        demoProjective('tdemo-4');
+    </script>
+</div>
+<p>As weird as this transformation seems, it does map lines to lines. The line might go off to infinity and wrap around to negative infinity, but it will still be a straight line. We&rsquo;ll explain more later in the workbook.</p>
+<h2 id="non-linear-transformations">Non-Linear Transformations</h2>
+<p>A non-linear transformation might just be one that is not linear. But, as we just saw, that can be ambiguous.</p>
+<p>Generally, we use the term &ldquo;non-linear&rdquo; to imply that it does not map lines to lines. Here is an example of a simple non-linear transformation:</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-5">
+    <script type="module">
+        import { demoBowl } from "/TransformDemos/transformDemo.js";
+        demoBowl('tdemo-5');
+    </script>
+</div>
+<p>In this workbook, we won&rsquo;t look at non-linear transformations (other than this one, and the grid warp on the first page). We&rsquo;ll come back to them later in the course.</p>
+<a href="../../docs/08/" class="Next__Page">Next: Page &nbsp;8&nbsp;-&nbsp;TransformToy</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Selected"> 7: More Transformations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p07",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

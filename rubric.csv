@@ -1,0 +1,38 @@
+Box,Link,CheckId,Kind,Description,HTML,JS
+02-05-01,/docs/05/#box-02-05-01,wbsp26_02_check-02-05-01-i,standard,"Page 05 Items",,
+02-06-03,/docs/06/#box-02-06-03,wbsp26_02_check-02-06-03-0,standard,"",02-06-03.html,02-06-03.js
+02-06-04,/docs/06/#box-02-06-04,wbsp26_02_check-02-06-04-i,standard,"Convenient Coordinate System Type-ins",,
+02-09-06,/docs/09/#box-02-09-06,wbsp26_02_check-02-09-06-0,regular,"triangle returns",02-09-06.html,02-09-06.js
+02-10-03,/docs/10/#box-02-10-03,wbsp26_02_check-02-10-03-0,regular,"add transformations to make images look the same",02-10-03.html,02-10-03.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-0,regular,"quadcopter has a front and 4 arms",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-1,regular,"four attached propellers that spin",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-2,regular,"propellers spin at different rates",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-3,regular,"goes around a circle",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-4,regular,"points forward while going around circle",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-5,advanced,"multiple vehicles types (all must have spinning parts)",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-6,advanced,"complex paths (at least one 'copter must be a circle)",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-7,creative,"cool looking vehicles",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-8,creative,"interaction (be sure to document)",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-9,creative,"quadcopters do something beyond move in a path",02-13-01.html,02-13-01.js
+02-13-01,/docs/13/#box-02-13-01,wbsp26_02_check-02-13-01-10,creative,"other articulated object",02-13-01.html,02-13-01.js
+02-18-01,/docs/18/#box-02-18-01,wbsp26_02_check-02-18-01-i,standard,"Page 18 Items",,
+02-21-01,/docs/21/#box-02-21-01,wbsp26_02_check-02-21-01-0,regular,"red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via translate, rotate, and scale",02-21-01.html,02-21-01.js
+02-21-02,/docs/21/#box-02-21-02,wbsp26_02_check-02-21-02-0,regular,"red dot stays in red corner and black dot stays in black corner as dots are dragged; square remains square; done via transform",02-21-02.html,02-21-02.js
+02-21-03,/docs/21/#box-02-21-03,wbsp26_02_check-02-21-03-0,regular,"red dot stays in red corner and green dot stays in green corner as dots are dragged; square remains square",02-21-03.html,02-21-03.js
+02-21-04,/docs/21/#box-02-21-04,wbsp26_02_check-02-21-04-0,regular,"parameters changed so that square 1 matches",02-21-04.html,02-21-04.js
+02-21-04,/docs/21/#box-02-21-04,wbsp26_02_check-02-21-04-1,regular,"parameters changed so that square 2 matches (freebie!)",02-21-04.html,02-21-04.js
+02-21-04,/docs/21/#box-02-21-04,wbsp26_02_check-02-21-04-2,regular,"parameters changed so that square 3 matches",02-21-04.html,02-21-04.js
+02-21-04,/docs/21/#box-02-21-04,wbsp26_02_check-02-21-04-3,regular,"parameters changed so that square 4 matches",02-21-04.html,02-21-04.js
+02-21-04,/docs/21/#box-02-21-04,wbsp26_02_check-02-21-04-4,regular,"parameters changed so that square 5 matches",02-21-04.html,02-21-04.js
+02-21-05,/docs/21/#box-02-21-05,wbsp26_02_check-02-21-05-0,regular,"shear-x implemented to draw sheared squares",02-21-05.html,02-21-05.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-0,regular,"a picture using SVG",02-24-01.html,02-24-01.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-1,regular,"at least one path with an arc",02-24-01.html,02-24-01.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-2,regular,"at least one polygon that is not a rectangle",02-24-01.html,02-24-01.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-3,regular,"a hierarchy using grouping",02-24-01.html,02-24-01.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-4,regular,"repeated instancing via use",02-24-01.html,02-24-01.js
+02-24-01,/docs/24/#box-02-24-01,wbsp26_02_check-02-24-01-5,creative,"artistic merit (grader's discretion)",02-24-01.html,02-24-01.js
+02-25-01,/docs/25/#box-02-25-01,wbsp26_02_check-02-25-01-0,standard,"Articulated thing (pieces, joints)",02-25-01.html,02-25-01.js
+02-25-01,/docs/25/#box-02-25-01,wbsp26_02_check-02-25-01-1,standard,"Articulated motion",02-25-01.html,02-25-01.js
+02-25-01,/docs/25/#box-02-25-01,wbsp26_02_check-02-25-01-2,advanced,"Character (multiple chains, ...)",02-25-01.html,02-25-01.js
+02-25-01,/docs/25/#box-02-25-01,wbsp26_02_check-02-25-01-3,creative,"Creativity in character design or motion",02-25-01.html,02-25-01.js
+02-27-01,/docs/27/#box-02-27-01,wbsp26_02_check-02-27-01-0,optional,"The Boids page will not be graded",02-27-01.html,02-27-01.js

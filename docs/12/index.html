@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 12: Hierarchy</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On this page, we&rsquo;ll extend the single articulated chains from the previous page to make more complex objects. We&rsquo;ll use hierarchical modeling, the idea that we have parts that fit together into wholes.</p>
+<p>The lecture videos cover this topic well:</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=1237">2023 Video Clip: Hierarchy and Chaining</a> [20:37 - 36:56 (16.3 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=2216">2023 Video Clip: A Tree of Parts</a> [36:56 - 48:45 (11.8 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div></p>
+<p>And you can also learn about it from the Graphics in 5 Minutes Video: <a href="https://youtu.be/4iNJdWXsFQ4" target="_blank">Hierarchical Modeling in 5 Minutes</a>, although that discusses it with the math that we haven&rsquo;t covered yet.</p>
+<h2 id="where-this-is-going">Where this is going&hellip;</h2>
+<p>We want to make complicated objects with multiple parts that stay attached, but move relative to each other. We want cars where the wheels spin around the axles, even as the whole car moves. We want characters whose arms and legs bend, but stay attached to the body. Here&rsquo;s an example that I made (it will come back on a later page):</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../characters/crab.html" class="boxtitlelink">/characters/crab.html</a>
+    <iframe
+        title="/characters/crab.html"
+        src="../../characters/crab.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Notice that this character is made up of rigid pieces that rotate relative to one another.</p>
+<p>The place where pieces are attached (the centers of rotation) are called joints. The crab has a lot of them. We&rsquo;ll start with something easier.</p>
+<h2 id="two-arms">Two Arms</h2>
+<p>Here is a variant of the arm example from the last page. This time, I made two arms.</p>
+<div class="inline-canvas-div" id="div-cs-canvas-1" style="width:680px;"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-1" width="400" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-1" style="font-weight: bold; font-size: 0.9em;">right 1</label>
+                    <span id="val-display-1-1" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-1-1" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-2" style="font-weight: bold; font-size: 0.9em;">right 2</label>
+                    <span id="val-display-1-2" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-1-2" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-3" style="font-weight: bold; font-size: 0.9em;">left 1</label>
+                    <span id="val-display-1-3" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-1-3" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-4" style="font-weight: bold; font-size: 0.9em;">left 2</label>
+                    <span id="val-display-1-4" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-1-4" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <button id="show-code-1" style="padding: 5px 10px; cursor: pointer;">Show Code</button><div id="code-container-1" style="display: none; margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span> <span style="color:#75715e">// center
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightGreen&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val3</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-1');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-1-1", displayId: "val-display-1-1" },{ id: "slider-1-2", displayId: "val-display-1-2" },{ id: "slider-1-3", displayId: "val-display-1-3" },{ id: "slider-1-4", displayId: "val-display-1-4" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            const val3 = Number(listeners[2].el.value);
+            if (listeners[2].disp) { listeners[2].disp.innerText = val3; }
+            const val4 = Number(listeners[3].el.value);
+            if (listeners[3].disp) { listeners[3].disp.innerText = val4; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+ctx.translate(canvas.width/2,canvas.height/2); // center
+ctx.fillStyle="lightGreen";
+ctx.fillRect(-20,-20,40,40);
+ctx.save();
+    ctx.translate(20,0);
+    ctx.rotate(val1);
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+    ctx.translate(80,0);
+    ctx.rotate(val2);
+    ctx.fillStyle="#E066E0";
+    ctx.fillRect(0,-10,80,20);
+ctx.restore();
+ctx.save();
+    ctx.scale(-1,1);
+    ctx.translate(20,0);
+    ctx.rotate(val3);
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+    ctx.translate(80,0);
+    ctx.rotate(val4);
+    ctx.fillStyle="#E066E0";
+    ctx.fillRect(0,-10,80,20);
+ctx.restore();
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+        const btn = document.getElementById('show-code-1');
+        const codeDiv = document.getElementById('code-container-1');
+        if(btn && codeDiv) {
+            btn.addEventListener('click', () => {
+                codeDiv.style.display = 'block';
+                btn.style.display = 'none';
+            });
+        }
+        
+    }
+</script>
+
+<p>Again, since the code gets a little long, let me make a simpler version so we can focus on the interesting pieces&hellip;
+<div class="inline-canvas-div" id="div-cs-canvas-2" style="width:680px;"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-2" width="400" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-2-1" style="font-weight: bold; font-size: 0.9em;">right 1</label>
+                    <span id="val-display-2-1" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-2-1" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-2-2" style="font-weight: bold; font-size: 0.9em;">left 1</label>
+                    <span id="val-display-2-2" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-2-2" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <div id="code-container-2" style=" margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span> <span style="color:#75715e">// center
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightGreen&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>                     <span style="color:#75715e">// right arm
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>        <span style="color:#75715e">// move to shoulder
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">);</span>           <span style="color:#75715e">// rotate shoulder joint
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>                     <span style="color:#75715e">// left arm
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>            <span style="color:#75715e">// flip coordinate system
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-2');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-2-1", displayId: "val-display-2-1" },{ id: "slider-2-2", displayId: "val-display-2-2" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+ctx.translate(canvas.width/2,canvas.height/2); // center
+ctx.fillStyle="lightGreen";
+ctx.fillRect(-20,-20,40,40);
+ctx.save();                     // right arm
+    ctx.translate(20,0);        // move to shoulder
+    ctx.rotate(val1);           // rotate shoulder joint
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+ctx.restore();
+ctx.save();                     // left arm
+    ctx.scale(-1,1);            // flip coordinate system
+    ctx.translate(20,0);
+    ctx.rotate(val2);
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+ctx.restore();
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+    }
+</script>
+</p>
+<p>I have indented the code to make it clearer. I started by drawing the green square in the center, the &ldquo;body&rdquo;. I put it at the center of the canvas. The center of the coordinate system is the center of the body.</p>
+<p>I then drew the right arm (lines 4-9). The main thing that is new is that I use <code>save</code> when I start drawing the arm. That way when I am done drawing the arm I can return to the &ldquo;body&rdquo; coordinate system with <code>restore</code>. Because I didn&rsquo;t want to think about negating all of the design of the right arm to make it go to the left, I just used scale to cause a mirror reflection on line 73.</p>
+<p>If you notice, the two arms are the same. I can write the code once and just reuse it.</p>
+<div class="inline-canvas-div" id="div-cs-canvas-3" style="width:680px;"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-3" width="400" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-3-1" style="font-weight: bold; font-size: 0.9em;">right 1</label>
+                    <span id="val-display-3-1" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-3-1" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-3-2" style="font-weight: bold; font-size: 0.9em;">right 2</label>
+                    <span id="val-display-3-2" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-3-2" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-3-3" style="font-weight: bold; font-size: 0.9em;">left 1</label>
+                    <span id="val-display-3-3" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-3-3" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-3-4" style="font-weight: bold; font-size: 0.9em;">left 2</label>
+                    <span id="val-display-3-4" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-3-4" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <button id="show-code-3" style="padding: 5px 10px; cursor: pointer;">Show Code</button><div id="code-container-3" style="display: none; margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">shoulder</span><span style="color:#111">,</span><span style="color:#75af00">elbow</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">shoulder</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">elbow</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span> <span style="color:#75715e">// center
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightGreen&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">,</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val3</span><span style="color:#111">,</span><span style="color:#75af00">val4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-3');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-3-1", displayId: "val-display-3-1" },{ id: "slider-3-2", displayId: "val-display-3-2" },{ id: "slider-3-3", displayId: "val-display-3-3" },{ id: "slider-3-4", displayId: "val-display-3-4" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            const val3 = Number(listeners[2].el.value);
+            if (listeners[2].disp) { listeners[2].disp.innerText = val3; }
+            const val4 = Number(listeners[3].el.value);
+            if (listeners[3].disp) { listeners[3].disp.innerText = val4; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+function arm(shoulder,elbow) {
+    ctx.save();
+    ctx.rotate(shoulder);
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+    ctx.translate(80,0);
+    ctx.rotate(elbow);
+    ctx.fillStyle="#E066E0";
+    ctx.fillRect(0,-10,80,20);
+    ctx.restore();
+}
+ctx.translate(canvas.width/2,canvas.height/2); // center
+ctx.fillStyle="lightGreen";
+ctx.fillRect(-20,-20,40,40);
+ctx.save();
+    ctx.translate(20,0);
+    arm(val1,val2);
+ctx.restore();
+ctx.save();
+    ctx.scale(-1,1);
+    ctx.translate(20,0);
+    arm(val3,val4);
+ctx.restore();
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+        const btn = document.getElementById('show-code-3');
+        const codeDiv = document.getElementById('code-container-3');
+        if(btn && codeDiv) {
+            btn.addEventListener('click', () => {
+                codeDiv.style.display = 'block';
+                btn.style.display = 'none';
+            });
+        }
+        
+    }
+</script>
+
+<p>This isn&rsquo;t much shorter. But it does have the advantage that if I improve the arm, I improve all of the arms. Of course, I can use the arms multiple times&hellip;</p>
+<div class="inline-canvas-div" id="div-cs-canvas-4" style="width:680px;"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-4" width="400" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-4-1" style="font-weight: bold; font-size: 0.9em;">right 1</label>
+                    <span id="val-display-4-1" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-4-1" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-4-2" style="font-weight: bold; font-size: 0.9em;">right 2</label>
+                    <span id="val-display-4-2" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-4-2" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-4-3" style="font-weight: bold; font-size: 0.9em;">left 1</label>
+                    <span id="val-display-4-3" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-4-3" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-4-4" style="font-weight: bold; font-size: 0.9em;">left 2</label>
+                    <span id="val-display-4-4" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-4-4" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <button id="show-code-4" style="padding: 5px 10px; cursor: pointer;">Show Code</button><div id="code-container-4" style="display: none; margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">shoulder</span><span style="color:#111">,</span><span style="color:#75af00">elbow</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">shoulder</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">elbow</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">);</span> <span style="color:#75715e">// center
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightGreen&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">80</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span><span style="color:#ae81ff">160</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">,</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">,</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">,</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">save</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val3</span><span style="color:#111">,</span><span style="color:#75af00">val4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val3</span><span style="color:#111">,</span><span style="color:#75af00">val4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">60</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">arm</span><span style="color:#111">(</span><span style="color:#75af00">val3</span><span style="color:#111">,</span><span style="color:#75af00">val4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">restore</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-4');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-4-1", displayId: "val-display-4-1" },{ id: "slider-4-2", displayId: "val-display-4-2" },{ id: "slider-4-3", displayId: "val-display-4-3" },{ id: "slider-4-4", displayId: "val-display-4-4" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            const val3 = Number(listeners[2].el.value);
+            if (listeners[2].disp) { listeners[2].disp.innerText = val3; }
+            const val4 = Number(listeners[3].el.value);
+            if (listeners[3].disp) { listeners[3].disp.innerText = val4; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+function arm(shoulder,elbow) {
+    ctx.save();
+    ctx.rotate(shoulder);
+    ctx.fillStyle="lightblue";
+    ctx.fillRect(0,-10,80,20);
+    ctx.translate(80,0);
+    ctx.rotate(elbow);
+    ctx.fillStyle="#E066E0";
+    ctx.fillRect(0,-10,80,20);
+    ctx.restore();
+}
+ctx.translate(canvas.width/2,canvas.height/2); // center
+ctx.fillStyle="lightGreen";
+ctx.fillRect(-20,-80,40,160);
+ctx.save();
+    ctx.translate(20,-60);
+    arm(val1,val2);
+    ctx.translate(0,60);
+    arm(val1,val2);
+    ctx.translate(0,60);
+    arm(val1,val2);
+ctx.restore();
+ctx.save();
+    ctx.scale(-1,1);
+    ctx.translate(20,-60);
+    arm(val3,val4);
+    ctx.translate(0,60);
+    arm(val3,val4);
+    ctx.translate(0,60);
+    arm(val3,val4);
+ctx.restore();
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+        const btn = document.getElementById('show-code-4');
+        const codeDiv = document.getElementById('code-container-4');
+        if(btn && codeDiv) {
+            btn.addEventListener('click', () => {
+                codeDiv.style.display = 'block';
+                btn.style.display = 'none';
+            });
+        }
+        
+    }
+</script>
+
+<p>I didn&rsquo;t make more sliders - so all arms on a side do the same thing. But hopefully you can read the code and get the points.</p>
+<p>What are the points?</p>
+<ol>
+<li>Notice how I defined each object as a rigid piece, with a &ldquo;joint center&rdquo;. I used rotations around those joint centers.</li>
+<li>I translated each object to its place relative to its parent (the thing it is connected to).</li>
+<li>I used <code>save</code> and <code>restore</code> to go back to a previous coordinate system that I wanted to work in.</li>
+</ol>
+<p>The <code>save</code> and <code>restore</code> are important. And I should point out&hellip; there needs to be a <code>save</code> and <code>restore</code> with every redraw. Each redraw needs to return the coordinate system to a place where the next redraw expects it. The workbook does this automatically for each &ldquo;inline code box&rdquo;.</p>
+<h2 id="box-1-arms-and-legs">Box 1: Arms and Legs</h2>
+<p>Here&rsquo;s a little more complete version of the arm example:</p>
+<p>
+
+<div id="box-02-12-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-12-01</span>&nbsp;
+    <input type="checkbox" id="check-02-12-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-12-01.html class="boxtitlelink">02-12-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-12-01.js" class="boxtitlelink">02-12-01.js</a>
+    <iframe
+        title="eg-arms-legs"
+        src="../../for_students/02-12-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-12-01"
+    ></iframe>
+</div></p>
+<p>This has so many parameters (one for the &ldquo;root&rdquo; position x,y and one for each angle) that the sliders are made with a loop! Try it out and see how each joint is connected to a slider. The code can be found in 
+<a href="../../for_students/02-12-01.js" class="box-html" data-tag="eg-arms-legs">02-12-01.js</a>
+.</p>
+<p>The place to focus on is the <code>drawBody</code> function (in 
+<a href="../../for_students/02-12-01.js" class="box-html" data-tag="eg-arms-legs">02-12-01.js</a>
+). It takes the parameters for the rotations and root positions, and draws the hierarchical figure.</p>
+<p>In this example, notice how some parts (the body) have multiple parts inside of them. Our hierarchical model is a <strong>tree.</strong> For the stick figure, the &ldquo;root&rdquo; is the body, which has 4 sub-parts (the four limbs).</p>
+<p>If you look carefully, you will notice that the arms are actually the same code repeated (with a changed coordinate system by scaling the X axis to make it go the other direction). We could have made the two arms the same (they are <em>instances</em>).</p>
+<p>Because we can have instances (the same part used by multiple &ldquo;parent&rdquo; parts), hierarchical models are usually thought of as <em>directed acyclic graphs</em> (or <strong>DAGs</strong>). A DAG is the generalization of a display list. We discussed display lists in the previous workbook. A common term for a DAG that represents a hierarchical model is a <strong>scene graph.</strong></p>
+<p>Most retained mode APIs (including SVG and THREE.js, which we will use later in the class) support representing models as scene graphs. In Canvas, because it is immediate mode, we either need to represent the graph in our own data structures, or represent the graph <em>implicitly</em> in code. The latter is what the <code>drawBody</code> function does: you can see the hierarchy of parts, but we never create any data structures to represent them.</p>
+<h2 id="more-on-save-and-restore">More on Save and Restore</h2>
+<p>Hopefully, you noticed that we can do many saves and restores. When we restore, we get back to the most recent save. When we restore again, we go back to the save before that.</p>
+<p>We usually think about saving and restoring as a <strong>stack</strong>. Save pushes a copy of the current context onto the stack. Restore pops a context off the top of the stack and makes it the current context.</p>
+<p>An alternative way to think about this is that the &ldquo;current context&rdquo; (the one that we are using) is the context at the top of the stack. Save makes a copy of the current context and pushes it onto the top of the stack (so we start using that copy), while restore pops the top element off the stack and discards it (so the &ldquo;current context&rdquo; is now the element that is newly exposed on top of the stack). This is how many systems actually implement the &ldquo;context stacks&rdquo;.</p>
+<p>In Canvas, we call these operations <code>save</code> and <code>restore</code> and they act on a context. Many other immediate mode graphics systems have similar operations with a stack of contexts. Often the save operation is called <code>push</code> and the restore operation is called <code>pop</code> (which makes sense given what they do). Because the most important piece of context we save is the current coordinate system (or transformation), the stack of contexts is sometimes called a <strong>matrix stack</strong> because transformations are represented as matrices.</p>
+<p>All that is relevant because (1) you need to understand the concept of the stack; and (2) when you read code (or books) written for something other than Canvas, you will see stack terminology.</p>
+<p>At this point, you will want to see another example of hierarchical modeling (or more than one). I recommend looking at the lecture video and/or the graphics in 5 minutes video:</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=1237">2023 Video Clip: Hierarchy and Chaining</a> [20:37 - 36:56 (16.3 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=2216">2023 Video Clip: A Tree of Parts</a> [36:56 - 48:45 (11.8 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div></p>
+<p><a href="https://youtu.be/4iNJdWXsFQ4" target="_blank">Hierarchical Modeling in 5 Minutes</a> (which is part of <a href="https://g5m.cs.washington.edu/" target="_blank">Graphics in 5 Minutes</a>). This video assumes you&rsquo;ve learned the math from <a href="https://youtu.be/AheaTd_l5Is" target="_blank">Affine Transformations in 5 Minutes</a>.</p>
+<h2 id="summary-hierarchical-models">Summary: Hierarchical Models</h2>
+<p>Hopefully, you have gotten the idea of how we use hierarchical modeling to put complicated objects together. Next week, we&rsquo;ll learn about how transformations are implemented using linear algebra. But for now, we&rsquo;ll give you a chance to make some models on your own on the <a href="../../docs/13/" class="Next__Page">next page</a>.</p>
+<a href="../../docs/13/" class="Next__Page">Next: Page &nbsp;13&nbsp;-&nbsp;Quadcopter Exercise</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Selected"> 12: Hierarchy </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p12",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 13: Quadcopter Exercise</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Note: this is not the last page. There is more in the workbook after this exercise.</p>
+<h2 id="box-1-exercise-4-quadcopter">Box 1: Exercise 4, Quadcopter</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>To try out hierarchical modeling and animation, you will make a quadcopter. Since we&rsquo;re still doing 2D, we&rsquo;ll make a top view. This is a hierarchical model: the quadcopter moves around (and turns) and has 4 propellers that stay attached, but spin around. You can make it fancier if you like. You can see examples from a previous class below.</p>
+<p>Some requirements:</p>
+<ol>
+<li>Your quadcopter can be simple in shape, but it must have a front, and 4 arms that the rotors attach to.</li>
+<li>The propellers can be simple, but they must have an obvious center that they spin around.</li>
+<li>Your scene must have a quadcopter that travels in a circle and points forward as it goes around the circle. (Yes, real quadcopters do not need to face their direction of travel, but for this, the quadcopter has to face where it is going)</li>
+<li>The propellers must spin at different rates.</li>
+<li>Your quadcopter must be done using Canvas, and put into a Canvas element on this page. You can use the above canvas with id <code>canvas1</code> on this page for it.</li>
+</ol>
+<p>For your assignment, you need to make a quadcopter. If you want to make something else, you can make it in addition to the quadcopter. There are many other vehicles with spinning parts.</p>
+<p>Your code must be in <a href="../../for_students/02-13-01.html" class="box-html" data-tag="ex-quad-copter">02-13-01.html</a> and 
+<a href="../../for_students/02-13-01.js" class="box-html" data-tag="ex-quad-copter">02-13-01.js</a>
+. We&rsquo;ve given you the basics. You must use <code>window.requestAnimationFrame</code> correctly, including using the time parameter. You learned about this in previous workbooks, and the provided code should give you plenty of examples. You may use features of Canvas that we have not learned about in class yet, but you do not have to.</p>
+<p>You can see examples of past assignments at <a href="https://pages.graphics.cs.wisc.edu/559-sp23/gallery/wb03/#box-03-06-01---quadcopters" target="_blank">2023 Workbook 3 Gallery</a> and <a href="https://pages.graphics.cs.wisc.edu/559-sp22/gallery/gallery03/#box-6-1" target="_blank">2022 Workbook 3 Gallery</a>.</p>
+<h2 id="beyond-the-basics">Beyond the Basics</h2>
+<p>The list above is for a complete assignment to get the basic items for this exercise. Basically, you need to make one quadcopter that moves in a circle with propellers that spin. The definition of &ldquo;enough&rdquo; advanced or creative features is at the discretion of the grader.</p>
+<ol>
+<li>Have multiple &ldquo;copters&rdquo; (vehicles with spinning parts): the copters need to be different in appearance or motion.</li>
+<li>Have quadcopters that fly in complex paths (at least one should still fly in a circle).</li>
+<li>Make cool looking quadcopters.</li>
+<li>Provide some kind of interaction (e.g., let the user fly a quadcopter with the keyboard). You can add controls to the HTML, or respond to events in the Canvas. If the user is supposed to do something, make sure that the HTML has instructions above the Canvas.</li>
+<li>Make the quadcopters &ldquo;do something&rdquo;. You could have people whom the quadcopter flies to and rescues - they could wave their arms to flag it down (more articulated motion!).</li>
+<li>Make other articulated objects in the scene that are animated to show off their articulations.</li>
+</ol>
+
+<div id="box-02-13-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-13-01</span>&nbsp;
+    <input type="checkbox" id="check-02-13-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-13-01.html class="boxtitlelink">02-13-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-13-01.js" class="boxtitlelink">02-13-01.js</a>
+    <iframe
+        title="ex-quad-copter"
+        src="../../for_students/02-13-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-13-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-0"></td>
+                <td>regular</td>
+                <td>quadcopter has a front and 4 arms</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-1"></td>
+                <td>regular</td>
+                <td>four attached propellers that spin</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-2"></td>
+                <td>regular</td>
+                <td>propellers spin at different rates</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-3"></td>
+                <td>regular</td>
+                <td>goes around a circle</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-4"></td>
+                <td>regular</td>
+                <td>points forward while going around circle</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-5"></td>
+                <td>advanced</td>
+                <td>multiple vehicles types (all must have spinning parts)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-6"></td>
+                <td>advanced</td>
+                <td>complex paths (at least one &#39;copter must be a circle)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-7"></td>
+                <td>creative</td>
+                <td>cool looking vehicles</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-8"></td>
+                <td>creative</td>
+                <td>interaction (be sure to document)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-9"></td>
+                <td>creative</td>
+                <td>quadcopters do something beyond move in a path</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-13-01-10"></td>
+                <td>creative</td>
+                <td>other articulated object</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>The grader might not recognize advanced features. You can describe what you&rsquo;ve done in this type-in box to help them. (be sure to checkpoint your localstore and save it to a file!)</p>
+<div class="input-group">
+    <label for="advanced-features-explanation" style="vertical-align: top;">Advanced Features Explanation</label>
+    <textarea id="advanced-features-explanation" class="" rows="5" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<p>For this workbook, we are trying an experiment where the course staff will select examples for the class gallery. If you would like your work considered, you can give a short description that we will put with your assignment. You can also request to be anonymous. By default, we will give you attribution. Inclusion in the gallery is not considered in grading.</p>
+<div class="input-group">
+    <label for="quadcopter-gallery-description" style="vertical-align: top;">Quadcopter Gallery Description</label>
+    <textarea id="quadcopter-gallery-description" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<p>Remember that the main learning goal of the assignment is hierarchical modeling using transformations with parts.</p>
+<p>Remember: advanced items are harder to get than regular items. Be sure to complete the basic items first. For example, if you make a quadcopter do something more complex than flying in a circle, you should also have another one that flies in a circle.</p>
+<a href="../../docs/14/" class="Next__Page">Next: Page &nbsp;14&nbsp;-&nbsp;Transformations as Math vs. Code</a>
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span id="sheets-status-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Selected"> 13: Quadcopter Exercise </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p13",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

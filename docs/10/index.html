@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 10: Composition</h1>
+		</header>
+		<div class="content post__content clearfix"><p>This page revisits composing scale and translate transformations. While we saw it on earlier pages, this page shows some of the math that may help you understand <em>why</em> the order matters so much.</p>
+<p>Now that we&rsquo;ve learned <code>scale</code> and <code>translate</code>, let&rsquo;s try to put them together!</p>
+<p>The idea of putting transformations together is a very important part of computer graphics. It&rsquo;s important to understand it in the simple case (scale and translate), so that when we get to more complex transformations and more complex combinations, you will be able to appreciate what is happening.</p>
+<p>As a reminder, you should be looking at the code for each of these examples.</p>
+<h2 id="scale-and-translate">Scale and Translate</h2>
+<p>
+We can apply transformations one after the other. For example, here we can scale (in the X direction) and then translate (also in the X direction). This box is <a href="../../for_students/02-10-01.html" class="box-html" data-tag="eg-scale-translate">02-10-01.html</a> and 
+<a href="../../for_students/02-10-01.js" class="box-html" data-tag="eg-scale-translate">02-10-01.js</a>
+.</p>
+
+<div id="box-02-10-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-10-01</span>&nbsp;
+    <input type="checkbox" id="check-02-10-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-10-01.html class="boxtitlelink">02-10-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-10-01.js" class="boxtitlelink">02-10-01.js</a>
+    <iframe
+        title="eg-scale-translate"
+        src="../../for_students/02-10-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-10-01"
+    ></iframe>
+</div>
+<p>Notice the difference in behavior. If we translate first, then the scale only applies to the object (we stretch the coordinate axes after we&rsquo;ve moved the origin). If we scale first, then the translation applies in that stretched coordinate system.</p>
+<p>We can think about this as functions being applied to positions (transformation). Let the position of the point be <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span>, the translation be <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span> and the scale be <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span>. The translate transformation is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>→</mo><mo stretchy="false">(</mo><mi>x</mi><mo>+</mo><mi>t</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T(x,y) \rightarrow (x+t,y)</annotation></semantics></math></span>, and the scale transformation is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>→</mo><mo stretchy="false">(</mo><mi>s</mi><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">S(x,y) \rightarrow (sx,y)</annotation></semantics></math></span>.</p>
+<p>If we translate first, and then scale, it is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>S</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mi>T</mi><mo stretchy="false">(</mo><mi>s</mi><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>s</mi><mi>x</mi><mo>+</mo><mi>t</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T(S(x,y)) = T(sx,y) = (sx+t,y)</annotation></semantics></math></span>.</p>
+<p>If we scale first, and then translate, it is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false">(</mo><mi>T</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mi>S</mi><mo stretchy="false">(</mo><mi>x</mi><mo>+</mo><mi>t</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>s</mi><mi>x</mi><mo>+</mo><mi>s</mi><mi>t</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">S(T(x,y)) = S(x+t,y) = (sx+st,y)</annotation></semantics></math></span>.</p>
+<p>Remember that translate and scale apply to the <em>coordinate system</em>. The coordinate system then affects the points, because the points are interpreted in the coordinate system. To use the pen and paper analogy, the transformation commands (translate and scale) move and stretch the paper we draw on.</p>
+<p>We can view the operations as applying to the points, but this requires us to read <em>backwards</em>. If we translate then scale, that means we first scale the object and then move it. If we scale then translate, we can think about first moving the object, then scaling the object (in its new position).</p>
+<p>This may be a good time to look at the <a href="https://cs559.github.io/2DTransformDemos/transformToy.html" target="_blank">2D Transform Toy (default demos)</a> - there are examples &ldquo;translate scale&rdquo; and &ldquo;scale translate&rdquo; (and a third one that does both - with a save/restore - so you can compare). The transforms toy allows you to &ldquo;run the code backwards&rdquo; (click the &ldquo;run the transformations in reverse order&rdquo; checkbox and start at the end).</p>
+<p>A warning: most programs cannot be run backwards. It is a special trick we can do in the <a href="https://cs559.github.io/2DTransformDemos/" target="_blank">2D Transform Demos</a>. Use it to understand how transformations work going forward. Don&rsquo;t try to write code this way.</p>
+<p>Understanding what happens when we scale first is important (and might be easiest if you look at the &ldquo;Scale then Translate&rdquo; demo). When we scale first, we make the coordinate system &ldquo;bigger&rdquo;. The translate is in the coordinate system, so we translate a larger amount than if we did the translate before we did the scale.</p>
+<h2 id="scale-about-the-center">Scale about the Center</h2>
+<p>Suppose we want to scale around the center of an object, not the center of the coordinate system.</p>
+<p>To do this, we move the object so its center is at the origin, scale it, then move the object back to its original position.</p>
+<p>
+
+<div id="box-02-10-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-10-02</span>&nbsp;
+    <input type="checkbox" id="check-02-10-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-10-02.html class="boxtitlelink">02-10-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-10-02.js" class="boxtitlelink">02-10-02.js</a>
+    <iframe
+        title="eg-scale-center"
+        src="../../for_students/02-10-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-10-02"
+    ></iframe>
+</div></p>
+<p>Here, the center of the square is at <code>(40,40)</code>. So we need to <code>translate(-40,-40)</code> to place its center at the origin, then scale, then do a translation to put the center back where it belongs. But when we look at the code 
+<a href="../../for_students/02-10-02.js" class="box-html" data-tag="eg-scale-center">02-10-02.js</a>
+):</p>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span> <span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">sc</span><span style="color:#111">,</span> <span style="color:#75af00">sc</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">30</span><span style="color:#111">,</span> <span style="color:#ae81ff">30</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">,</span> <span style="color:#ae81ff">20</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>The order of transforms may seem backwards. The transformation that applies first to the object is closest to the object. However, when we think of the transformations as being things that change the coordinate system, they occur in the correct order. We can read the code as: (1) move the center of the coordinate system to where the center of the object will be; (2) scale the coordinate system; (3) move the center of the coordinate system back so that the object&rsquo;s center position is where the object&rsquo;s center position should be.</p>
+<p>Note that we cannot do a save/restore to undo the first translation because that would also get rid of the scale.</p>
+<p>This is an important example to understand. Combining transformations this way to control the center is a common thing. Understanding how we use ordered transformations is very important. There is an example &ldquo;Center of Scaling&rdquo; in <a href="https://cs559.github.io/2DTransformDemos/transformToy.html" target="_blank">2D Transform Toy (default demos)</a> that may help - you can even try &ldquo;running the code backwards&rdquo;.</p>
+<p>A warning: most programs cannot be run backwards. It is a special trick we can do in the <a href="https://cs559.github.io/2DTransformDemos/" target="_blank">2D Transform Demos</a>. Use it to understand how transformations work going forward. Don&rsquo;t try to write code this way.</p>
+<h2 id="exercise-another-example">Exercise: Another Example</h2>
+<p>The original box with a triangle function puts the box at the origin. Suppose we want to make a grid of them (on the same (20,20) spacing), but with the boxes being half size.</p>
+<p>
+
+
+
+
+
+<div id="box-02-10-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-10-03</span>&nbsp;
+    <input type="checkbox" id="check-02-10-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-10-03.html class="boxtitlelink">02-10-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-10-03.js" class="boxtitlelink">02-10-03.js</a>
+    <iframe
+        title="ex-grid"
+        src="../../for_students/02-10-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-10-03"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-02-10-03-0"></td>
+                <td>regular</td>
+                <td>add transformations to make images look the same</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div></p>
+<p>Oh wait, the scale is missing :-) You need to fix the code - add the appropriate scaling, save and restore to make the lower box (canvas) <code>canvas2</code> look like the upper one.
+You can find this code in 
+<a href="../../for_students/02-10-03.js" class="box-html" data-tag="ex-grid">02-10-03.js</a>
+. You should add lines inside of the loop.</p>
+<h2 id="summary-composing-transformations">Summary: Composing transformations</h2>
+<p>Composing transformations is a key concept in computer graphics. It is important to understand it now, when the transformations are simple (2D translate and scale). In the future, the transformations will become more complex, but the basic idea of composition will be the same.</p>
+<p>In fact, on the <a href="../../docs/11/" class="Next__Page">next page</a>, we&rsquo;ll consider rotations - which might really make your head spin.</p>
+<a href="../../docs/11/" class="Next__Page">Next: Page &nbsp;11&nbsp;-&nbsp;Rotations and Articulation</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Selected"> 10: Composition </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p10",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 15: Points, Vectors, Co-Ordinate Systems</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On the next page, we&rsquo;ll finally get to doing things in terms of vector / linear algebra.</p>
+<p>Unfortunately, this requires you to be familiar enough with the basics of &ldquo;vector&rdquo; algebra (including matrices). I am told they assume that you know it when you start the linear algebra class, so they don&rsquo;t even teach it there.</p>
+<p>Make sure that you know the following. It should be sufficient for this workbook. Knowing more linear algebra will be useful in doing computer graphics. But these basics will get you surprisingly far.</p>
+<ul>
+<li>Vectors</li>
+<li>Matrices</li>
+<li>Vector operations (scalar multiple, addition)</li>
+<li>Matrix vector multiplication</li>
+<li>Matrix multiplication (remember it is not commutative)</li>
+</ul>
+<p>If you need a refresher, <a href="https://cs559.github.io/559Tutorials/math/linear-algebra/" target="_blank">CS559 Tutorial: Linear Algebra for CS559</a> has suggestions.</p>
+<h2 id="intuitions-for-the-connection-to-graphics">Intuitions for the connection to graphics</h2>
+<p>Here are some intuitions behind the math you (hopefully) already learned.</p>
+<p>It always bugged me that math books made a big deal of the difference between points and vectors. They’re both just a list of numbers, right? In practice, yes, they are both lists of numbers. But getting an idea of what the difference is helps develop the intuition of the coordinate system. To describe this, let me use an analogy/example: describing walking in a room. Assume that you know which way is north.</p>
+<ul>
+<li>a <strong>vector</strong> is a movement that you can make. like “2 steps north, 3 steps east”</li>
+<li>a <strong>point</strong> is a position. it’s a place in the room. like “the south east corner” or “the center”</li>
+</ul>
+<p>Notice that a vector doesn’t say where you start or end. Just how you should move. Notice that it makes sense to do arithmetic on vectors. For example you can double the vector (if you do the movement described twice), you can add two vectors (do the first movement, then the second movement – combined into one movement). It makes less sense to do this with points (twice the center of the room?) Some operations mix the two. You can take a point and add a vector (start in the center of the room, go 2 steps north and 3 steps east). You can take two points and talk about the vector between them (the movement needed to get between the points).</p>
+<h2 id="vectors-as-points-and-points-as-vectors">Vectors as Points (and points as vectors)</h2>
+<p>We can add a vector to a point to get another point. This gives us a way to describe points. We need to have a starting point (the <strong>origin</strong>). And then we can describe other points by the vectors that take you from this origin. So, a point is just a vector with a known origin. Think about it this way: if we agree that the south east corner of the room is the origin, then 5 steps north, 6 steps east is the “middle of the room” (for the room I’m in now). Or in Madison, the capitol is the center of the coordinate system, so the computer science department is “12 blocks west” (hence the number 1210).</p>
+<h2 id="coordinate-systems">Coordinate Systems</h2>
+<p>Having an origin is only part of what we need to interpret a point (or vector). Notice in the descriptions we use the terms “steps north” and “steps east”. To interpret a vector, we basically need other vectors that will tell us how to interpret each of the numbers.</p>
+<p>“One step north” and “one step east” are the building blocks from which we build more vectors. These are actually vectors themselves. So, yes, we define vectors in terms of other vectors – the story of the world being carried on the back of a <a href="http://en.wikipedia.org/wiki/Turtles_all_the_way_down">turtle</a>, who is on the back of another turtle, and it is turtles all the way down comes to mind (if you don’t know this, don’t worry about it – but I just learned from <a href="http://en.wikipedia.org/wiki/Turtles_all_the_way_down">Wikipedia</a> that it is not actually a Hindu myth).</p>
+<p><strong>The important point:</strong> to describe what a vector means (in 2 dimensions), we need 2 <strong>basis vectors</strong> that tell us how to interpret  the two numbers. If you want to define a <strong>coordinate system</strong> (something that tells us how to interpret a point) in two dimensions, we need two basis vectors and an origin. If you have these things, then you can take pairs of numbers (2-vectors, or coordinates) and interpret them as points/positions or vectors. So, if we agree that the origin is the south-west corner of the room, and our basis vectors are a step north and a step east, you can interpret (3,5) as a position: it’s the place you get to if you start at the origin and take 3 steps north and 5 steps east.</p>
+<p>Or, to give a more practical example… If we agree that the origin is the top left corner of the page/screen, that the first basis vector is one pixel down, and the second basis vector is one pixel to the right, then pairs of numbers like (40,75) tell us positions on the page/screen.</p>
+<h2 id="getting-to-know-your-bases">Getting to know your bases</h2>
+<p>For the screen, this might be overkill. We know to start at the top left, have x count pixels to the right, and y count pixels down. However, understanding these concepts is really important because it will help us generalize to other bases and coordinate systems.</p>
+<p>A quick idea of where this is going… You could imagine that there are lots of possible bases. Above, I gave one for the screen, but I could have picked another one equally well (say, the origin is the center, and the first basis vector is from the center to the right edge, and the second basis vector is from the center to the top edge). If we’re going to talk about positions, we’ll need to know what basis we’re in. We’ll want to be able to use whatever basis is useful, and transition between them. And this is the basis (pardon the pun) of linear algebra. Notice how we took a geometric problem (describing places and movements) and translated it into a math problem (multiplying and adding lists of numbers). Next we’ll need to think about bases and spaces a bunch more. But I’ll put that on a separate page.</p>
+<h2 id="more-notational-sloppiness-rows-and-columns">More notational sloppiness: rows and columns</h2>
+<p>In a linear algebra class, they make a big difference between row vectors and column vectors. What&rsquo;s the big difference? They are both lists of numbers!</p>
+<p>Actually, when doing math, there is a difference. It&rsquo;s kind of like using types when programming. Knowing what &ldquo;type&rdquo; something is tells you what you can, and can&rsquo;t do with it. If you work in a strictly-typed programming language, the type checker can help you determine what you can, and cannot, do with an object.</p>
+<p>With linear algebra, a row vector is a different &ldquo;type&rdquo; than a column vector. You can do different things with them: you can left multiply a row vector by a matrix, you can right-multiply a matrix by a column vector. There is an equivalent to a &ldquo;type cast&rdquo; - we can transpose the vector.</p>
+<p>In class, I will be sloppy. When I say vector, I (usually) will not distinguish if it is a row vector or a column vector. You should be able to infer which direction it goes by context, and transpose it if you care to have things be &ldquo;correct&rdquo; for your Linear Algebra professor.</p>
+<p>So, if I write <strong>x M</strong>, you should read that as &ldquo;left multiply the vector <strong>x</strong> by the matrix <strong>M</strong>. If you think &ldquo;it must be a row vector&rdquo; or &ldquo;it&rsquo;s a column vector, so it must be transposed&rdquo;, your linear algebra teacher will be proud.</p>
+<p>There is a catch for this&hellip; <strong>x M</strong> (or <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="bold">x</mi><mi>T</mi></msup><mtext> </mtext><mi mathvariant="bold">M</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}^T\ \mathbf{M}</annotation></semantics></math></span> to be more careful) is different than <strong>M x</strong>. If the matrix <strong>M</strong> is designed to be a transform when right multiplied, it will do the wrong thing if it is used with left multiply!</p>
+<p>In class, we will use the convention (explained on the next page) that matrices for transformations are applied to points using right multiply.</p>
+<p>We actually won&rsquo;t see very much left multiplication of a vector in class, so this confusion won&rsquo;t be such a big deal.  In fact, in this workbook, it might have been safer for me to say &ldquo;in this workbook, all vectors are column vectors&rdquo;.</p>
+<h2 id="read-about-it-in-a-book">Read About It In A Book</h2>
+<p>Resources for learning the math are given at <a href="https://cs559.github.io/559Tutorials/math/linear-algebra/" target="_blank">CS559 Tutorial: Linear Algebra for CS559</a>.</p>
+<p>But, hopefully you are ready to apply these concepts to transformations on <a href="../../docs/16/" class="Next__Page">Next: Page &nbsp;16&nbsp;-&nbsp;Transformations with Linear Algebra</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Selected"> 15: Points, Vectors, Co-Ordinate Systems </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p15",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

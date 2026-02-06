@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 16: Transformations with Linear Algebra</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Now let&rsquo;s use linear algebra to look at the transformations we&rsquo;ve been working with.</p>
+<p>There are some excellent internet videos that explain this really well. I recommend watching these in addition to reading the pages. The Three Blue One Brown videos are high-quality animated linear algebra tutorials that provide the geometric intuition. The Graphics in 5 Minutes video comes from the University of Washington, where Prof. Steve Seitz is trying to teach computer graphics by making &ldquo;short cartoons.&rdquo; These videos cover the material in a different order than we do in class.</p>
+<ul>
+<li><a href="https://www.3blue1brown.com/?v=linear-transformations#video-section">3blue1brown: Linear Transformations and Matrices</a></li>
+<li><a href="https://www.3blue1brown.com/?v=matrix-multiplication#video-section">3blue1brown: Matrix multiplication as composition</a></li>
+<li><a href="https://www.youtube.com/watch?v=AheaTd_l5Is&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=2">Graphics in 5 Minutes: Affine Transformations in 5 minutes</a></li>
+</ul>
+<h2 id="linear-transformations">Linear Transformations</h2>
+<p>Many useful transformations can be written as linear combinations of the input variables.</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mi>a</mi><mi>x</mi><mo>+</mo><mi>b</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">x&#x27; = ax + by </annotation></semantics></math></span>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mi>c</mi><mi>x</mi><mo>+</mo><mi>d</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">y&#x27; = cx + dy </annotation></semantics></math></span></p>
+<p>The &ldquo;new x&rdquo; is some multiple of the old x, added to some multiple of the old y. Note that for the 2D case, there are 4 parameters (a,b,c,d) corresponding to the amount that new x depends on the old y (b), etc. In fact, a slightly different naming might make this clearer.</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub><mi>x</mi><mo>+</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mi>y</mi></mrow><annotation encoding="application/x-tex">x&#x27; = a_{xx} x + a_{xy} y </annotation></semantics></math></span>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub><mi>x</mi><mo>+</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub><mi>y</mi></mrow><annotation encoding="application/x-tex">y&#x27; = a_{yx} x + a_{yy} y </annotation></semantics></math></span></p>
+<p>Where the four parameters have names like <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex"> a_{yx} </annotation></semantics></math></span> to denote it&rsquo;s the amount that y depends on x.</p>
+<p>Notice that the 4 parameters (<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub></mrow><annotation encoding="application/x-tex">a_{xx}, a_{xy}, a_{yx}, a_{yy}</annotation></semantics></math></span>) naturally form a square. The rows contain the coefficients used to compute each new variable (so the top row is for new x). The columns are the ways that each old variable affects the new ones (so the first column is the amount that the old x variable affects the new x and y).</p>
+<p>Hopefully, you recognize this square of numbers as a matrix, and the operation performed in that equation as multiplying a matrix by a vector. So if we write:
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="bold">x</mi><mo mathvariant="bold" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mrow><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi></mrow></mrow><annotation encoding="application/x-tex"> \mathbf{x&#x27;} = \mathbf{Ax} </annotation></semantics></math></span>
+where <strong>x&rsquo;</strong> and <strong>x</strong> are vectors (of length 2), and <strong>A</strong> is a 2x2 matrix, you won&rsquo;t be too surprised. Other than that, we are ignoring whether something is a column vector or a row vector. Technically, they are column vectors.</p>
+<p><strong>Important:</strong> the matrix is defined such that the transformation is for a vector multiplied on the right. If you try to multiply on the left, you get a different transformation. This is a <em>convention</em> that we use in class. We always define transformations such that they are for right multiplication.</p>
+<p>If you&rsquo;re not comfortable with the matrix notation and matrix multiplication, now might be a good time to review it.</p>
+<p>Even if you are familiar with matrices, make sure that you see what each row and column does in the matrix multiplication.</p>
+<p>The matrix multiplication says that the first element of the result (x&rsquo;) comes from the top row of the matrix (<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub><mo separator="true">,</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mrow><annotation encoding="application/x-tex">a_{xx}, a_{xy}</annotation></semantics></math></span>) combined with the input vector (x,y or <strong>x</strong>). The operation between the two vectors is called a dot product. In fact, you can think of matrix-vector multiplication as the process of taking the dot product of each row of the matrix with the vector we&rsquo;re multiplying by (on the right).</p>
+<p>A <strong>linear transformation</strong> is a transformation where the function is multiplication by some matrix. Specifically, we multiply the vector on the right. So, the transformation (function) <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex"> f_A </annotation></semantics></math></span> would use the matrix <strong>A</strong> as <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>A</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex"> f_A(\mathbf x) = \mathbf A \mathbf x </annotation></semantics></math></span>.</p>
+<p>Here are some important facts about linear transformations. If you took a linear algebra class, you probably proved all of them already.</p>
+<ol>
+<li>Zero is preserved. If you put in the vector zero, you get zero out.</li>
+<li>Composition of functions is multiplication of matrices. If we have two transformations <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex"> f_A </annotation></semantics></math></span> and <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>B</mi></msub></mrow><annotation encoding="application/x-tex"> f_B </annotation></semantics></math></span> that we apply as composition <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>B</mi></msub><mo stretchy="false">(</mo><msub><mi>f</mi><mi>A</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> f_B(f_A(\mathbf x)) </annotation></semantics></math></span> this is the same as <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>f</mi><mi>B</mi></msub><mo>∘</mo><msub><mi>f</mi><mi>A</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> (f_B \circ f_A) (\mathbf x) </annotation></semantics></math></span>, which is <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">B</mi><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex"> \mathbf B \mathbf A \mathbf x </annotation></semantics></math></span>.</li>
+<li>Because matrix multiplication associates, you can multiply the matrices first: <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">B</mi><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi><mo>=</mo><mo stretchy="false">(</mo><mi mathvariant="bold">B</mi><mi mathvariant="bold">A</mi><mo stretchy="false">)</mo><mi mathvariant="bold">x</mi><mo>=</mo><mi mathvariant="bold">B</mi><mo stretchy="false">(</mo><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> \mathbf B \mathbf A \mathbf x = (\mathbf B \mathbf A) \mathbf x = \mathbf B (\mathbf A \mathbf x) </annotation></semantics></math></span>.</li>
+<li>The set of linear transformations is closed under composition. Any sequence of linear transformations is a linear transformation. For any sequence of linear transformations, there is a single linear transformation that has the same result. You get this by multiplying the matrices.</li>
+<li>The order of application matters. Matrix multiplication does not commute.</li>
+</ol>
+<h2 id="composing-transformations">Composing Transformations</h2>
+<p>An important feature of using the matrix form for transformations (at least the linear ones that can be expressed as matrices) is that we can compose them by multiplying the matrices.</p>
+<p>We like the right multiplication convention because it matches the function composition notation on <a href="../../docs/14/">Page &nbsp;14&nbsp; (Transformations as Math vs. Code)</a>. Suppose we have 3 transformations (as matrices) <strong>A</strong>, <strong>B</strong>, and <strong>C</strong>. If we want to apply them to our current coordinate system in that order, and then compute the position of point <strong>x</strong> in that coordinate system, we could write: <strong>x&rsquo; = A B C x</strong>. We multiply things together. (more on that in a minute).</p>
+<p>We could think of each matrix as a function, so <strong>A</strong> might be defined as <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">f</mi><mi mathvariant="bold">A</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mrow><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi></mrow></mrow><annotation encoding="application/x-tex">\mathbf{f_A}(\mathbf{x})=\mathbf{Ax}</annotation></semantics></math></span> and so forth. In this case, we could write it as:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="bold">x</mi><mo mathvariant="bold" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mo>&gt;</mo><msub><mi mathvariant="bold">f</mi><mi mathvariant="bold">A</mi></msub><mo stretchy="false">(</mo><msub><mi mathvariant="bold">f</mi><mi mathvariant="bold">B</mi></msub><mo stretchy="false">(</mo><msub><mi mathvariant="bold">f</mi><mi mathvariant="bold">C</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{x&#x27;}=&gt;\mathbf{f_A}(\mathbf{f_B}(\mathbf{f_C}(\mathbf{x})))</annotation></semantics></math></span>
+<p>Notice how this looks similar to the matrix version (in terms of being left to right).</p>
+<p>If we were writing this in HTML5 Canvas code, it would look like:
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">transform</span><span style="color:#111">(</span><span style="color:#75715e">/** A matrix numbers **/</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">transform</span><span style="color:#111">(</span><span style="color:#75715e">/** B matrix numbers **/</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">transform</span><span style="color:#111">(</span><span style="color:#75715e">/** C matrix numbers **/</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#75af00">x</span><span style="color:#111">.</span><span style="color:#75af00">x</span><span style="color:#111">,</span> <span style="color:#75af00">x</span><span style="color:#111">.</span><span style="color:#75af00">y</span><span style="color:#111">);</span></span></span></code></pre></div>
+Later, we will see there is an actual <code>context.transform</code> method in the canvas that takes the numbers in the matrix as an argument. And I used <code>moveTo</code> to submit my point <strong>x</strong> - any drawing command uses the &ldquo;current coordinate system&rdquo;. But, on the next page, we&rsquo;ll see some simpler transformation functions.</p>
+<p>Remember that matrix multiplication does not <em>commute.</em> You cannot change the order of the transformations! If you have <strong>A B</strong> that is different than <strong>B A</strong>.</p>
+<p>But, matrix multiplication does <em>associate</em>. We can change the order that we perform the multiplications. We could multiply left to right: multiply <strong>A</strong> times <strong>B</strong> to get <strong>AB</strong>, multiply that times <strong>C</strong> to get <strong>ABC</strong>, and then multiply that matrix by the point <strong>x</strong>. Or we could start on the right and multiply <strong>C</strong> times <strong>x</strong> to get the vector <strong>Cx</strong>, and multiply <strong>B</strong> by that to get <strong>BCx</strong>, and then multiply <strong>A</strong> times that to get the result. Both are mathematically equivalent, although, one way is two matrix multiplies and one matrix-vector multiply, and the other way we do three matrix-vector multiplies. The latter is less computation. However, we usually compute the matrix (left to right) because we&rsquo;ll be able to use it to apply to many points.</p>
+<h2 id="what-do-we-use-this-for">What do we use this for?</h2>
+<p>You should be wondering, what matrices do we use? What does this have to do with the transformations we use in graphics? The short version: the most important transformations can be implemented as linear functions. We&rsquo;ll see that on the next few pages.</p>
+<a href="../../docs/17/" class="Next__Page">Next: Page &nbsp;17&nbsp;-&nbsp;Linear Transformations</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Selected"> 16: Transformations with Linear Algebra </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p16",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WB4: Flock: Student Flocking Assignment</title>
+    <link rel="stylesheet" href="../libs/CS559/style559.css" />
+</head>
+
+<body>
+    <canvas id="flock" height="600px" width="600px" style="border:2px solid black"></canvas>
+    <input type="range" width="100px" min="0" max="10" step=".2" value="3" id="speed" />
+    <button id="add">Add 10</button><button id="clear">Clear</button>
+
+    <script src="02-27-01.js" type="module" defer></script>
+
+<!-- The screenshot and record buttons -->
+    <br><button onclick="screenshot('flock')">Screenshot</button> <button
+        onclick="record('flock','time')">Record</button> <input id="time" type="text" size="2" value="10"> seconds.
+    <script type="module">
+        import { screenshot, record } from "../libs/CS559/saveCanvas.js";
+        window.screenshot = screenshot;
+        window.record = record;
+    </script>
+
+</body>
+
+</html>
+
+
+
+<!-- CS559 2026 Workbook -->

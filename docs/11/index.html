@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 11: Rotations and Articulation</h1>
+		</header>
+		<div class="content post__content clearfix"><p>
+
+
+
+
+</p>
+<p>The old lectures mix the topics on this page in with other topics. Some relevant pieces are:</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=42">2023 Video Clip: Lecture 6 Agenda</a> [0:42 - 8:34 (7.9 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=514">2023 Video Clip: Sequences of Transformations, Non-Uniform Scaling</a> [8:34 - 18:33 (10.0 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div></p>
+<h2 id="rotation">Rotation</h2>
+<p>Time for the next transformation: Rotation. Spinning things around.</p>
+<p>Rotation will turn out to have all sorts of complexity to it - especially when we get to 3D. We&rsquo;ll talk about the math more later in the workbook (in 
+     <a href="../../docs/17/#rotation">Linear Transformations&nbsp;(rotation)</a>) and when we get to 3D.</p>
+<p>But the basic idea is simple: we spin an object around some point.</p>
+<p>Rotations are a <em>rigid</em> transformation: they do not change the distances between points. Translation is also a kind of rigid transformation. Rigid transformations are important: many objects in the real world do not change shape as they move.</p>
+<p>If translation is sliding the paper you&rsquo;re drawing on in some direction, scaling is stretching it, then rotation is turning it by some amount.</p>
+<h2 id="rotation-1">Rotation</h2>
+<p>When you rotate, there is always one point that you spin around: the center of rotation. By convention, this is the center of the coordinate system.</p>
+<p>With Canvas, the rotation command measures the amount of rotation in radians, measured clockwise. Actually, it is better to say &ldquo;from the X axis towards the Y axis&rdquo; in case the axes change.</p>
+<div id="div-canvas-1" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <div style="display: flex; align-items: start;">
+        <canvas id="canvas-1" height="200" width="200"></canvas>
+        <div class="canvas-slider-controls" style="height: 200px;">
+            <label for="slider-1">angle</label>
+            <div class="canvas-slider-input-container" style="flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="slider-1" class="canvas-slider" 
+                    min="0" 
+                    max="6.28" 
+                    step=".1" 
+                    value="0"
+                    style="width: 160px; transform: rotate(-90deg);">
+            </div>
+            <span id="value-1">0</span>
+        </div>
+    </div>
+    <div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;goldenrod&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{const canvas = document.getElementById('canvas-1');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider-1');
+    const valueDisplay = document.getElementById('value-1');
+
+    function draw() {
+        const val = Number(slider.value);
+        valueDisplay.innerText = val;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+ctx.fillStyle="goldenrod";
+ctx.rotate(val);
+ctx.fillRect(0,0,20,20);
+ctx.fillRect(50,0,20,20);
+
+        ctx.restore();
+    }
+    slider.oninput = draw;
+    draw();}
+</script>
+<p>Because the center of rotation is at zero (the top left corner), things quickly move out of the screen.</p>
+<p>Of course, we can change coordinate systems to move the origin to the center of the window so we can see what is going on. Here, we are drawing the coordinate axes (x=0 and y=0) before we do the rotation. Make sure to look at the code to understand the change of coordinate system!</p>
+<div id="div-canvas-2" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <div style="display: flex; align-items: start;">
+        <canvas id="canvas-2" height="200" width="200"></canvas>
+        <div class="canvas-slider-controls" style="height: 200px;">
+            <label for="slider-2">angle</label>
+            <div class="canvas-slider-input-container" style="flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="slider-2" class="canvas-slider" 
+                    min="0" 
+                    max="6.28" 
+                    step=".1" 
+                    value="0"
+                    style="width: 160px; transform: rotate(-90deg);">
+            </div>
+            <span id="value-2">0</span>
+        </div>
+    </div>
+    <div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">centerX</span> <span style="color:#f92672">=</span> <span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">centerY</span> <span style="color:#f92672">=</span> <span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#75af00">centerY</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">width</span><span style="color:#111">,</span><span style="color:#75af00">centerY</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#75af00">centerX</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#75af00">centerX</span><span style="color:#111">,</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">stroke</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">centerX</span><span style="color:#111">,</span> <span style="color:#75af00">centerY</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;goldenrod&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{const canvas = document.getElementById('canvas-2');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider-2');
+    const valueDisplay = document.getElementById('value-2');
+
+    function draw() {
+        const val = Number(slider.value);
+        valueDisplay.innerText = val;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+const centerX = canvas.width/2;
+const centerY = canvas.height/2;
+ctx.moveTo(0,centerY); ctx.lineTo(canvas.width,centerY);
+ctx.moveTo(centerX,0); ctx.lineTo(centerX,canvas.height);
+ctx.stroke();
+ctx.translate(centerX, centerY);
+ctx.fillStyle="goldenrod";
+ctx.rotate(val);
+ctx.fillRect(0,0,20,20);
+ctx.fillRect(50,0,20,20);
+
+        ctx.restore();
+    }
+    slider.oninput = draw;
+    draw();}
+</script>
+<p>In <strong>TransformToy</strong>, the center of the initial coordinate system is already in the center of the canvas. It uses degrees, since these are a little more &ldquo;human readable.&rdquo;</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Rotation1&amp;showHeader=false" class="boxtitlelink">TransformToy?Rotation1</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Rotation1&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Rotation1&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="properties-of-rotations">Properties of Rotations</h2>
+<p>Rotations preserve distances. That means that the distance between any two points before the transformation will be the same afterwards.</p>
+<p>This applies to the center as well: the distance from a point to the center will be the same after the transformation. Therefore, the set of places a transformation can &ldquo;take&rdquo; a point to is a circle.</p>
+<p>Rotations also preserve angles. This is implied by preserving distances. The angle between 3 points will remain the same after transformation.</p>
+<p>The trickier one to understand: rotations preserve <strong>handedness</strong>. The reason for calling it &ldquo;handedness&rdquo; will be easier to explain when we get to 3D. However, for now, handedness means that if 3 points are oriented clockwise before transformation, they will be clockwise in the transformed coordinate system as well.</p>
+
+    
+    <figure class="">
+        <a href="../../docs/11/rotate-vs-reflect.png">
+            <img src="../../docs/11/rotate-vs-reflect_hu_28f78cba5c4325e3.png" alt="rotate-vs-reflect.png" />
+        </a>
+    </figure>
+
+<p>Notice that in the original triangle (points 1,2,3, upper right), the points go counter-clockwise. After a 180 degree rotation the points are still counter-clockwise. A mirror reflection (scale by -1,1) changes the handedness: the red triangle is clockwise.</p>
+<p>Mirror reflection <strong>is not</strong> a rotation, because it changes handedness.</p>
+<h2 id="center-of-rotation">Center of Rotation</h2>
+<p>Just like with scaling, the center of rotation (the point that does not move) is at the center of the coordinate system.</p>
+<p>We often like to rotate about the center of an object - which means we need to change coordinate systems! We move the object so that the center (the point we want to rotate around) is at the origin of the coordinate system; we rotate; then we move the object back. We can view this as: move the coordinate system to the object&rsquo;s center, rotate the coordinate system, move the coordinate system back to where it came from. The latter may still feel weird to you, but since the commands operate on coordinate systems, the code will read in the correct direction.</p>
+<p>
+Here are a bunch of squares in different places, rotating around different centers. You should be able to guess what the code looks like, but you should read it anyway 
+<a href="../../for_students/02-11-01.js" class="box-html" data-tag="eg-rotation-center">02-11-01.js</a>
+}.</p>
+
+<div id="box-02-11-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-11-01</span>&nbsp;
+    <input type="checkbox" id="check-02-11-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-11-01.html class="boxtitlelink">02-11-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-11-01.js" class="boxtitlelink">02-11-01.js</a>
+    <iframe
+        title="eg-rotation-center"
+        src="../../for_students/02-11-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-11-01"
+    ></iframe>
+</div>
+<p>Make sure you understand this! There is a &ldquo;Rotate around object center&rdquo; example in the <a href="https://cs559.github.io/2DTransformDemos/transformToy.html" target="_blank">2D Transform Toy (default demos)</a>.</p>
+<p>Making good use of center of rotation is an important tool in making objects that move correctly. It&rsquo;s also useful in positioning things.</p>
+<h2 id="an-actual-picture">An Actual Picture</h2>
+<p>This time, we&rsquo;ll make something that you might actually want to make rotate: a simple windmill.</p>
+<p>
+
+<div id="box-02-11-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-11-02</span>&nbsp;
+    <input type="checkbox" id="check-02-11-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-11-02.html class="boxtitlelink">02-11-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-11-02.js" class="boxtitlelink">02-11-02.js</a>
+    <iframe
+        title="eg-windmill"
+        src="../../for_students/02-11-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-11-02"
+    ></iframe>
+</div></p>
+<p>The code for this example is in 
+<a href="../../for_students/02-11-02.js" class="box-html" data-tag="eg-windmill">02-11-02.js</a>
+.
+It isn&rsquo;t great landscape art, but it makes a few points.</p>
+<p>Most obviously, it uses rotation to make the mills spin. But it also uses rotate to build the fans: we have code that makes one blade, and then we rotate that blade into 3 other places to make the 4 bladed fan. We talked about <em>instancing</em> on a prior page, but this is an example.</p>
+<p>Notice how the picture is built up from parts. The scene is made from windmills. The windmills are made from a body and a propeller. A propeller is made from four blades. Each blade has two pieces.</p>
+<p>The idea of building up objects from parts is called <strong>hierarchical modeling</strong>. Any object is made up of other objects, until at some point we get to primitives.</p>
+<p>Coordinate systems and transforms are critical for hierarchical modeling. Each object has its own coordinate system. When a part is placed inside of a containing object, a transformation is used to rotate, translate, and/or scale things into place. In the future, we will use other transformations, too.</p>
+<p>Hierarchical modeling makes it easier to build objects. It also makes it easier to change or animate objects - for example, by having the windmill fan as a separate piece, we can rotate it.</p>
+<p>Notice how the composition of transformations means that changes we make to a part get properly placed in the whole. The windmill fan rotates about its center. But that gets moved to the correct place on the windmill. And the windmill gets moved to the right place in the scene.</p>
+<h2 id="the-arm-bone-is-connected-to">The arm bone is connected to&hellip;</h2>
+<p>Here&rsquo;s another example of hierarchical modeling: a stick figure arm. Each piece will be simple, but once we put them together, we can always improve how they look. This idea of having a chain of rigid pieces connected by angles is very common. We&rsquo;ll start with a simple 2 link chain.</p>
+<p>Here is a simple example. I am making an arm with two segments. You can imagine the first (blue) rectangle being connected to the shoulder. I am just going to move it to some place away from the origin. I will also draw axes so you can see the &ldquo;centers of the pieces&rdquo;.</p>
+<p><em>Warning&hellip; Sometimes the browser scrolls the first time you try to click a slider. I haven&rsquo;t been able to figure this out. If you scroll back, things are usually OK.</em></p>
+<div class="inline-canvas-div" id="div-cs-canvas-1"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-1" width="250" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-1" style="font-weight: bold; font-size: 0.9em;">joint 1</label>
+                    <span id="val-display-1-1" style="font-family: monospace;">0.5</span>
+                </div>
+                <input type="range" id="slider-1-1" 
+                       min="-1" max="1" step="0.1" value="0.5"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-1-2" style="font-weight: bold; font-size: 0.9em;">joint 2</label>
+                    <span id="val-display-1-2" style="font-family: monospace;">0.5</span>
+                </div>
+                <input type="range" id="slider-1-2" 
+                       min="-1" max="1" step="0.1" value="0.5"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <button id="show-code-1" style="padding: 5px 10px; cursor: pointer;">Show Code</button><div id="code-container-1" style="display: none; margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">125</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">strokeStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;blue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">110</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">stroke</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">beginPath</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">strokeStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;purple&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">110</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span> <span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">lineTo</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">stroke</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-1');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-1-1", displayId: "val-display-1-1" },{ id: "slider-1-2", displayId: "val-display-1-2" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+ctx.translate(20,125);
+ctx.rotate(val1);
+ctx.fillStyle="lightblue";
+ctx.fillRect(0,-10,100,20);
+ctx.strokeStyle="blue";
+ctx.moveTo(-10,0); ctx.lineTo(110,0);
+ctx.moveTo(0,-20); ctx.lineTo(0,20);
+ctx.stroke();
+ctx.beginPath();
+ctx.translate(100,0);
+ctx.rotate(val2);
+ctx.fillStyle="#E066E0";
+ctx.fillRect(0,-10,100,20);
+ctx.strokeStyle="purple";
+ctx.moveTo(-10,0); ctx.lineTo(110,0);
+ctx.moveTo(0,-20); ctx.lineTo(0,20);
+ctx.stroke();
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+        const btn = document.getElementById('show-code-1');
+        const codeDiv = document.getElementById('code-container-1');
+        if(btn && codeDiv) {
+            btn.addEventListener('click', () => {
+                codeDiv.style.display = 'block';
+                btn.style.display = 'none';
+            });
+        }
+        
+    }
+</script>
+
+<p>The code gets a little bloated drawing the axes. Let me get rid of the axes so we can focus on the important pieces of the code.</p>
+<div class="inline-canvas-div" id="div-cs-canvas-2"><div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 10px;">
+        
+        <canvas id="cs-canvas-2" width="250" height="250"></canvas>
+        
+        
+        <div class="sliders-panel" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;"><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-2-1" style="font-weight: bold; font-size: 0.9em;">joint 1</label>
+                    <span id="val-display-2-1" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-2-1" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div><div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <label for="slider-2-2" style="font-weight: bold; font-size: 0.9em;">joint 2</label>
+                    <span id="val-display-2-2" style="font-family: monospace;">0</span>
+                </div>
+                <input type="range" id="slider-2-2" 
+                       min="-1" max="1" step="0.1" value="0"
+                       style="width: 100%; display: block;">
+            </div></div>
+    </div>
+
+    <div id="code-container-2" style=" margin-top: 10px;">
+            <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">125</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;lightblue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">val2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;#E066E0&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+        </div></div>
+
+<script type="module">
+    {
+        const canvas = document.getElementById('cs-canvas-2');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const sliderConfig = [{ id: "slider-2-1", displayId: "val-display-2-1" },{ id: "slider-2-2", displayId: "val-display-2-2" },];
+
+        const listeners = sliderConfig.map(c => {
+            const el = document.getElementById(c.id);
+            const disp = document.getElementById(c.displayId);
+            return { el, disp };
+        });
+
+        function draw() {
+            const val1 = Number(listeners[0].el.value);
+            if (listeners[0].disp) { listeners[0].disp.innerText = val1; }
+            const val2 = Number(listeners[1].el.value);
+            if (listeners[1].disp) { listeners[1].disp.innerText = val2; }
+            
+
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            
+            
+            
+ctx.translate(20,125);
+ctx.rotate(val1);
+ctx.fillStyle="lightblue";
+ctx.fillRect(0,-10,100,20);
+ctx.translate(100,0);
+ctx.rotate(val2);
+ctx.fillStyle="#E066E0";
+ctx.fillRect(0,-10,100,20);
+
+            
+            ctx.restore();
+        }
+
+        
+        listeners.forEach(l => {
+            if(l.el) l.el.addEventListener('input', draw);
+        });
+
+        
+        draw();
+    }
+</script>
+
+<p>On line 1, we move to the &ldquo;shoulder&rdquo; - the position that the arm will start.
+The rotation of the arm around this joint happens on line 49. It will affect everything that comes after it (unless we do a <code>save</code>/<code>restore</code>). We draw the upper arm on lines 150-151. Notice that we center the arm in the Y direction.</p>
+<p>Line 152 moves the coordinate system to the end of upper arm - where the &ldquo;elbow&rdquo; joint will be. We can then rotate around the elbow joint on line 153. The lower arm is drawn in this coordinate system (lines 154-155).</p>
+<p>Here is an extended example.</p>
+<p>
+
+<div id="box-02-11-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-11-03</span>&nbsp;
+    <input type="checkbox" id="check-02-11-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-11-03.html class="boxtitlelink">02-11-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-11-03.js" class="boxtitlelink">02-11-03.js</a>
+    <iframe
+        title="eg-arm"
+        src="../../for_students/02-11-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-11-03"
+    ></iframe>
+</div></p>
+<p>The code for this example is in 
+<a href="../../for_students/02-11-03.js" class="box-html" data-tag="eg-arm">02-11-03.js</a>
+ and <a href="../../for_students/02-11-03.html" class="box-html" data-tag="eg-arm">02-11-03.html</a>. You can read the code to see how it works and how I made the demo showing different views of the same objects.
+It is important to understand these ideas of hierarchical modeling in the simple
+cases, before we move on to complex ones.</p>
+<p>A hierarchical model that consists of rigid pieces that rotate relative to each other (such as this arm, or even the windmill) is referred to as an <strong>articulated</strong> object. Sometimes the term is used more generally for an object that has a set of pieces that move relative to each other. This concept is relevant outside of graphics - articulated robots, such as robot arms, can be represented in much the same way (in three dimensions).</p>
+<h2 id="summary">Summary</h2>
+<p>We&rsquo;ve seen rotations, and how we use transformations to build hierarchical models.</p>
+<p>These are both important concepts that will not go away.</p>
+<p>We&rsquo;ll look at a slightly more complex example on the <a href="../../docs/12/" class="Next__Page">Next: Page &nbsp;12&nbsp;-&nbsp;Hierarchy</a>.</p>
+<a href="../../docs/12/" class="Next__Page">Next: Page &nbsp;12&nbsp;-&nbsp;Hierarchy</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Selected"> 11: Rotations and Articulation </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p11",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Uniform Scale Demo</title>
+    <link rel="stylesheet" href="./transformDemo.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: transparent; }
+        
+        /* Slider styling from ik2d.html */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #555;
+            margin-top: -6px;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #ccc;
+            border-radius: 2px;
+        }
+        /* Firefox styles */
+        input[type=range]::-moz-range-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #555;
+            border: none;
+            cursor: pointer;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: #ccc;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="trdemo-box">
+        <h1>Non-Uniform Scale</h1>
+        <div style="display: flex; align-items: start;">
+            <canvas id="canvas1" width="400" height="400"></canvas>
+            
+            <!-- Slider for Scale X -->
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 0 10px;">
+                <label for="scaleXSlider" style="font-family: sans-serif;">Scale X</label>
+                <div style="width: 30px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="scaleXSlider" min="-3" max="3" step="0.1" value="1" style="width: 200px; transform: rotate(-90deg);">
+                </div>
+                <span id="scaleXValue" style="font-family: sans-serif;">1</span>
+            </div>
+
+            <!-- Slider for Scale Y -->
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 0 10px;">
+                <label for="scaleYSlider" style="font-family: sans-serif;">Scale Y</label>
+                <div style="width: 30px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="scaleYSlider" min="-3" max="3" step="0.1" value="1" style="width: 200px; transform: rotate(-90deg);">
+                </div>
+                <span id="scaleYValue" style="font-family: sans-serif;">1</span>
+            </div>
+        </div>
+        
+        <script type="module">
+            import { drawGrid } from "./transformDemo.js";
+            // Assuming computeTransforms.js has a scale function that takes (sx, sy) or we use the matrix directly
+            import { scale } from "./computeTransforms.js";
+            
+            const canvas1 = document.getElementById("canvas1");
+            const sliderX = document.getElementById("scaleXSlider");
+            const sliderY = document.getElementById("scaleYSlider");
+            const valueX = document.getElementById("scaleXValue");
+            const valueY = document.getElementById("scaleYValue");
+            
+            function draw1() {
+                const sx = Number(sliderX.value);
+                const sy = Number(sliderY.value);
+                valueX.innerText = sx;
+                valueY.innerText = sy;
+                
+                // Most 2D scale functions in this context take either one param (uniform) or two
+                // We'll pass both.
+                const matrix = scale(sx, sy);
+                drawGrid(canvas1, matrix);
+            }
+            sliderX.oninput = draw1;
+            sliderY.oninput = draw1;
+            draw1();
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 22: Robots! (Kinematics and Inverse Kinematics)</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The concepts of transformations are very important in fields outside of graphics. For example, just as transformations are useful for moving things in the &ldquo;virtual worlds&rdquo; of graphics, they can be useful in figuring out how things move in the real world, for example, to do robotics. On this page, we&rsquo;ll consider <strong>Inverse Kinematics</strong>, a problem that is useful in graphics (especially for animation), and is very useful in robotics, so we&rsquo;ll use robots as our example.</p>
+<p>In the real world, many objects are rigid: they don&rsquo;t change size or shape. Therefore, rigid transformations (rotation and translation) that don&rsquo;t change size are used a lot. That&rsquo;s what we&rsquo;ll focus on here. Real objects that do change size and shape generally do so in complex ways.</p>
+<p>Modeling a character as a chain of rotational joints is an approximation for a biological system - your elbow, for example, is not a simple rotation. For a robot arm, however, it is a good model: robot arms are (usually) built of rigid pieces that have rotational joints.</p>
+<h2 id="forward-and-inverse-kinematics">Forward and Inverse Kinematics</h2>
+<p>Consider two different problems:</p>
+<ol>
+<li>We know the angles, but we need to know where the robot is. For example, we might want to draw it, or we might want to know the position of the tip of the hand (in robot terms, its &ldquo;end effector&rdquo;). This is the <strong>forward kinematics</strong> problem.</li>
+<li>If we know the position of the end effector (or where we want pieces to go), we need to figure out the joint angles that put the pieces in place to achieve that goal. This is the <strong>inverse kinematics</strong> problem (<strong>IK</strong>).</li>
+</ol>
+<p>Here&rsquo;s a little demo. It&rsquo;s a 2 link robot arm. You can control the angles and see where the robot goes. That&rsquo;s <strong>Forward Kinematics</strong>. You can grab the end of the robot and drag it around. The program has to compute the angles that make it go there. That&rsquo;s the <strong>Inverse Kinematics</strong> problem.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../robot/ik2d.html" class="boxtitlelink">/robot/ik2d.html</a>
+    <iframe
+        title="/robot/ik2d.html"
+        src="../../robot/ik2d.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>As you might guess, this is really useful for a robot: you want it to get its hand to a particular place; you don&rsquo;t want to tell it how to bend its elbow.</p>
+<p>For the workbook, I want you to understand what Inverse Kinematics is.</p>
+<p>You should know that it is a more complicated problem than forward kinematics (which we have done in this workbook). You can learn about it in a robotics class.</p>
+<a href="../../docs/23/" class="Next__Page">Next: Page &nbsp;23&nbsp;-&nbsp;SVG Tutorial and Transformations</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Selected"> 22: Robots! (Kinematics and Inverse Kinematics) </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p22",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

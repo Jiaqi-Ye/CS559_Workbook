@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link rel="stylesheet" href="../libs/CS559/common.css" />
+    </head>
+    
+<body>
+
+<svg id="mysvg" width="300px" height="150px">
+    <g id="group1" transform="translate(0,0)">
+        <rect   transform="translate(40,30)"  id="rect1" width="20" height="20" x="-10" y="-10" fill="red" />
+        <circle transform="translate(40,70)"  id="circ1" cx="0" cy="0" r="20" fill="blue" />
+        <path   transform="translate(40,110)" id="path1" d="M-15,0 h30 l-15,30 Z" fill="orange" />
+    </g>
+</svg>
+</body>
+
+<script>
+    const myrect = document.getElementById("rect1");
+    const mycircle = document.getElementById("circ1");
+    const mygroup = document.getElementById("group1");
+
+    function update(timestamp) {
+        mygroup.setAttribute("transform",`translate(0,${(timestamp/60)%10})`);
+        myrect.setAttribute("transform",`translate(${(timestamp/10) % 300},30)`);
+        mycircle.setAttribute("transform",`translate(40,70) scale(${((timestamp) % 600)/300},1)`)
+        window.requestAnimationFrame(update);
+    }
+    window.requestAnimationFrame(update);
+</script>
+
+</html>
+
+
+
+
+<!-- CS559 2026 Workbook -->

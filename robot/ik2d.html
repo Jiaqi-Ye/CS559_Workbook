@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2D Robot Arm IK Demo</title>
+  <style>
+    /* Slider styling from robot.html / ik3link.html */
+    input[type=range] {
+        -webkit-appearance: none;
+        background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #555;
+        margin-top: -6px;
+        cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        background: #ccc;
+        border-radius: 2px;
+    }
+    /* Firefox styles */
+    input[type=range]::-moz-range-thumb {
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #555;
+        border: none;
+        cursor: pointer;
+    }
+    input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 4px;
+        background: #ccc;
+        border-radius: 2px;
+    }
+  </style>
+</head>
+<!--
+Written by Claude Opus 4.5
+
+prompt: 
+In the file ik2d.html, make the canvas intoi a simple demo that shows off ik2d.js
+
+The program show show a picture of the robot arm, and allow the user to click and drag a point and have the robot follow it. in the case where the robot cannot reach the mouse, draw a line between the end of the robot and the mouse.
+
+if the mouse goes outside of the canvas, treat this as a mouse release
+
+-->
+<body>
+  <div style="display: flex; align-items: start;">
+      <canvas id="canvas" width="400" height="400" style="border:1px solid #000;"></canvas>
+      <div style="display: flex; flex-direction: row; margin-left: 20px;">
+          <!-- Slider 1 -->
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 0 10px;">
+              <label for="theta1" style="font-family: sans-serif;">theta1</label>
+              <div style="width: 30px; height: 160px; display: flex; align-items: center; justify-content: center;">
+                  <input type="range" id="theta1" min="-180" max="180" value="0" style="width: 200px; transform: rotate(90deg);">
+              </div>
+              <span id="theta1-display" style="font-family: sans-serif;">0</span>
+          </div>
+          <!-- Slider 2 -->
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 0 10px;">
+              <label for="theta2" style="font-family: sans-serif;">theta2</label>
+              <div style="width: 30px; height: 160px; display: flex; align-items: center; justify-content: center;">
+                  <input type="range" id="theta2" min="-180" max="180" value="0" style="width: 200px; transform: rotate(90deg);">
+              </div>
+              <span id="theta2-display" style="font-family: sans-serif;">0</span>
+          </div>
+      </div>
+  </div>
+  
+  <script type="module">
+    import { inverseKinematics, getJointPosition, forwardKinematics } from './ik2d.js';
+    
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const L = 20, scale = 4;
+    const origin = { x: canvas.width / 2, y: canvas.height / 2 };
+    
+    let target = { x: 40, y: 0 };
+    let dragging = false;
+    let currentThetas = [0, 0];
+    
+    const sliders = [
+        document.getElementById('theta1'),
+        document.getElementById('theta2')
+    ];
+    const displays = [
+        document.getElementById('theta1-display'),
+        document.getElementById('theta2-display')
+    ];
+    
+    function toCanvas(x, y) {
+      return [origin.x + x * scale, origin.y - y * scale];
+    }
+    
+    function fromCanvas(cx, cy) {
+      return [(cx - origin.x) / scale, (origin.y - cy) / scale];
+    }
+    
+    function updateSliderUI() {
+        sliders.forEach((s, i) => {
+            let deg = currentThetas[i] * 180 / Math.PI;
+            // Normalize to -180 to 180 range
+            while (deg > 180) deg -= 360;
+            while (deg < -180) deg += 360;
+            s.value = deg;
+            displays[i].innerText = Math.round(deg);
+        });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const [theta1, theta2] = currentThetas;
+      const [jx, jy] = getJointPosition(theta1);
+      const [ex, ey] = forwardKinematics(theta1, theta2);
+      
+      // Draw arm segments
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#333';
+      ctx.beginPath();
+      ctx.moveTo(...toCanvas(0, 0));
+      ctx.lineTo(...toCanvas(jx, jy));
+      ctx.lineTo(...toCanvas(ex, ey));
+      ctx.stroke();
+      
+      // Draw joints
+      ctx.fillStyle = '#666';
+      ctx.beginPath();
+      ctx.arc(...toCanvas(0, 0), 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(...toCanvas(jx, jy), 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw end effector
+      ctx.fillStyle = '#00f';
+      ctx.beginPath();
+      ctx.arc(...toCanvas(ex, ey), 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw line to target if out of reach
+      const d = Math.sqrt(target.x * target.x + target.y * target.y);
+      if (d > 2 * L + 0.001) {
+        ctx.strokeStyle = '#f00';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(...toCanvas(ex, ey));
+        ctx.lineTo(...toCanvas(target.x, target.y));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      // Draw target
+      ctx.fillStyle = '#f00';
+      ctx.beginPath();
+      ctx.arc(...toCanvas(target.x, target.y), 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    function updateMouse(e) {
+        const rect = canvas.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        if (cx < 0 || cx > canvas.width || cy < 0 || cy > canvas.height) {
+            dragging = false; 
+            return;
+        }
+
+        [target.x, target.y] = fromCanvas(cx, cy);
+        currentThetas = inverseKinematics(target.x, target.y);
+        updateSliderUI();
+        draw();
+    }
+
+    function onSliderInput() {
+        // Read sliders (degrees) -> convert to radians
+        currentThetas = sliders.map(s => Number(s.value) * Math.PI / 180);
+        
+        // Update displays immediately
+        sliders.forEach((s, i) => {
+             displays[i].innerText = s.value;
+        });
+
+        // Update target via Forward Kinematics
+        const [theta1, theta2] = currentThetas;
+        const [ex, ey] = forwardKinematics(theta1, theta2);
+        target.x = ex;
+        target.y = ey;
+        
+        draw();
+    }
+    
+    canvas.addEventListener('mousedown', e => {
+      dragging = true;
+      updateMouse(e);
+    });
+    
+    canvas.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      updateMouse(e);
+    });
+    
+    canvas.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('mouseleave', () => dragging = false);
+    
+    sliders.forEach(s => s.addEventListener('input', onSliderInput));
+
+    // Initial State
+    currentThetas = inverseKinematics(target.x, target.y);
+    updateSliderUI();
+    draw();
+  </script>
+</body>
+</html>

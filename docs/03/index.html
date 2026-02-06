@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 3: Transformations Backwards</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On this page, we&rsquo;ll try to look at transformations a different way. This might help you understand them better. Having the two different ways to think about transformations may come in handy later when we need to compute things by hand.</p>
+<p>Since this way of understanding transformations can be tricky, we&rsquo;ll use a special feature of <strong>TransformToy</strong>: the ability to run programs <em>backwards</em>. You can&rsquo;t do this with real programs.</p>
+<p>This material (the basics of translation, and understanding it with transform toy) can be seen in the lecture video. There&rsquo;s a place where I have computer problems (which is why there is a title &ldquo;Return of Lecture&rdquo;). The lecture video shows me playing with <strong>TransformToy</strong>. I recommend that you try it yourself in the workbook.</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=98">2023 Video Clip: Agenda</a> [1:38 - 6:16 (4.6 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=376">2023 Video Clip: Visualizing Transformations</a> [6:16 - 14:32 (8.3 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=872">2023 Video Clip: Return of Lecture</a> [14:32 - 23:03 (8.5 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
+</div></p>
+<h2 id="why-another-perspective-might-be-handy">Why another perspective might be handy&hellip;</h2>
+<p>Let&rsquo;s consider what happens to an object (or a point) when we apply transformations. Here&rsquo;s a very simple program with two translations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>Where on the screen does the corner of the square (0,0 in its local coordinate system) go?</p>
+<p>To trace this program, we step through it. At the beginning, the coordinate system has 0,0 at the origin. After line 1, it is at 20,0. After line 2, it is at 20,20. When we draw, 0,0 (the origin) is relative to this origin, so its position is 20,20.</p>
+<p>Notice that I had to keep track of how the coordinate is moving. Of course, the API (or <strong>TransformToy</strong>) does this. But for us to understand what is going on, we have to move the coordinate systems around in our heads. This isn&rsquo;t too hard when all we&rsquo;re doing is translating, but when the transformations are more complicated, it can be tricky to keep track of the coordinate systems.</p>
+<p>If our goal is to figure out where the point goes, we could ask, &ldquo;What happens to the point as it goes through the transformations?&rdquo; or &ldquo;If we start at the point, where do we end up?&rdquo;</p>
+<p>Of course, the point doesn&rsquo;t exist in our program until the end. In order to figure out where it &ldquo;ends up,&rdquo; we need to trace its movement <em>backwards</em> from the end. Real programs don&rsquo;t run backwards. We either need to do this in our heads, or in a simulation that allows this kind of weird time travel.</p>
+<h2 id="backwards">Backwards?</h2>
+<p>Here is that same example. Step through it (normally using next) to make sure you understand how the coordinate system moves so the square finally gets placed at 20,20.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Backwards1&amp;showHeader=false" class="boxtitlelink">TransformToy?Backwards1</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Backwards1&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Backwards1&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Let&rsquo;s imagine this process from the point of view of the square (specifically its top left corner). We&rsquo;ll have to think about time backwards.</p>
+<p>At the beginning, the square is created. The corner is at (0,0) in the local coordinate system. Then this coordinate system (with the objects attached to it) is moved 20 units in the Y direction. Then this coordinate system is moved 20 units in the X direction. Now we&rsquo;ve gotten to the &ldquo;end&rdquo; and we have the final picture.</p>
+<p><strong>TransformToy</strong> can help us visualize this &ldquo;backwards&rdquo; execution. To try it, click the &ldquo;Backwards Mode&rdquo; checkbox. Notice that we are at the end of the program, but the picture is empty! Since we&rsquo;re in backwards mode, at the end of the program nothing exists yet, and we&rsquo;re in the &ldquo;final&rdquo; coordinate system (the current coordinate system at the end of the program). We&rsquo;ll color this coordinate system blue.</p>
+<p>On the right is the &ldquo;final&rdquo; result - at the beginning of the program. The final result is in the current coordinate system (current at the beginning of the program). In backwards mode, we color the current coordinate system purple.</p>
+<p>Now press &ldquo;Prev&rdquo; to move back one step of the program. The object is created in the current coordinate system. In backwards mode, we draw the current coordinate system in purple, but right now, it&rsquo;s the same as the &ldquo;final&rdquo; coordinate system so we only see blue.  This is the only one that the object knows. Our object will stay in this &ldquo;final&rdquo; coordinate system.</p>
+<p>Now press &ldquo;Prev&rdquo; again to move back through one more step: the <code>translate(0,20)</code> command. The current transformation (current at the beginning of the <code>translate</code>) is different from the &ldquo;final&rdquo; coordinate system—we see the blue coordinate system for the &ldquo;current&rdquo; one (above the translation). Notice that the object stayed in the coordinate system in which it was created.</p>
+<p>Now press &ldquo;Prev&rdquo; again to step through another <code>translate</code>. We&rsquo;ve gotten to the beginning of the program. And the result should be the same as what we would have had if we executed the program normally.</p>
+<h2 id="another-example">Another Example</h2>
+<p>Here&rsquo;s a longer and more complex example.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Backwards2&amp;showHeader=false" class="boxtitlelink">TransformToy?Backwards2</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Backwards2&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Backwards2&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>First, read the program (on the right; on the left, the transformation values haven&rsquo;t been filled in yet) and make sure you understand why it produces the picture that it does. You can step through the program (in regular mode) to see how execution happens.</p>
+<p>After understanding the program, put <strong>TransformToy</strong> into Backwards Mode, and step through the program backwards. Make sure you understand this &ldquo;reverse operation&rdquo;.</p>
+<h2 id="why-backwards">Why Backwards?</h2>
+<p>The backwards view of transformations is a bit tricky. It is not how things are actually implemented. And it is not the standard way to think about things.</p>
+<p>Later, on <a href="../../docs/14/">Page &nbsp;14&nbsp; (Transformations as Math vs. Code)</a>, we&rsquo;ll see how this view matches one way of writing out the math.</p>
+<p>But, for now, I find it handy to have a different way to think about transformations. I find it particularly useful when we are trying to compute where a point goes. Notice that we can consider a single point and trace it through the transformations - we don&rsquo;t need to think about the whole coordinate systems changing around.</p>
+<p>I believe that learning to think this way will help you understand transformations better. This will be important as we start combining complex sequences of transformations. Right now, we just have translations, so we need another kind of transformation so we can start to have combinations.</p>
+<a href="../../docs/04/" class="Next__Page">Next: Page &nbsp;4&nbsp;-&nbsp;Something Bigger: Scale</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Selected"> 3: Transformations Backwards </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p03",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

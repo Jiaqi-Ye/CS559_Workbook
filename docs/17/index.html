@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 17: Linear Transformations</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On the previous page, I said &ldquo;many useful transformations can be written as linear combinations of the input variables&rdquo;. Hopefully, you were wondering &ldquo;which ones&rdquo;. Now we&rsquo;ll answer that question!</p>
+<p>This is the place where in the past I would have referred you to the textbook where it shows the specific matrices for linear transformations. I do not believe that seeing the equations helps develop the understanding. I am not giving you the textbook chapter here. Previously, I asked students to write out the matrices. Not very useful. Don&rsquo;t worry, I am not doing that here.</p>
+<p>Watching a video about them can help. This is also a good time to watch <a href="https://youtu.be/AheaTd_l5Is" target="_blank">Affine Transformations in 5 Minutes</a> if you haven&rsquo;t already. It does a good job of motivating this material in a different way, including what the various elements of the matrix do. We&rsquo;ll actually do that interactively over the next few pages. But if you see it first, it will be easier to take it in.</p>
+<p>But I believe (without evidence, since this is the first time I am trying it) that interactively playing with the matrices will help you understand what they mean. So here are some demos.</p>
+<h2 id="scale">Scale</h2>
+<p><strong>Scale</strong> can be implemented as a linear transformation. The matrix is</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>s</mi><mi>x</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>s</mi><mi>y</mi></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} s_x &amp; 0 \\ 0 &amp; s_y  \end{bmatrix}</annotation></semantics></math></span>
+<p>but here&rsquo;s a demo so that you can try it out. This demo is showing <strong>uniform</strong> scale, so that the x and y scales are the same.</p>
+<p>
+  <link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-1">
+    <script type="module">
+        import { createParametricDemo } from "/TransformDemos/matrixDrivenDemo.js";
+        import { rotate, scale, shearX, shearY, translate } from "/TransformDemos/computeTransforms.js";
+        createParametricDemo('tdemo-1', 
+            (t) => scale(t), 
+            { min: 0.1, max: 2, def: 1, label: "Scale Factor", 
+              layout: "horizontal",
+              width: 600, matrix:"linear" 
+            }
+        );
+    </script>
+</div>    .</p>
+<p>Notice how the values of the scale parameter get used to make the matrix.</p>
+<p>Most of the time, you don&rsquo;t need to write this matrix yourself because it is built into the API. In HTML5 Canvas, you can write:</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">sx</span><span style="color:#111">,</span><span style="color:#75af00">sy</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>This command changes the current coordinate system by right multiplying the initial current coordinate system with a scale matrix.</p>
+<h2 id="rotation">Rotation</h2>
+<p><strong>Rotation</strong> is also represented as a matrix. The method for determining the matrix requires a non-linear computation (using sines and cosines):</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>cos</mi><mo>⁡</mo><mi>θ</mi></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mi>sin</mi><mo>⁡</mo><mi>θ</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>sin</mi><mo>⁡</mo><mi>θ</mi></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>cos</mi><mo>⁡</mo><mi>θ</mi></mrow></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} \cos\theta &amp; -\sin\theta \\ \sin\theta &amp; \cos\theta \end{bmatrix}</annotation></semantics></math></span>
+<p>Notice how all the parameters of the matrix have to change as you change the angle.</p>
+
+<div id="tdemo-2">
+    <script type="module">
+        import { createParametricDemo } from "/TransformDemos/matrixDrivenDemo.js";
+        import { rotate, scale, shearX, shearY, translate } from "/TransformDemos/computeTransforms.js";
+        createParametricDemo('tdemo-2', 
+            (t) => rotate(t), 
+            { min: -3.14, max: 3.14, def: 0, label: "Angle (rad)",
+              layout:"horizontal",
+              width:600, matrix:"linear" 
+            }
+        );
+    </script>
+</div>    
+<p>Rotations are measured from the X axis towards the Y axis. In the standard HTML5 Canvas coordinate system, angles are given in radians. Like the other transformation commands, <code>rotate</code> updates the current coordinate system by multiplying it on the right.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">rotate</span><span style="color:#111">(</span><span style="color:#75af00">theta</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>Rotations have many interesting mathematical properties. Here are a few that are useful&hellip;</p>
+<ol>
+<li>The columns and rows must have length 1.</li>
+<li>The rows are orthogonal to each other. The columns are orthogonal to each other.</li>
+<li>The determinant is positive; this means that it preserves handedness.</li>
+<li>The transpose of the matrix is its inverse.</li>
+</ol>
+<h2 id="shear">Shear</h2>
+<p>Shear is a much less common transformation, but it is still useful. A shear in the X-direction has the matrix.</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>k</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 1 &amp; k \\ 0 &amp; 1 \end{bmatrix}</annotation></semantics></math></span>
+<p>Notice how with a shear, things slide in the X direction.</p>
+
+<div id="tdemo-3">
+    <script type="module">
+        import { createParametricDemo } from "/TransformDemos/matrixDrivenDemo.js";
+        import { rotate, scale, shearX, shearY, translate } from "/TransformDemos/computeTransforms.js";
+        createParametricDemo('tdemo-3', 
+            (t) => shearX(t), 
+            { min: -2, max: 2, def: 0, label: "Shear K" }
+        );
+    </script>
+</div>    
+<p>A shear in the Y direction is similar.</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>k</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 1 &amp; 0 \\ k &amp; 1 \end{bmatrix}</annotation></semantics></math></span>
+<p>Try it.</p>
+
+<div id="tdemo-4">
+    <script type="module">
+        import { createParametricDemo } from "/TransformDemos/matrixDrivenDemo.js";
+        import { rotate, scale, shearX, shearY, translate } from "/TransformDemos/computeTransforms.js";
+        createParametricDemo('tdemo-4', 
+            (t) => shearY(t), 
+            { min: -2, max: 2, def: 0, label: "Shear K", layout: "horizontal",
+            width: 600, matrix:"projective", layout: "horizontal",
+            width: 600, matrix:"projective"   }
+        );
+    </script>
+</div>    
+<p>Shears are not built into HTML5 Canvas. However, because the API allows us to give arbitrary matrices, we can make them ourselves. We will do that in this workbook after we learn how Canvas handles matrices.</p>
+<h2 id="practice">Practice</h2>
+<p>Remembering the equations for matrices is not worth the effort - you can always look them up. However, it can be handy to be able to recognize a matrix. For example, when you are debugging and you expect a certain matrix in your code.</p>
+<p>So, see if you can say what this matrix is:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>1</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} -1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix}</annotation></semantics></math></span>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer</summary>
+    <div class="markdown-inner myexpand-content">
+      This is a scale by (-1,1). It is a mirror reflection about the Y axis (of the X direction).
+    </div>
+</details>
+</div>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>1</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 0 &amp; -1 \\ 1 &amp; 0 \end{bmatrix}</annotation></semantics></math></span>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer</summary>
+    <div class="markdown-inner myexpand-content">
+      This is a rotation. It happens to be a rotation by 90 degrees. To figure it out, see what happens to the X and Y axes. You can check that the matrix is orthogonal (the rows/columns are orthogonal) and normal (all rows/columns have length 1).
+    </div>
+</details>
+</div>
+<p>How about this one? Is this a rotation matrix? What can you say about it?</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>.8</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>.6</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>.6</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>.8</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} .8 &amp; -.6 \\ .6 &amp; .8 \end{bmatrix}</annotation></semantics></math></span>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer - with a long explanation</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>Yes. How can we check?</p>
+<p>To be sure it really is a rotation, we can check that the rows both have length one, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>.8</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>.6</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>.64</mn><mo>+</mo><mn>.36</mn><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">(.8)^2+(-.6)^2=.64+.36=1</annotation></semantics></math></span>. We can check orthogonality: .8 * .6 + (-.6) <em>.8 = 0. We should check for positiveness; we compute the determinant .8</em>.8+(-.6)*.6=1 (which is positive). Another feature is the &ldquo;anti-symmetry&rdquo; (the off-diagonal elements are negatives of each other).</p>
+<p>Visually, we could apply the matrix to the unit X vector (1,0), and see that it ends up at .8,.6. Since we think this is a rotation, we can see it is rotating the X axis into the first quadrant.</p>
+<p>You might notice that this is a 3,4,5 right triangle. We could use the arc cosine of .8 to determine the angle.</p>
+
+    </div>
+</details>
+</div>
+<p>How about this one&hellip;</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>2</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 0 &amp; 2 \\ -2 &amp; 0 \end{bmatrix}</annotation></semantics></math></span>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer - with explanation</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>Clearly, it is not a rotation - the first row (or first column) has length 2, not length 1. So some scaling is involved.</p>
+<p>We can divide everything by two, and see a rotation matrix (by -90). Thus, this matrix is a scale and rotate. It turns out, for scales and rotates, the order doesn&rsquo;t matter. This is not true for transformations in general.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="the-missing-transformation">The Missing Transformation&hellip;</h2>
+<p>If you notice, translation is missing. We&rsquo;ll discuss that on the next page.</p>
+<a href="../../docs/18/" class="Next__Page">Next: Page &nbsp;18&nbsp;-&nbsp;Affine Transformations</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Selected"> 17: Linear Transformations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p17",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

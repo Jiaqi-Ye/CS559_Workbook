@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 23: SVG Tutorial and Transformations</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Unfortunately, the workbook will not teach you SVG. It refers you to the tutorial. There are also the lecture videos:</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=2925">2023 Video Clip: Structured SVG</a> [48:45 - 60:12 (11.4 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=3612">2023 Video Clip: Reusing Assets</a> [60:12 - 70:25 (10.2 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d?st=4225">2023 Video Clip: SVG vs Canvas</a> [70:25]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d">Lecture 6</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf">Slides</a>
+</div></p>
+<h2 id="svg">SVG</h2>
+<p>In previous workbooks, we mentioned the SVG (Scalable Vector Graphics) API. It is a vector, retained-mode, scene-graph API where the graphics objects are stored as elements in the browser&rsquo;s DOM.</p>
+<p>Learning about SVG is useful: it is a very commonly used web graphics API. It is also a great way to learn about the concepts in a scene graph API, so you will be ready when we get to a 3D scene graph API.</p>
+<p>With respect to the topic of this workbook (coordinate systems and transformations), SVG is useful for learning, so we will look at it here. The concepts are the same: we have coordinate systems, transformations that change coordinate systems, objects are drawn in coordinate systems, we create hierarchies, etc. However, we use these features differently.</p>
+<p>To start, you should learn the basics of SVG. This is discussed in the <a href="https://cs559.github.io/559Tutorials/svg/" target="_blank">CS559 SVG Tutorial</a>. You may find it useful to read beyond the class tutorial; the <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial" target="_blank">Mozilla SVG Tutorial</a> (optional) is quite good.</p>
+<p>Once you&rsquo;re comfortable with SVG, we can learn about how it handles transformations and hierarchies to connect with what we saw in Canvas.</p>
+<p><strong>Note:</strong> in class, we are not going to discuss how to write JavaScript programs to use SVG very much. On one hand, because SVG objects are just like any other web browser elements, we can use the same built-in element manipulation functions. However, this is inconvenient: in practice, you would probably use some library to make manipulating SVG from JavaScript easier.</p>
+<p>For the workbook, we&rsquo;re focusing on SVG concepts that you can explore by typing the SVG in text form (just like we type HTML as a text form of web page elements).</p>
+<h2 id="coordinate-systems-for-display-list-apis">Coordinate Systems for Display-List APIs</h2>
+<p>We saw on previous pages how Canvas (and many other immediate-mode APIs) use a <em>transformation stack</em> approach to handling coordinate systems and hierarchy. Drawing commands use the current transformation. Transformation commands update the current transformation. We use save and restore (push/pop) to save the transformations. Save and restore creates a stack, so I call this a <em>transformation stack</em> approach. Because the transformations are stored as matrices (more on that in the next workbook), I will also call it a <em>matrix stack</em>.</p>
+<p>The transformation stack (save and restore) model is very procedural: it represents the hierarchical structure of the objects implicitly in the code. There is no representation of groups (unless your code has them). When graphics objects are drawn, the objects are drawn with the current transformation (i.e., in the current coordinate system).</p>
+<p>In a retained mode system, the system stores the graphics objects as an explicit data structure. Those objects persist after they are created. They can be changed, and we will see those changes. The coordinate systems that the objects &ldquo;live&rdquo; in also must stay around so we can interpret the objects. Indeed, it is useful to be able to change the coordinate system to change the objects.</p>
+<p>With SVG, each object has its own coordinate system that it is drawn in. It is a property of every SVG object.</p>
+
+<p>Here is a really simple SVG with three objects (the SVG is inside of the HTML file <a href="../../for_students/02-23-01.html" class="box-html" data-tag="eg-svg">02-23-01.html</a>):</p>
+
+<div id="box-02-23-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-23-01</span>&nbsp;
+    <input type="checkbox" id="check-02-23-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-23-01.html class="boxtitlelink">02-23-01.html</a>
+    <iframe
+        title="eg-svg"
+        src="../../for_students/02-23-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-23-01"
+    ></iframe>
+</div>
+<p>If you look at the SVG, you will see that each object has its own transformation defined, giving it its own coordinate system. This coordinate system is stored as a property of the object.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-svg" data-lang="svg"><span style="display:flex;"><span><span style="color:#f92672">&lt;svg</span> <span style="color:#75af00">id=</span><span style="color:#d88200">&#34;mysvg&#34;</span> <span style="color:#75af00">width=</span><span style="color:#d88200">&#34;300px&#34;</span> <span style="color:#75af00">height=</span><span style="color:#d88200">&#34;150px&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;rect</span>   <span style="color:#75af00">transform=</span><span style="color:#d88200">&#34;translate(40,30)&#34;</span> 
+</span></span><span style="display:flex;"><span>	    <span style="color:#75af00">id=</span><span style="color:#d88200">&#34;rect1&#34;</span> <span style="color:#75af00">width=</span><span style="color:#d88200">&#34;20&#34;</span> <span style="color:#75af00">height=</span><span style="color:#d88200">&#34;20&#34;</span> <span style="color:#75af00">x=</span><span style="color:#d88200">&#34;-10&#34;</span> <span style="color:#75af00">y=</span><span style="color:#d88200">&#34;-10&#34;</span> <span style="color:#75af00">fill=</span><span style="color:#d88200">&#34;red&#34;</span> <span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;circle</span> <span style="color:#75af00">transform=</span><span style="color:#d88200">&#34;translate(40,70)&#34;</span> 
+</span></span><span style="display:flex;"><span>	    <span style="color:#75af00">id=</span><span style="color:#d88200">&#34;circ1&#34;</span> <span style="color:#75af00">cx=</span><span style="color:#d88200">&#34;0&#34;</span> <span style="color:#75af00">cy=</span><span style="color:#d88200">&#34;0&#34;</span> <span style="color:#75af00">r=</span><span style="color:#d88200">&#34;20&#34;</span> <span style="color:#75af00">fill=</span><span style="color:#d88200">&#34;blue&#34;</span> <span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;path</span>   <span style="color:#75af00">transform=</span><span style="color:#d88200">&#34;translate(40,110)&#34;</span> 
+</span></span><span style="display:flex;"><span>	    <span style="color:#75af00">id=</span><span style="color:#d88200">&#34;path1&#34;</span> <span style="color:#75af00">d=</span><span style="color:#d88200">&#34;M-15,0 h30 l-15,30 Z&#34;</span> <span style="color:#75af00">fill=</span><span style="color:#d88200">&#34;orange&#34;</span> <span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/svg&gt;</span></span></span></code></pre></div>
+<p>If I want, I can write JavaScript code to change the coordinate systems the objects are in (by changing their transformations).</p>
+<p>
+
+<div id="box-02-23-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-23-02</span>&nbsp;
+    <input type="checkbox" id="check-02-23-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-23-02.html class="boxtitlelink">02-23-02.html</a>
+    <iframe
+        title="eg-svg-animation"
+        src="../../for_students/02-23-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-23-02"
+    ></iframe>
+</div></p>
+<p>If you look at <a href="../../for_students/02-23-02.html" class="box-html" data-tag="eg-svg-animation">02-23-02.html</a> you will see that I use a standard animation loop, but on each frame I change the transformation for the circle and the square.</p>
+<p>A few things to notice:</p>
+<ol>
+<li>On each iteration, I set the value of the transformation, writing over the old transformation. This is different than Canvas where the transformations were relative to the &ldquo;current transformation&rdquo;.</li>
+<li>I access the SVG elements the same way that I access any other DOM element: by using their element ID and searching for them in the document.</li>
+<li>I update the <code>transform</code> property, the same one I put in the SVG code itself. I have JavaScript write the transform using the same text I wrote by hand. This may seem a little clunky. In practice, we would use a library to make it more convenient.</li>
+<li>Notice that I designed my objects at 0,0, and used translation to put them into place; this is a common paradigm.</li>
+</ol>
+<p>Note: in this workbook, you will not need to write code that manipulates SVG using JavaScript. I am doing it to help you understand how objects have transforms and coordinate systems.</p>
+<h2 id="hierarchies-transforms-and-coordinate-systems">Hierarchies, Transforms and Coordinate Systems</h2>
+<p>In SVG, each object has its own coordinate system. This interacts nicely with the hierarchical way that SVG objects are stored.</p>
+<p>All SVG objects are part of another object. By default, the objects we create are part of the SVG element itself (this is what is happening in the earlier examples). Objects can also be placed into groups (you might want to review <a href="https://cs559.github.io/559Tutorials/svg/svg4/" target="_blank">CS559 SVG Tutorial Part 4: Groups, Transformations, Re-Use and Hierarchies</a> for info on groups in SVG). Groups are SVG objects, just like rectangles and circles. In a sense, the &ldquo;top level&rdquo; SVG element is a special SVG element (it can contain other elements).</p>
+<p>Before, we said that all SVG objects have their own coordinate system. This includes the &ldquo;top level&rdquo; SVG element; its coordinate system is usually starting at 0,0 and extending to width, height, but it can be controlled with <code>viewBox</code> (see <a href="https://cs559.github.io/559Tutorials/svg/svg2/" target="_blank">CS559 SVG Tutorial Part 2: Coordinate Systems</a>). Groups have coordinate systems too.</p>
+<p>The key idea is that each object&rsquo;s coordinate system is based on its &ldquo;parent&rdquo; (the object it is inside of). An object&rsquo;s <code>transform</code> tells us how to create its coordinate system from its parent. So, in the case of the examples above, each object is part of the SVG element. Thus, its transformation describes how to change the SVG element to create the new coordinate system for the object.</p>
+<p>Here is a simple example. I have taken the example from above, and placed the three shapes in a group. I have changed the group&rsquo;s coordinate system by setting its transform. All of the object&rsquo;s transformations are affected by the group&rsquo;s transformation. In the group&rsquo;s coordinate system (that we get by applying its transform), we then apply the individual objects&rsquo; transformation. Each object combines its parent&rsquo;s transform and its own transform.</p>
+<p>
+
+<div id="box-02-23-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-23-03</span>&nbsp;
+    <input type="checkbox" id="check-02-23-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-23-03.html class="boxtitlelink">02-23-03.html</a>
+    <iframe
+        title="eg-svg-hierarchy"
+        src="../../for_students/02-23-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-23-03"
+    ></iframe>
+</div></p>
+<p>Of course, we can manipulate the group&rsquo;s transformation as well as the object&rsquo;s transformation. Here I am moving the group up and down.</p>
+<p>
+
+<div id="box-02-23-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-23-04</span>&nbsp;
+    <input type="checkbox" id="check-02-23-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-23-04.html class="boxtitlelink">02-23-04.html</a>
+    <iframe
+        title="eg-svg-hierarchy-animation"
+        src="../../for_students/02-23-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-23-04"
+    ></iframe>
+</div></p>
+<p>OK, that example is silly and annoying to watch, but it hopefully makes the point: with SVG, we explicitly build a tree of objects. Each object has a coordinate system. We determine an object&rsquo;s coordinate system by applying its transform to its parent object&rsquo;s coordinate system. Of course, this works up the tree: if the parent (group) is inside of another group, then it refers to its parent.</p>
+<h2 id="box-3-groups-in-svg">Box 3: Groups in SVG</h2>
+<p>In SVG, we can apply transformations (including rotation, translation, and scale) to any object. We can also create special group objects that contain other objects. Of course, we can transform group objects (since we can transform any object).</p>
+
+<p>While we can put SVG right into our HTML files, it is often more convenient to just load from a file. Here&rsquo;s an example (loaded from <a href="../../for_students/02-23-05.html" class="box-html" data-tag="eg-svg-group">02-23-05.html</a> and 
+<a href="../../for_students/02-23-05.svg" class="box-svg" data-tag="eg-svg-group">02-23-05.svg</a>
+):</p>
+
+<div id="box-02-23-05" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">02-23-05</span>&nbsp;
+    <input type="checkbox" id="check-02-23-05">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/02-23-05.html class="boxtitlelink">02-23-05.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/02-23-05.svg" class="boxtitlelink">02-23-05.svg</a>
+    <iframe
+        title="eg-svg-group"
+        src="../../for_students/02-23-05.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-02-23-05"
+    ></iframe>
+</div>
+<p>This example shows how you can apply multiple transforms to a single object by listing transforms in the <code>transform</code> parameter.</p>
+<p>You can read more about how to place SVGs on web pages in the <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Adding_vector_graphics_to_the_Web" target="_blank">Mozilla (Official) Vector Graphics</a> (optional). You&rsquo;ll see a lot about supporting old browsers that don&rsquo;t support SVG, which we don&rsquo;t need to worry about for class.</p>
+<p>On the next page, we will ask you to make a picture using SVG. You do not need to write any JavaScript to change the SVG. You should write the SVG directly.</p>
+<a href="../../docs/24/" class="Next__Page">Next: Page &nbsp;24&nbsp;-&nbsp;SVG Exercise</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Selected"> 23: SVG Tutorial and Transformations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p23",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

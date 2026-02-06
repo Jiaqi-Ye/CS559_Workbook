@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 2: Translation 1: Intuitions</h1>
+		</header>
+		<div class="content post__content clearfix"><p>
+
+
+
+
+</p>
+<p>On this page, we&rsquo;ll consider a simple transformation: translation. We will try to understand how it works in terms of moving coordinate systems. Translation is easy enough that we can view it in simpler ways—but by trying to really understand it, we&rsquo;ll be ready for more transformations later.</p>
+<p>To explain transformation concepts, we&rsquo;ve built this gadget called <strong>TransformToy</strong>. We will use it throughout the workbook to demonstrate some concepts. We&rsquo;ll introduce it here on a simple example, and show off more of its features later.</p>
+<h2 id="local-coordinates">Local Coordinates</h2>
+<p>Let&rsquo;s consider a simple case: we are translating a single point. The point is at the origin (0,0) of its &ldquo;local&rdquo; coordinate system. As far as it is concerned, it is at the origin. We want it to end up at 20,30. So we can translate it there. You could think of translation as adding a value to each point.</p>
+<p>But we think of the translation in terms of the coordinate system. The translation (20,30) moves the target coordinate system such that the origin appears at (20,30) in the final or &ldquo;home&rdquo; coordinate system.</p>
+<p>So, the way a program would work: (1) we start in the &ldquo;home&rdquo; coordinate system; (2) we translate the coordinate system (to get to the local coordinate system); (3) we draw the object at the origin (in the local coordinate system) and it appears at the right place (in the &ldquo;home&rdquo; coordinate system).</p>
+<p>Of course, you want to see that program run step by step; so we have a little gadget. We&rsquo;ll use this gadget for lots of little programs like this as we try to understand transformations.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Translation1&amp;showHeader=false" class="boxtitlelink">TransformToy?Translation1</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Translation1&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Translation1&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The program doesn&rsquo;t draw dots, so we&rsquo;ll draw a square with its corner at the origin. You can see the result on the right side: a blue square at (20,30). On the bottom right, you see the program that produces that result. It is similar to what you write in JavaScript using HTML5 Canvas.</p>
+<p>Notice that there is a red line at the bottom of the program on the right. That red line is the &ldquo;cursor&rdquo; to show us where execution is. This is like the &ldquo;Instruction Pointer&rdquo; or &ldquo;Execution Pointer&rdquo; in the debugger. Since the right side of the screen is showing what happened after the program finished, the red line is after the end of the program.</p>
+<p>On the left is where we can step through the program.</p>
+<p>The left picture shows a red coordinate system (it is reddish-brown, but I&rsquo;ll still call it red): that is the &ldquo;current coordinate system&rdquo; or &ldquo;local coordinate system&rdquo; where objects will be drawn if they are drawn now. There is also the black &ldquo;home&rdquo; coordinate system, but right now it is covered by the red one.</p>
+<p>The program on the left also has the red &ldquo;cursor&rdquo; line. To start it is before the first line of code. When you press &ldquo;Next&rdquo;, the program will step and execute that line. The line of code will be highlighted in red and its actions animated as it executes. Afterwards, the cursor will be after this line of code.</p>
+<p>If you haven&rsquo;t already, press &ldquo;next&rdquo; to execute the first line of the program (<code>translate</code> &hellip;).
+When we execute &ldquo;translate,&rdquo; it moves from the current local coordinate system to a new local coordinate system. The red coordinate system is in a new place. Transformations change the coordinate system. Transformations act on the current coordinate system and leave a new one.</p>
+<p>The next &ldquo;line&rdquo; of code is split into two lines: <code>fillStyle=&quot;blue&quot;;</code> and
+<code>fillRect(0,0,10,10);</code>. You should recognize these as HTML5 Canvas API commands from Workbook 1: we set the color to blue, and draw a rectangle with a corner at 0,0 and size 10,10. Commands in <strong>TransformToy</strong> mimic the Canvas commands. We leave off the <code>context.</code> to save space (and because it is implied).</p>
+<h2 id="a-slightly-bigger-example">A Slightly Bigger Example</h2>
+<p>This example does the same thing, except that rather than doing it with a single translation, we have two translations. We first translate by (20,0), and then (30,0). Try stepping through the program to watch what happens and to practice using <strong>TransformToy</strong> (we&rsquo;ll have more complex examples with it later).</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Translation2&amp;showHeader=false" class="boxtitlelink">TransformToy?Translation2</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Translation2&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Translation2&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Notice that the translations happen in the <em>current</em> coordinate system. The second <code>translate</code> command modifies the coordinate system in which it was applied. The <code>fillRect</code> command applies in the current coordinate system.</p>
+<p>The idea that drawing uses the &ldquo;current&rdquo; state should be familiar from your previous work with Canvas. The rectangle is drawn using the current <strong>state</strong>: the coordinate system is just like the color, we have to set it before we draw. It has to be this way, since Canvas is an immediate mode system (we can&rsquo;t change the rectangle after we&rsquo;ve drawn it!).</p>
+<p>You also probably noticed that the result of the two translations was the same as the first one. The composition of two translations is a translation that combines them. For translation, the composition is easy (we just add). Composition can be more complicated when we consider other transformations.</p>
+<h2 id="current-transformations">Current Transformations</h2>
+<p>To emphasize, drawing operations happen relative to the &ldquo;current&rdquo; transformation. When we draw, we draw in the current coordinate system. When we apply a transformation, we apply it to the current coordinate system. Here&rsquo;s an example that might help with that.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=TranslationList&amp;showHeader=false" class="boxtitlelink">TransformToy?TranslationList</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=TranslationList&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=TranslationList&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Unfortunately, we&rsquo;re stuck with drawing squares (and a few other things) in <strong>TransformToy</strong>, which makes these demos somewhat boring. On the next page, we&rsquo;ll see some of the cool features that explain why we keep it.</p>
+<p>Even though the picture is boring, the program does show some of the key ideas of transformations. Make sure that you understand what is going on. Why do the rectangles all have the same positions in the code, but appear in different places on the screen? Make sure you can predict the picture that code like this produces.</p>
+<p>Actually, to practice predicting programs and to show you what the actual JavaScript code looks like, here&rsquo;s another example. There are a few differences from <strong>TransformToy</strong> - for example, the origin is in the top left of the Canvas, and we don&rsquo;t actually see the grid. And since the units are pixels, we need to use bigger numbers. But it should be familiar.</p>
+<div id="div-canvas-1" class="inline-canvas-div">
+    <div class="inline-canvas-title">Guess what the program does and then press &nbsp;<button id="canvas-test-1">Run</button>
+    </div>
+    <canvas id="canvas-1" height="90" width="120"></canvas><div id="canvas-explain-1" width="120"></div><div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;gray&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;blue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">40</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;purple&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#ae81ff">40</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span> <span style="color:#f92672">=</span> <span style="color:#d88200">&#34;black&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">,</span><span style="color:#ae81ff">20</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{const button = document.getElementById('canvas-test-1');
+    button.addEventListener('click', () => {
+        const explainDiv = document.getElementById('canvas-explain-1');const canvas = document.getElementById('canvas-1');
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+ctx.fillStyle = "gray";
+ctx.fillRect(0,0,20,20);
+ctx.translate(0,40);
+ctx.fillStyle = "blue";
+ctx.fillRect(0,0,20,20);
+ctx.translate(40,0);
+ctx.fillStyle = "purple";
+ctx.fillRect(0,0,20,20);
+ctx.translate(0,-40);
+ctx.fillStyle = "black";
+ctx.fillRect(0,0,20,20);
+
+        ctx.restore();
+    });}
+</script>
+<h2 id="more-about-transformations-as-state">More About Transformations As State</h2>
+<p>In Canvas (and most graphics systems) there is a notion of the &ldquo;current coordinate system&rdquo; where objects will be drawn. In Canvas, it starts out with the box on the screen: the origin is at the top left corner, the X axis goes to the right (measured in &ldquo;screen pixels&rdquo;), and the Y axis goes downwards (again in &ldquo;screen pixels&rdquo;).</p>
+<p>The transformation commands alter the current coordinate system. Translate moves the center.</p>
+<p>In Canvas, the current transformation is part of the drawing state, just like the color of the pen. That means we can save and restore it. Here are those previous two examples combined so you can see they do the same thing. Notice how I use <code>save</code> and <code>restore</code> so I can reset and start over.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Translation3&amp;showHeader=false" class="boxtitlelink">TransformToy?Translation3</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Translation3&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Translation3&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="moving-on">Moving On</h2>
+<p>These examples are very simple. But make sure that you understand the concepts while things are still simple.</p>
+<ul>
+<li>Coordinate System - tells us how to interpret positions</li>
+<li>The &ldquo;current&rdquo; coordinate system - how drawing operations will be interpreted now</li>
+<li>Transformations - change the current coordinate system into a new current coordinate system</li>
+<li>Composition - a sequence of transformations combined can be thought of as a single transformation that does the same thing</li>
+</ul>
+<p>In order to make this more interesting, we&rsquo;ll need to have more types of transformations to apply. But first, let&rsquo;s look at <strong>TransformToy</strong> and how we think about transformations more carefully.</p>
+<a href="../../docs/03/" class="Next__Page">Next: Page &nbsp;3&nbsp;-&nbsp;Transformations Backwards</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Selected"> 2: Translation 1: Intuitions </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p02",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

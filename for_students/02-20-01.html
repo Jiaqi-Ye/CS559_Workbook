@@ -1,0 +1,55 @@
+<html>
+    <body>
+        <!-- we need an invisible canvas for the transformations -->
+        <canvas id="mycanvas" width=10 height=10></canvas>
+        <div id="logContainer"></div>
+    </body>
+    <script type="module" defer>
+import {
+    makeParagraph
+} from "../libs/CS559/inputHelpers.js";
+
+function multiLog(where,text) {
+    console.log(text);
+    makeParagraph(text,where);
+}
+
+// simple things to make matrices using Canvas and printing them out
+const canvas=document.getElementById("mycanvas");  
+const context=canvas.getContext("2d");
+const logContainer = document.getElementById("logContainer");
+
+multiLog(logContainer,`initial transform is: ${context.getTransform()}`);
+
+context.save();
+context.translate(20,30);
+multiLog(logContainer,`translate(20,30) is: ${context.getTransform()}`);
+context.restore();
+
+context.save();
+context.scale(2,3);
+multiLog(logContainer,`scale(2,3) is: ${context.getTransform()}`);
+context.restore();
+
+context.save();
+context.rotate(Math.PI / 6);
+multiLog(logContainer,`rotate(30 degrees) is: ${context.getTransform()}`);
+context.restore();
+
+context.save();
+context.translate(20,30);
+context.scale(2,3);
+multiLog(logContainer,`translate(20,30); scale(2,3) is: ${context.getTransform()}`);
+context.restore();
+
+context.save();
+context.scale(2,3);
+context.translate(20,30);
+multiLog(logContainer,`scale(2,3);translate(20,30) is: ${context.getTransform()}`);
+context.restore();
+
+    </script>
+</html>
+
+
+<!-- CS559 2026 Workbook -->

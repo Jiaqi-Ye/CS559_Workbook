@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 18: Affine Transformations</h1>
+		</header>
+		<div class="content post__content clearfix"><h2 id="translations-affine-transformations">Translations (Affine Transformations)</h2>
+<p>Hopefully, you noticed that translation is <strong>not</strong> a linear transformation.
+If nothing else, it violates the property that zero is preserved. Translation adds a vector to all points, including zero. Any matrix times a zero vector is zero.</p>
+<p>The combination of a linear transformation and a translation is called an <strong>affine transformation.</strong> Affine is another class of transformations that contains linear transformations (a linear transformation is an affine transformation with a zero translation).</p>
+<p>We typically write affine transformations by multiplying first and adding second. So, for matrix <strong>A</strong> and translation vector <strong>t</strong>, we write <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>A</mi><mo separator="true">,</mo><mi>t</mi></mrow></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi><mo>+</mo><mi mathvariant="bold">t</mi></mrow><annotation encoding="application/x-tex"> f_{A,t}(\mathbf x) = \mathbf A \mathbf x + \mathbf t </annotation></semantics></math></span>.</p>
+<p>Writing this out to expose what matrix multiply does can emphasize that this can be viewed as a separate equation for each coordinate (row of the equation):
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi mathvariant="bold">x</mi><mo mathvariant="bold" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><msub><mi>f</mi><mrow><mi>A</mi><mo separator="true">,</mo><mi>t</mi></mrow></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi><mo>+</mo><mi mathvariant="bold">t</mi><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>y</mi></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>+</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>y</mi></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{x&#x27;} = \begin{bmatrix} x&#x27;_x \\ x&#x27;_y \end{bmatrix} = f_{A,t}(\mathbf x) = \mathbf A \mathbf x + \mathbf t = \begin{bmatrix} a_{xx} &amp; a_{xy} \\ a_{yx} &amp; a_{yy} \end{bmatrix} \begin{bmatrix} x_x \\ x_y \end{bmatrix} + \begin{bmatrix} t_x \\ t_y \end{bmatrix}</annotation></semantics></math></span></p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right" columnspacing=""><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><msubsup><mi>x</mi><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>=</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub><msub><mi>x</mi><mi>x</mi></msub><mo>+</mo><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><msub><mi>x</mi><mi>y</mi></msub><mo>+</mo><msub><mi>t</mi><mi>x</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><msubsup><mi>x</mi><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>=</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub><msub><mi>x</mi><mi>x</mi></msub><mo>+</mo><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub><msub><mi>x</mi><mi>y</mi></msub><mo>+</mo><msub><mi>t</mi><mi>y</mi></msub></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}x&#x27;_x = a_{xx} x_x + a_{xy} x_y + t_x \\ x&#x27;_y = a_{yx} x_x + a_{yy} x_y + t_y \end{aligned}</annotation></semantics></math></span>
+<p>It is tempting to put that 3x2 &ldquo;rectangle&rdquo; of numbers as a matrix. However, we cannot use multiply operations for composition or application. You can&rsquo;t multiply two 3x2 matrices together, nor does it make sense to multiply a 3x2 matrix by a 2-vector on the right.</p>
+<p>Affine transformations are closed under composition, and have the property that any sequence of affine transformations can be represented as a single affine transformation. However, the composition is messy notationally. We can&rsquo;t use the nice matrix notation where function composition is matrix multiplication. Unless we use the trick in the next section.</p>
+<p>The answer is: we will write an affine matrix (in 2D) as the top 2 rows of a 3x3 matrix. This will turn out to be an essential trick in computer graphics called Homogeneous coordinates. Before we explain them, let&rsquo;s have a demo where you can see what each element of the matrix does.</p>
+
+<link rel="stylesheet" href="../../TransformDemos/transformDemo.css">
+<div id="tdemo-1">
+    <script type="module">
+        import { demoMatrixAffine } from "/TransformDemos/matrixDrivenDemo.js";
+        demoMatrixAffine('tdemo-1',{width:640,layout:'horizontal'});
+    </script>
+</div>    
+<h2 id="properties-of-affine-transformations">Properties of Affine Transformations</h2>
+<p>Affine Transformations are important. They include all of the linear transformations on the previous page, but they add the translation that allow us to shift the center.</p>
+<p>Here are a few important properties that they have:</p>
+<ol>
+<li>They are closed: the composition of two affine transformations is an affine transformation.</li>
+<li>They preserve parallelness: if two lines start out parallel, they will end up parallel. If you play with the demo above, you can turn the square into any parallelogram that you like. But the resulting sides will always be parallel (since they started out parallel).</li>
+</ol>
+<p>OK, so why do we put affine transformations in 2D into 3x3 matrices? By the way, this answer will be the same later in the class: we put affine transformations in 3D into 4x4 matrices. But let&rsquo;s save that for a later workbook.</p>
+<h2 id="homogeneous-coordinates">Homogeneous Coordinates</h2>
+<p>Several transformations that we want to have in 2D are not linear. But we like linear transformations.</p>
+<p>The counter-intuitive solution is to stop using 2D points. We&rsquo;ll embed the 2D space that we want to work in into a 3D space, do linear operations in this 3D space, and then interpret the points in 3D back in 2D.</p>
+<p>This will turn out to have all sorts of advantages as we do more graphics because many important operations will turn into simple linear operations in a higher dimension. We&rsquo;ll start with the simple version that will allow us to do affine transformations (including translations) as linear transformations.</p>
+<p>The trick of using an <em>n+1</em> dimensional space to represent <em>n</em> dimensional points is known as <strong>homogeneous coordinates.</strong> For this workbook, we&rsquo;ll be using 3D homogeneous coordinates to represent 2D spaces. In the future, we&rsquo;ll use 4D homogeneous coordinates to represent 3D spaces.</p>
+<p>We&rsquo;ll call the last coordinate of the 3 coordinates w. So our three coordinates in homogeneous space will be (x,y,w). Calling the extra dimension w will be a reminder that it is special, and will still work when we create 4D homogeneous coordinates for 3D space.</p>
+<p><strong>Basic version:</strong> we&rsquo;ll represent the 2D point (x,y) by the 3-vector (x,y,1). In this workbook, we&rsquo;ll focus on the case where the last coordinate (w) is 1.</p>
+<p><strong>If you want the math version:</strong>
+Homogeneous space treats all points along lines through the origin as equivalent.
+Our 2D space will be the plane w=1 inside of the 3D space. For any line through the origin, we project the entire line to its intersection with the plane. So if we have a point (x,y,w) in 3D, it&rsquo;s equivalent to the point (x/w, y/w, 1), which we interpret as (x/w, y/w) in our 2D space.</p>
+<p><strong>Geometric Intuition version:</strong>
+The geometric intuitions are best seen as an explanation. Watch one of the videos. But&hellip;
+Homogeneous space treats the entire line between the origin (0,0,0) and the point (x,y,w) as the same. To convert these points back to 2D, we <em>project</em> them to (x/w, y/w, 1) (the w=1 plane). Translation in the 2D plane is the same as a shear in 3D.</p>
+<p>If we change our 2D points into homogeneous coordinates, our transformations become 3x3 matrices to transform the 3D homogeneous points. An affine transformation in 2D becomes a linear transformation in the 3D homogeneous space. If we had the 2D affine transformation <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="bold">x</mi><mo mathvariant="bold" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mi mathvariant="bold">A</mi><mi mathvariant="bold">x</mi><mo>+</mo><mi mathvariant="bold">t</mi></mrow><annotation encoding="application/x-tex"> \mathbf{x&#x27;} = \mathbf A \mathbf x + \mathbf t </annotation></semantics></math></span> we write the following in 3D:
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msubsup><mi>x</mi><mi>w</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>x</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mrow><mi>y</mi><mi>y</mi></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>t</mi><mi>y</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>x</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mi>y</mi></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex"> \begin{bmatrix} x&#x27;_x \\ x&#x27;_y \\ x&#x27;_w \end{bmatrix} = \begin{bmatrix} a_{xx}&amp;a_{xy}&amp;t_x \\ a_{yx}&amp;a_{yy}&amp;t_y \\0&amp;0&amp;1 \end{bmatrix} \begin{bmatrix} x_x\\x_y\\1 \end{bmatrix} </annotation></semantics></math></span>
+If you multiply this out, you&rsquo;ll see that <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>x</mi><mi>w</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup></mrow><annotation encoding="application/x-tex"> x&#x27;_w </annotation></semantics></math></span> will always end up being 1. You&rsquo;ll also notice that the top two rows end up being exactly the same expressions as in the equations at the top of the page.</p>
+<p>The cool thing about this is that affine transformations in 2D are linear transformations in the 3D homogeneous space. We can represent transformations as matrices. Transformation composition is matrix multiplication.</p>
+<h2 id="before-we-move-on">Before we move on&hellip;</h2>
+<p>This concept of using 3x3 matrices and homogeneous coordinates is really important. So please practice. Here&rsquo;s something to try&hellip;</p>
+<p>Given the matrix:</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>2</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 2 &amp; -2 &amp; 6 \\ 2 &amp; 1 &amp; 4 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}</annotation></semantics></math></span>
+<p>Where does the point (3,4) go?</p>
+<p>(<input type="text" id="x" class="" placeholder="Type Here...">
+, <input type="text" id="y" class="" placeholder="Type Here...">
+)</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer</summary>
+    <div class="markdown-inner myexpand-content">
+      To compute this we add a 1 to our point to get the vector (3,4,1), we then multiply the matrix by this vector (remember, we use right multiplication to &ldquo;apply&rdquo; a transformation) to get the vector (4,14,1). We then divide by w (which is 1) to get (4,14).
+    </div>
+</details>
+</div>
+<p>How about&hellip;</p>
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>2</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 2 &amp; -2 &amp; 6 \\ 2 &amp; 1 &amp; 4 \\ 0 &amp; 0 &amp; 2 \end{bmatrix}</annotation></semantics></math></span>
+<p>where does the point (4,3) go?</p>
+<p>(<input type="text" id="x" class="" placeholder="Type Here...">
+, <input type="text" id="y" class="" placeholder="Type Here...">
+)</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">answer</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The first part is easy, we extend the point to 3D and multiply the matrix by it:
+<span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>2</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo>⋅</mo><mn>4</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo>⋅</mo><mn>3</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>6</mn><mo>⋅</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo>⋅</mo><mn>4</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>⋅</mo><mn>3</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>4</mn><mo>⋅</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo>⋅</mo><mn>4</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>0</mn><mo>⋅</mo><mn>3</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>2</mn><mo>⋅</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>8</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>15</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{bmatrix} 2 &amp; -2 &amp; 6 \ 2 &amp; 1 &amp; 4 \ 0 &amp; 0 &amp; 2 \end{bmatrix} \begin{bmatrix} 4 \ 3 \ 1 \end{bmatrix} = \begin{bmatrix} (2 \cdot 4) + (-2 \cdot 3) + (6 \cdot 1) \ (2 \cdot 4) + (1 \cdot 3) + (4 \cdot 1) \ (0 \cdot 4) + (0 \cdot 3) + (2 \cdot 1) \end{bmatrix} = \begin{bmatrix} 8 \ 15 \ 2 \end{bmatrix}</annotation></semantics></math></span></p>
+<p>But then, we need to do the &ldquo;homogeneous divide&rdquo;; w is 2, so we end up with 4, 7.5.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="moving-on">Moving on&hellip;</h2>
+<p>Maybe you&rsquo;re wondering what those other elements of the matrix are doing. That&rsquo;s the topic of the next page.</p>
+<div id="box-02-18-01" style="border: 2px solid black; padding: 0px; margin: 0;border-radius: 5px; display: inline-block;">
+    <div class="box-rubric-container">
+      <table class="frame-rubric-table">
+        <thead><tr>
+            <td></td>
+            <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+            <td>Description</td>
+        </tr></thead>
+      <tbody><tr>
+            <td><input type="checkbox" class="sitekey" id="check-02-18-01-i"></td>
+            <td>standard</td>
+            <td>Page 18 Items</td>
+        </tr></tbody>
+      </table>
+    </div>  
+</div>
+<a href="../../docs/19/" class="Next__Page">Next: Page &nbsp;19&nbsp;-&nbsp;Projective (Homogeneous) Transformations</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 2: Transformations</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Selected"> 18: Affine Transformations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_02",  
+            pageId:     "p18",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "02",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

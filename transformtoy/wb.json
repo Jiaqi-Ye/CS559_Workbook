@@ -1,0 +1,187 @@
+[
+    {
+        "title":"Translation1",
+        "transformations": [
+            ["translate",20,30],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"Translation2",
+        "transformations": [
+            ["translate",20,0],
+            ["translate",0,30],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"Translation3",
+        "transformations": [
+            ["save"],
+            ["translate",20,30],
+            ["fillRect",0,0,10,10,"blue"],
+            ["restore"],
+            ["translate",20,0],
+            ["translate",0,30],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"TranslationList",
+        "transformations": [
+            ["fillRect",0,0,10,10,"gray"],
+            ["translate",0,20],
+            ["fillRect",0,0,10,10,"blue"],
+            ["translate",20,0],
+            ["fillRect",0,0,10,10,"purple"],
+            ["translate",0,-20],
+            ["fillRect",0,0,10,10,"black"],
+            ["translate",0,-40],
+            ["fillRect",0,0,10,10,"red"],
+            ["translate",0,20],
+            ["fillRect",0,0,10,10,"green"]
+        ]
+    },
+    {
+        "title":"Backwards1",
+        "transformations": [
+            ["translate",20,0],
+            ["translate",0,20],
+            ["fillRect",0,0,10,10,"black"]
+        ]
+    },
+    {
+        "title":"Scale1",
+        "transformations": [
+            ["scale",2,2],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"Scale2",
+        "transformations": [
+            ["scale",2,2],
+            ["fillRect",10,10,10,10,"purple"]
+        ]
+    },
+    {
+        "title":"Scale3",
+        "transformations": [
+            ["fillRect",10,10,10,10,"blue"],
+            ["scale",2,2],
+            ["fillRect",10,10,10,10,"purple"]
+        ]
+    },
+    {
+        "title":"Scale4",
+        "transformations": [
+            ["scale",2,2],
+            ["scale",2,2],
+            ["scale",0.5,0.5],
+            ["scale",0.5,0.5],
+            ["scale",3,3],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"Combine1",
+        "transformations": [
+            ["translate",20,10],
+            ["scale",2,2],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    },
+    {
+        "title":"Combine2",
+        "transformations": [
+            ["scale",2,2],
+            ["translate",20,10],
+            ["fillRect",0,0,10,10,"purple"]
+        ]
+    },
+    {
+        "title":"Combine3",
+        "transformations": [
+            ["save"],
+            ["translate",20,10],
+            ["scale",2,2],
+            ["fillRect",0,0,10,10,"blue"],
+            ["restore"],
+            ["scale",2,2],
+            ["translate",20,10],
+            ["fillRect",0,0,10,10,"purple"]
+        ]
+    },
+    {
+        "title":"Combine4",
+        "transformations": [
+            ["save"],
+            ["translate",20,10],
+            ["scale",2,2],
+            ["fillRect",0,0,10,10,"blue"],
+            ["restore"],
+            ["save"],
+            ["scale",2,2],
+            ["translate",20,10],
+            ["fillRect",0,0,10,10,"purple"],
+            ["restore"],
+            ["scale",2,2],
+            ["translate",10,5],
+            ["fillRect",0,0,10,10,"red"]
+        ]
+    },
+    {
+        "title":"CombineCompare",
+        "transformations": [
+            ["save"],
+            ["translate",20,10],
+            ["scale",2,2],
+            ["fillRect",0,0,10,10,"blue"],
+            ["restore"],
+            ["scale",2,2],
+            ["translate",20,10],
+            ["fillRect",0,0,10,10,"purple"]
+        ]
+    },
+    {
+        "title":"CombineTableNoScale",
+        "transformations": [
+            ["fillRect",0,40,50,10],
+            ["fillRect",10,30,10,10,"blue"],
+            ["fillRect",20,30,10,10,"green"],
+            ["fillRect",15,20,10,10,"red"]
+        ]
+    },
+    {
+        "title":"CombineTableScale",
+        "transformations": [
+            ["fillRect",0,40,50,10],
+            ["translate",20,40],
+            ["scale",2,2],
+            ["translate",-20,-40],
+            ["fillRect",10,30,10,10,"blue"],
+            ["fillRect",20,30,10,10,"green"],
+            ["fillRect",15,20,10,10,"red"]
+        ]
+    },
+    {
+        "title":"Backwards2",
+        "transformations": [
+            ["fillRect",0,0,10,10,"gray"],
+            ["translate",0,20],
+            ["fillRect",0,0,10,10,"blue"],
+            ["translate",20,0],
+            ["fillRect",0,0,10,10,"green"],
+            ["translate",0,-20],
+            ["fillRect",0,0,10,10,"black"]
+        ]
+    },
+    {
+        "title":"Rotation1",
+        "transformations": [
+            ["rotate",60],
+            ["fillRect",0,0,10,10,"blue"]
+        ]
+    }
+
+]
