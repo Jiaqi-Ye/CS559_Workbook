@@ -10,8 +10,8 @@ function picture(canvas) {
     // student should use translate and scale to
     // change the coordinate system to [-100,100] [-100,100]
     // you online need to change line 1 and line 2
-    console.log("Student will replace this line");  // line 1
-    console.log("Student will replace this line");  // line 2
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(canvas.width / 200, -canvas.height / 200);
     // now I'll draw something...
     context.fillStyle = "lightgray";
     context.beginPath();

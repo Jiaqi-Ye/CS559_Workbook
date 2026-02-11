@@ -21,6 +21,7 @@ const button = /** @type {HTMLButtonElement} */ (document.getElementById("button
  */
 function draw(jump) {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context?.save();
     if (jump) {
         context.translate(20, 0);
         context.fillStyle = "blue";
@@ -32,6 +33,7 @@ function draw(jump) {
     context.lineTo(10, 30);
     context.lineTo(30, 30);
     context.fill();
+    context.restore();
 }
 // draw the initial triangle
 draw(0);
