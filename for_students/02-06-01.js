@@ -1,6 +1,6 @@
 // @ts-check
 export {};
-
+ 
 /**
  *
  * @param {CanvasRenderingContext2D} context
