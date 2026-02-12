@@ -33,6 +33,7 @@ import * as trisquare from "../libs/CS559/TriSquare.js";
         for (let c = 0; c < 8; c++) {
             context.save();
             context.translate(c * 20, r * 20);
+            context?.scale(0.5, 0.5);
             trisquare.drawTriSquare(context);
             context.restore();
         }
