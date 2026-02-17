@@ -26,11 +26,19 @@ import * as utilities from "../libs/CS559/dots.js";
  * @param {number} y2
  */
 function twoDots(context, x1, y1, x2, y2) {
-    // these two lines are placeholders
-    // students should delete these two lines
-    // and replace them with different transformation commands
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    let angle = Math.atan2(dy, dx);
+
     context.translate(x1, y1);
-    context.scale(5, 5);
+
+    context.rotate(angle);
+
+    let s = distance / 10;
+    context.scale(s, s);
 }
 
 utilities.setup("canvas1", twoDots, "black");

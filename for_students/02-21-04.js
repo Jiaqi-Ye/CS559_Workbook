@@ -80,7 +80,7 @@ import * as utilities from "../libs/CS559/dots.js";
     // Square #1
     context.save();
     // matrix version (student should replace the numbers)
-    context.transform(1, 0, 0, 1, 20, 0);
+    context.transform(4, 0, 0, 4, 20, 20);
     //
     utilities.markedSquare(context);
     context.restore();
@@ -96,7 +96,7 @@ import * as utilities from "../libs/CS559/dots.js";
     // Square #3
     context.save();
     // matrix version (student should replace the numbers)
-    context.transform(1, 0, 0, 1, 40, 0);
+    context.transform(0, 4, -4, 0, 180, 20);
     //
     utilities.markedSquare(context);
     context.restore();
@@ -104,7 +104,7 @@ import * as utilities from "../libs/CS559/dots.js";
     // Square #4
     context.save();
     // matrix version (student should replace the numbers)
-    context.transform(1, 0, 0, 1, 60, 0);
+    context.transform(0, -4, 4, 0, 200, 60);
     //
     utilities.markedSquare(context);
     context.restore();
@@ -112,7 +112,7 @@ import * as utilities from "../libs/CS559/dots.js";
     // Square #5
     context.save();
     // matrix version (student should replace the numbers)
-    context.transform(1, 0, 0, 1, 80, 0);
+    context.transform(0, -4, -4, 0,300, 60);
     //
     utilities.markedSquare(context);
     context.restore();

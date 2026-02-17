@@ -5,160 +5,350 @@
 <!-- This page is part of a Workbook developed for the 
     CS559 Computer Graphics Class at the University of Wisconsin
     https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
-    <head>
-	<meta name="generator" content="Hugo 0.155.1">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="./css/workbook.css">
-        <script src="./js/resizeIFrames.js"></script>
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <script src="../../js/resizeIFrames.js"></script>
     </head>
     <body>
         <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 5: Combining Transformations 1: Center of Scale</h1>
+		</header>
+		<div class="content post__content clearfix">
+                <h3>Draft of 1combine -&gt; 05</h3><p>
 
 
-<main class="main list" role="main">
-	<header class="main__header">
-		<h1 class="main__title">Workbook 2: Transformations</h1>
-	</header>
-	<div class="content main__content clearfix"><p>One of the most fundamental concepts in computer graphics is <em>transformation</em>. Transformations let us work in convenient coordinate systems, model complicated things by putting together parts, move things around without damaging their structure, animate things without changing their shape (or changing their shape if we want), and much more.</p>
-<p>Generally, the mathematics of transformations are taught first, and then we tell you what to use them for.</p>
-<p>This workbook will try to do things differently: we&rsquo;ll try to convey the intuitions first so you understand the concepts. Then we&rsquo;ll see how we use transformations in programs. Finally, we&rsquo;ll look into the math &ldquo;under the hood&rdquo;.</p>
-<h2 id="a-note-about-this-workbook">A Note About This Workbook</h2>
-<p>This workbook covers a lot of content. It is what we would have covered in class over two weeks, which makes sense because it&rsquo;s a two-week workbook. However, since this workbook is replacing the textbook chapters, the workbook is long.</p>
-<p>There are small exercises scattered throughout the workbook (these are listed on the rubric on the last page). Be aware that there are some bigger exercises in this workbook—be sure to plan your time accordingly!</p>
-<ul>
-<li><a href="./docs/13/">Page &nbsp;13&nbsp; (Quadcopter Exercise)</a> - has the &ldquo;Quadcopter&rdquo; exercise</li>
-<li><a href="./docs/24/">Page &nbsp;24&nbsp; (SVG Exercise)</a> - asks you to make a picture with SVG</li>
-<li><a href="./docs/25/">Page &nbsp;25&nbsp; (Mascot Competiton)</a> - asks you to make an animated character</li>
-</ul>
-<p>In previous years, there was another &ldquo;big exercise&rdquo; in week 4. We are skipping it this year because the time for this workbook was shortened. We have included the page at the end of the workbook in case you are curious <a href="./docs/27/">Optional: Lots of Walking Objects</a>.</p>
-<p>If you think you prefer the &ldquo;traditional lecture style&rdquo; (e.g., 75-minute monologues on the topic), you can watch the 2023 lectures. The workbook has slightly different content (and much better demonstrations). Specific sections of the videos are linked on the relevant workbook pages. (note: Lecture 5 gets a detail of handedness wrong, which is explained in Lecture 6)</p>
-<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k" target="_blank" rel="noopener">2023 Video: Lecture 5</a>
-        Transformations 1&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf" target="_blank" rel="noopener">Slides</a></div>
-<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_ic844b5d" target="_blank" rel="noopener">2023 Video: Lecture 6</a>
-        Transformations and Retained Mode Graphics&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/06-Transformation-post.pdf" target="_blank" rel="noopener">Slides</a></div>
-<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_mdqlzhua" target="_blank" rel="noopener">2023 Video: Lecture 7</a>
-        Transformation Math&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/07-TransformMath-post.pdf" target="_blank" rel="noopener">Slides</a></div>
-<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_7xmpxqwh" target="_blank" rel="noopener">2023 Video: Lecture 8</a>
-        More Transformation Math&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/08-MoreTransformMath-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
-<h2 id="workbook-operations">Workbook Operations</h2>
-<p>The workbook uses both type-in forms that rely on browser local storage and &ldquo;page boxes&rdquo; that are files that must be checked in to GitHub.</p>
-<p>Right now, please put your name on the workbook and press the &ldquo;checkpoint&rdquo; button so that we know that you have at least seen this workbook.</p>
-<p><div class="netid">
-<label for="netid">NetID:</label>
-<input 
-  type="text" 
-  id="netid" 
-  class="netid-input sitekey" 
-  placeholder="e.g. bbadger123" 
-  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
-  title="NetID must start with a letter and contain only letters and numbers."
-  required
-  oninput="validateNetID(this)"
-> <span id="netid-error" class="netid-error"></span>
-<script>
-  function validateNetID(input) {
-    const errorSpan = document.getElementById("netid-error");
-    
-    if (input.value.includes(" ")) {
-      input.value = input.value.replace(/\s/g, "");
-    }
-    
-    
-    
 
-    
-    if (input.validity.patternMismatch) {
-      
-      if (!/^[a-zA-Z]/.test(input.value)) {
-        errorSpan.textContent = "NetID must start with a letter.";
-        errorSpan.style.color = "red";
-      } else {
-        errorSpan.textContent = "NetID can only contain letters and numbers.";
-        errorSpan.style.color = "red";
-      }
-    } else {
-        errorSpan.textContent = ""; 
-        errorSpan.style.color = "black";
-    }
-  }
-</script></div>
 
-<div class="netid">
-<label for="github">GithubID (user name):</label>
-<input 
-  type="text" 
-  id="github" 
-  class="netid-input sitekey" 
-  placeholder="e.g. octocat" 
-  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
-  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
-  required
-  oninput="validateGithubID(this)"
-> <span id="github-error" class="netid-error"></span>
-<script>
-  function validateGithubID(input) {
-    const errorSpan = document.getElementById("github-error");
-    
-    if (input.value.includes(" ")) {
-      input.value = input.value.replace(/\s/g, "");
-    }
-    
-    
-    
-
-    
-    if (input.validity.patternMismatch) {
-      
-      if (!/^[a-zA-Z]/.test(input.value)) {
-        errorSpan.textContent = "Github ID must start with a letter.";
-        errorSpan.style.color = "red";
-      } else {
-        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
-        errorSpan.style.color = "red";
-      }
-    } else {
-        errorSpan.textContent = ""; 
-        errorSpan.style.color = "black";
-    }
-  }
-</script></div>
-
-<div id="sheets-status-div" class="status-box">
-<strong>Checkpoint Upload:&nbsp;</strong><span id="sheets-status-span">waiting for check</span>
-<br>
-<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
-<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
-</div></p>
-<p>This workbook makes more use of type-in forms for actual content than the previous workbook.
-This workbook contains type-ins that are part of the assignment. Some of these have specific rubric checkboxes at the end of the page.</p>
-<p>The checkboxes for boxes and rubric elements are to help students keep track of their work.</p>
-<p>Remember to save your local storage to the json file periodically in case something goes wrong. You should also make a checkpoint periodically.</p>
-<p>Remember to commit your work as you edit files in <code>for_students</code> (you should not need to edit files outside of that directory). Remember to push your work to GitHub—at least at the end, or periodically after you commit, to make a backup. And, when you have completed the workbook, remember to use the submit button on the last page to signal us that your workbook is ready for grading.</p>
-<h2 id="learning-goals">Learning Goals</h2>
-<ol>
-<li>Understand the concepts of transformation and coordinate systems and their use in graphics</li>
-<li>Understand how basic transformations (rotate, translate, scale,etc.) are used and composed to achieve different effects</li>
-<li>Understand the mathematical representation and application of transformations for important types, including affine transformations using homogeneous coordinates and matrices</li>
-<li>Understand how transformations are used in different graphics APIs including HTML Canvas and SVG</li>
-<li>Understand and apply the concepts of hierarchical modeling and scene graph representations</li>
-<li>Understand the ideas of kinematics and inverse kinematics to create articulated models and animate them</li>
-</ol>
-<h2 id="readings-and-videos">Readings and Videos</h2>
-<p>The workbook is the primary reading.</p>
-<p>This topic, particularly the mathematical elements of it, is covered well by textbooks. In the past, we&rsquo;ve required students to read some of a textbook. This year, we are trying an experiment and making the textbook optional. (Students treated it that way anyway.) I am trying to make the workbook self-contained, except for the videos.</p>
-<p>The workbook pages will provide links to videos.</p>
-<p>Some of the videos are portions of 2023 lectures. These cover the material well. We will give links that let you access specific parts of the lectures.</p>
-<h2 id="due-date-grading-and-rubric">Due Date, Grading and Rubric</h2>
-<p>This workbook is due on Tuesday, February 17, 2026. A Tuesday deadline means any time Tuesday (Madison time); 12:01AM Wednesday is not Tuesday.</p>
-<p>Consult the class website for information on the late policy. While we accept late assignments, we limit the amount of credit you can get for them.</p>
-<p>A detailed rubric for this workbook can be seen on the last page. Note: while the biggest items are part of boxes (that require you to edit JavaScript files), there are also parts of the assignment that require you to fill in form elements on the web pages. Not all of these have their own rubric items (there may be a rubric item for &ldquo;forms on page X&rdquo;).</p>
-<p>The checkboxes for boxes and rubric elements are to help students keep track of their work. For assessment, the graders will look at the actual work submitted.</p>
-<h2 id="lets-get-started">Let&rsquo;s Get Started!</h2>
-<p>Get Started on <a href="./docs/01/">Page &nbsp;1&nbsp; (Introduction)</a>!</p>
-<h2 id="ai-disclosure">AI Disclosure</h2>
-<p>I used AI tools a lot in the preparation of this workbook. The code for the &ldquo;newer&rdquo; examples was often written by Gemini (either from the chat interface, or using GitHub Copilot). Some examples were written using Claude Opus.</p>
-<p>I had AI tools proofread the workbook. And I used it to check explanations, and generate typesetting for some of the mathematics.</p>
+</p>
+<p>On this page, we&rsquo;ll consider combining different types of transformations.
+We&rsquo;ll use <code>translate</code> and <code>scale</code> since that&rsquo;s all we have.
+And we&rsquo;ll try to do it visually - we&rsquo;ll come back to the underlying math later.
+However, even in this simple setting, we&rsquo;ll be able to do something useful: control the center of scaling.</p>
+<p>The material in the next few pages was covered in a different order in previous years. These parts of lecture 5 explain the material on the next few pages. (note: Lecture 5 gets a detail of handedness wrong, which is explained in Lecture 6)</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=1383">2023 Video Clip: Instancing</a> [23:03 - 31:57 (8.9 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
 </div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=1917">2023 Video Clip: Types of Transformations</a> [31:57 - 50:55 (19.0 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
+</div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;">
+    <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k?st=3055">2023 Video Clip: Points of Scaling/Rotation</a> [50:55]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_7qlixn1k">Lecture 5</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/05-Transformations-1-post.pdf">Slides</a>
+</div></p>
+<h2 id="one-thing-after-another">One thing after another&hellip;</h2>
+<p>On previous pages, we applied transformations in sequence. Each one modifies the current coordinate system to produce a new coordinate system. On the previous pages, we repeated the same kind of transformation. With many kinds of transformations, we can mix it up. Here, we translate then scale (in terms of the order we perform the commands which modify the coordinate systems).</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Combine1&amp;showHeader=false" class="boxtitlelink">TransformToy?Combine1</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Combine1&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Combine1&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>You should be able to predict what happens (even though you can see the result). But step through the program to make sure you really understand it.
+We move the coordinate system first, and then we scale. So the square is placed to the right of and is bigger.</p>
+<p>Can you guess what happens if we reverse the order of the transformations? You don&rsquo;t have to, since we have the demo.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Combine2&amp;showHeader=false" class="boxtitlelink">TransformToy?Combine2</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Combine2&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Combine2&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Notice that the result is different. When we scale first, the coordinate system gets &ldquo;bigger&rdquo; so when we translate it, we translate according to these bigger grid cells.</p>
+<p>This is a really important concept: <strong>transformations apply in the current coordinate system</strong>. The ones that come first affect the ones that come later.</p>
+<p>To help you compare, here are both demonstrations. Notice how I use <code>save</code> and <code>restore</code> to get back to the original, &ldquo;untransformed&rdquo; state so I can do the second example after the first.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Combine3&amp;showHeader=false" class="boxtitlelink">TransformToy?Combine3</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Combine3&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Combine3&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="equivalence">Equivalence</h2>
+<p>In the previous example, order mattered: translation by (T) followed by a scale (S) is not the same as a scale (S) followed by translation (T). However, it is the same as a scale (S) followed by some other translation (T&rsquo;). Here is that demo again, demonstrating it. In this case, we have to &ldquo;scale the translation&rdquo; by 1/2 to counteract the fact that the translation will be scaled by 2.
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=Combine4&amp;showHeader=false" class="boxtitlelink">TransformToy?Combine4</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=Combine4&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=Combine4&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>If we have a translation T followed by a scale S, we can flip the order and make it a scale by S followed by a translation T/S.
+If we have a scale S followed by a translation T, we can flip the order and make it a translation by T*S followed by scale by S.</p>
+<p>When we had all translates, or all scales, any combination of transformations was the same as a single transformation that composed the parts. For translations, we could compose by adding parameters; for scale, we multiplied. And order didn&rsquo;t matter.</p>
+<p>With combinations of scales and translates, things are trickier. Any combination of scales and translations can be represented by a single scale followed by a single translation, or a single translation followed by a single scale.</p>
+<p>The process of figuring out this combined transformation is straightforward. We take advantage of two simple things we&rsquo;ve seen already:</p>
+<ol>
+<li>If there are two consecutive transformations of the same type, we can combine them into a single transformation (by adding translations or multiplying scales).</li>
+<li>We can swap the order of a scale/translate (changing the amount of translation by multiplying/dividing).</li>
+</ol>
+<p>These kinds of translate/scale combinations are great quiz questions for a graphics class. So we should practice.</p>
+<p>Write the following sequence of translations and scales as a single translation followed by a single scale.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#75af00">scale</span><span style="color:#111">(.</span><span style="color:#ae81ff">5</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">4</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">5</span><span style="color:#111">)</span></span></span></code></pre></div>
+<p>Your answer is:<br/>
+Translate by: <input type="text" id="t1x" class="" placeholder="Type Here...">
+, <input type="text" id="t1y" class="" placeholder="Type Here...">
+<br/>
+Scale by: <input type="text" id="s1" class="" placeholder="Type Here...">
+</p>
+
+
+<div class="">
+<details class="myexpand" >
+    <summary class="myexpand-head">See my answer</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>I&rsquo;m going to use a simplified notation, so the original problem is:</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>2</mn></msub><msub><mi>T</mi><mn>10</mn></msub><msub><mi>T</mi><mn>5</mn></msub><msub><mi>S</mi><mn>.5</mn></msub><msub><mi>S</mi><mn>4</mn></msub><msub><mi>T</mi><mn>10</mn></msub><msub><mi>T</mi><mn>5</mn></msub></mrow><annotation encoding="application/x-tex">S_2 T_{10} T_5 S_{.5} S_{4} T_{10} T_{5}</annotation></semantics></math></span></p>
+<p>I&rsquo;ll start by combining like transformations:</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>2</mn></msub><msub><mi>T</mi><mn>15</mn></msub><msub><mi>S</mi><mn>2</mn></msub><msub><mi>T</mi><mn>15</mn></msub></mrow><annotation encoding="application/x-tex">S_2 T_{15} S_{2} T_{15}</annotation></semantics></math></span></p>
+<p>Now, I&rsquo;ll swap the order of the last two (multiply by scale)</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>2</mn></msub><msub><mi>T</mi><mn>15</mn></msub><msub><mi>T</mi><mn>30</mn></msub><msub><mi>S</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">S_2 T_{15} T_{30} S_{2}</annotation></semantics></math></span></p>
+<p>So I can combine the like terms</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>2</mn></msub><msub><mi>T</mi><mn>45</mn></msub><msub><mi>S</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">S_2 T_{45} S_{2}</annotation></semantics></math></span></p>
+<p>Again, reordering (since we want to translate first)</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>90</mn></msub><msub><mi>S</mi><mn>2</mn></msub><msub><mi>S</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">T_{90} S_2  S_{2}</annotation></semantics></math></span></p>
+<p>Then combining the last scales to get&hellip;</p>
+<p><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>90</mn></msub><msub><mi>S</mi><mn>4</mn></msub></mrow><annotation encoding="application/x-tex">T_{90} S_4</annotation></semantics></math></span></p>
+<p>So my answer is</p>
+<p>Translate by 90,90, then scale by 4.</p>
+
+    </div>
+</details>
+</div>
+<p>OK, here&rsquo;s one for you to try yourself. Write this as a single scale followed by a single translation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">10</span><span style="color:#111">,</span><span style="color:#ae81ff">10</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">)</span></span></span></code></pre></div>
+<p>Your answer is:<br/>
+Scale by: <input type="text" id="s2" class="" placeholder="Type Here...">
+<br>
+Translate by: <input type="text" id="t2x" class="" placeholder="Type Here...">
+, <input type="text" id="t2y" class="" placeholder="Type Here...">
+<br/></p>
+<p>Actually, try it for the other order as well:<br>
+Translate by: <input type="text" id="t2x" class="" placeholder="Type Here...">
+, <input type="text" id="t2y" class="" placeholder="Type Here...">
+<br/>
+Scale by: <input type="text" id="s2" class="" placeholder="Type Here...">
+</p>
+<h2 id="center-of-scale">Center of Scale</h2>
+<p>The ability to mix translate and scale allows us to control the center of scale. This is how we solved the scaling problem on the previous page.</p>
+<p>The trick: we (1) translate the coordinate system so that its origin is the point where we want the scaling to be centered; (2) apply the scale in this coordinate system; and (3) translate back.</p>
+<p>This is a very common pattern: it is worth remembering. Later, we will apply it to transformations other than scale.</p>
+<p>The pattern is:
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#75af00">cx</span><span style="color:#111">,</span><span style="color:#75af00">cy</span><span style="color:#111">);</span>   <span style="color:#75715e">// cx,cy is the center of scaling
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">sx</span><span style="color:#111">,</span><span style="color:#75af00">sy</span><span style="color:#111">);</span>       <span style="color:#75715e">// apply whatever scale you want
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#75af00">cx</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#75af00">cy</span><span style="color:#111">);</span> <span style="color:#75715e">// put things back
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#75af00">draw_object</span><span style="color:#111">();</span>      <span style="color:#75715e">// whatever drawing commands
+</span></span></span></code></pre></div></p>
+<p>You can combine those 3 transformations into 2 (using what we learned above). But I think it&rsquo;s easier to remember the pattern this way.</p>
+<p>Here&rsquo;s the example from the previous page. This time with the code showing. The key lines are 3-5.</p>
+<div id="div-canvas-1" class="inline-canvas-div">
+    <div class="inline-canvas-title">
+    </div>
+    <div style="display: flex; align-items: start;">
+        <canvas id="canvas-1" height="200" width="300"></canvas>
+        <div class="canvas-slider-controls" style="height: 200px;">
+            <label for="slider-1">scale</label>
+            <div class="canvas-slider-input-container" style="flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <input type="range" id="slider-1" class="canvas-slider" 
+                    min="0" 
+                    max="2" 
+                    step="0.1" 
+                    value="1"
+                    style="width: 160px; transform: rotate(-90deg);">
+            </div>
+            <span id="value-1">1</span>
+        </div>
+    </div>
+    <div>
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">tableTop</span><span style="color:#f92672">=</span><span style="color:#75af00">canvas</span><span style="color:#111">.</span><span style="color:#75af00">height</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#111">,</span><span style="color:#ae81ff">200</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#ae81ff">150</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">scale</span><span style="color:#111">(</span><span style="color:#75af00">val</span><span style="color:#111">,</span><span style="color:#75af00">val</span><span style="color:#111">);</span>  <span style="color:#75715e">// val is slider
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">translate</span><span style="color:#111">(</span><span style="color:#f92672">-</span><span style="color:#ae81ff">150</span><span style="color:#111">,</span><span style="color:#f92672">-</span><span style="color:#75af00">tableTop</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;blue&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;green&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">150</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillStyle</span><span style="color:#f92672">=</span><span style="color:#d88200">&#34;red&#34;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">ctx</span><span style="color:#111">.</span><span style="color:#75af00">fillRect</span><span style="color:#111">(</span><span style="color:#ae81ff">125</span><span style="color:#111">,</span><span style="color:#75af00">tableTop</span><span style="color:#f92672">-</span><span style="color:#ae81ff">100</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">,</span><span style="color:#ae81ff">50</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+</div><script type="module">
+{const canvas = document.getElementById('canvas-1');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider-1');
+    const valueDisplay = document.getElementById('value-1');
+
+    function draw() {
+        const val = Number(slider.value);
+        valueDisplay.innerText = val;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+const tableTop=canvas.height-50
+ctx.fillRect(50,tableTop,200,50);
+ctx.translate(150,tableTop);
+ctx.scale(val,val);  // val is slider
+ctx.translate(-150,-tableTop);
+ctx.fillStyle="blue";
+ctx.fillRect(100,tableTop-50,50,50);
+ctx.fillStyle="green";
+ctx.fillRect(150,tableTop-50,50,50);
+ctx.fillStyle="red";
+ctx.fillRect(125,tableTop-100,50,50);
+
+        ctx.restore();
+    }
+    slider.oninput = draw;
+    draw();}
+</script>
+<p>Notice that lines 3-5 follow the pattern. We want the &ldquo;center of scaling&rdquo; (the point that won&rsquo;t move as things are scaled) to be the bottom center of the object (the lower left corner of the green square). So, on line 3 we translate the coordinate system there, on line 4 we apply the scale, and on line 5 we put the coordinate system &ldquo;back&rdquo; (except it doesn&rsquo;t go back to the same place).</p>
+<p>To see what is happening, let&rsquo;s try it in <strong>TransformToy</strong>. First, here is what the stack looks like without the scale:
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=CombineTableNoScale&amp;showHeader=false" class="boxtitlelink">TransformToy?CombineTableNoScale</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=CombineTableNoScale&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=CombineTableNoScale&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Now let&rsquo;s make the blocks bigger using the &ldquo;change of center&rdquo; approach. The scaling will be a factor of 2. Notice how I translate the center before the scale, and translate &ldquo;back&rdquo; after the scale. But, since the translation back is scaled, it takes us to a different place.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <a href="../../TransformToy/index.html?file=wb.json&amp;demo=CombineTableScale&amp;showHeader=false" class="boxtitlelink">TransformToy?CombineTableScale</a>
+    <iframe
+        title="/TransformToy/index.html?file=wb.json&amp;demo=CombineTableScale&amp;showHeader=false"
+        src="../../TransformToy/index.html?file=wb.json&amp;demo=CombineTableScale&amp;showHeader=false"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>This &ldquo;transformation centering&rdquo; will turn out to be extremely useful with other transformations. It is also just one example of working in convenient coordinate systems, which we will explore on the next page.</p>
+<p>However, since you completed some type-in boxes on this page, it might be a good time to make a checkpoint!</p>
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span id="sheets-status-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+<a href="../../docs/06/" class="Next__Page">Next: Page &nbsp;6&nbsp;-&nbsp;Convenient Coordinate Systems</a>
+<div id="box-02-05-01" style="border: 2px solid black; padding: 0px; margin: 0;border-radius: 5px; display: inline-block;">
+    <div class="box-rubric-container">
+      <table class="frame-rubric-table">
+        <thead><tr>
+            <td></td>
+            <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+            <td>Description</td>
+        </tr></thead>
+      <tbody><tr>
+            <td><input type="checkbox" class="sitekey" id="check-02-05-01-i"></td>
+            <td>standard</td>
+            <td>Page 05 Items</td>
+        </tr></tbody>
+      </table>
+    </div>  
+</div>
+
+		</div>
+	</article>
 </main>
 
                 </div>
@@ -166,51 +356,51 @@ This workbook contains type-ins that are part of the assignment. Some of these h
 <h2 class="Side_Title">Workbook 2: Transformations</h2>
 <p class="Side__Note">Pages:</p>
 <ul class="Side__List">
-    <li class="Side__Item Side__Selected">Index (CS559 Workbook 2: Transformations) </li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/01/">1: Introduction </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/02/">2: Translation 1: Intuitions </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/03/">3: Transformations Backwards </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/04/">4: Something Bigger: Scale </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/05/">5: Combining Transformations 1: Center of Scale </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/06/">6: Convenient Coordinate Systems </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/07/">7: More Transformations </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/08/">8: TransformToy </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/09/">9: Translate Transformations (Again) </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/10/">10: Composition </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/11/">11: Rotations and Articulation </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/12/">12: Hierarchy </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/13/">13: Quadcopter Exercise </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/14/">14: Transformations as Math vs. Code </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/16/">16: Transformations with Linear Algebra </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/17/">17: Linear Transformations </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/18/">18: Affine Transformations </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/19/">19: Projective (Homogeneous) Transformations </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/20/">20: Matrices in Code </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/21/">21: Matrix Exercises </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/23/">23: SVG Tutorial and Transformations </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/24/">24: SVG Exercise </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/25/">25: Mascot Competiton </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/26/">26: Last Page (rubric) </a></li>
-        <li class="Side__Item Side__Unselected"> <a href="./docs/27/">27: Optional: Lots of Walking Objects </a></li>
-        <li class="Side__Item Side__Unselected"><a href="./storepanels/">Local Storage Interface</a></li>
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (CS559 Workbook 2: Transformations)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Translation 1: Intuitions </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Transformations Backwards </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Something Bigger: Scale </a></li>
+        <li class="Side__Item Side__Selected"> 5: Combining Transformations 1: Center of Scale </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Convenient Coordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: More Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: TransformToy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Translate Transformations (Again) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Rotations and Articulation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Hierarchy </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Quadcopter Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Transformations as Math vs. Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Points, Vectors, Co-Ordinate Systems </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Transformations with Linear Algebra </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Linear Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Affine Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Projective (Homogeneous) Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Matrices in Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Matrix Exercises </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Robots! (Kinematics and Inverse Kinematics) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: SVG Tutorial and Transformations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: SVG Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Mascot Competiton </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Optional: Lots of Walking Objects </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
 </ul>
 </div>
 </div>
-<a id="localstore-json-file"href="./wb_localstore_save.json"></a>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
 <script>
         const WORKBOOK_CONFIG = {
             localstorename: "wbsp26",  
             workbookId: "wbsp26_02",  
-            pageId:     "np",            
+            pageId:     "p05",            
             savefilename: "wb_localstore_save.json",
             savefilepath: "\/wb_localstore_save.json", 
             sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
             bookname2char: "02",
-            pageType: "\u003cnil\u003e",
+            pageType: "uint64",
             solution: false
         };
-</script><script src="./js/localstore.js"></script><script src="./js/check-protocol.js"></script>
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
     </body>
 </html>

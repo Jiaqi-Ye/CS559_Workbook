@@ -20,7 +20,7 @@ import * as utilities from "../libs/CS559/dots.js";
  * @param {number} s
  */
 function shearX(context, s) {
-
+    context.transform(1, 0, s, 1, 0, 0);
 }
 
 // students don't need to change this

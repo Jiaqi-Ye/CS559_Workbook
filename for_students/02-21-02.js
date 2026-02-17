@@ -27,13 +27,18 @@ import * as utilities from "../libs/CS559/dots.js";
  * @param {number} y2
  */
 function twoDots(context, x1, y1, x2, y2) {
-    let a = 5;
-    let b = 0;
-    let c = 0;
-    let d = 5;
-    let e = x2;
-    let f = y2;
-    // please leave this line - you should CHANGE the 6 lines above. Add additional math/logic code as needed.
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+
+    let a = dx / 10;
+    let b = dy / 10;
+    
+    let c = -dy / 10;
+    let d = dx / 10;
+    
+    let e = x1;
+    let f = y1;
+
     context.transform(a, b, c, d, e, f);
 }
 

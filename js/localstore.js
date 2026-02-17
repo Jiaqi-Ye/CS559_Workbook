@@ -226,7 +226,7 @@ window.checkJSONStatus = async function(debug=false) {
  */
 window.loadFromJSON = async function() {
     const wbId = WORKBOOK_CONFIG.workbookId;
-    const filename = filename = jsonFilePath ? jsonFilePath : WORKBOOK_CONFIG.savefilepath;
+    const filename = jsonFilePath ? jsonFilePath : WORKBOOK_CONFIG.savefilepath;
 
     // 1. Safety Check
     if (!confirm("⚠️ Are you sure you want to LOAD answers from the file?\n\nThis will overwrite your current work in the browser with the data from " + filename)) {
