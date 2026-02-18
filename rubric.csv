@@ -1,0 +1,32 @@
+Box,Link,CheckId,Kind,Description,HTML,JS
+03-06-01,/docs/06/#box-03-06-01,wbsp26_03_check-03-06-01-0,standard,"implement the correct tangent vector for the parabola",03-06-01.html,03-06-01.js
+03-17-01,/docs/17/#box-03-17-01,wbsp26_03_check-03-17-01-0,standard,"recreated the picture using Canvas",03-17-01.html,03-17-01.js
+03-17-01,/docs/17/#box-03-17-01,wbsp26_03_check-03-17-01-1,standard,"didn't use quadratic commands but got the correct shape using cubics",03-17-01.html,03-17-01.js
+03-17-02,/docs/17/#box-03-17-02,wbsp26_03_check-03-17-02-0,standard,"draw a picture that demonstrates the use of bezierCurveTo in Canvas",03-17-02.html,03-17-02.js
+03-17-02,/docs/17/#box-03-17-02,wbsp26_03_check-03-17-02-1,standard,"explained where there is G(1) continuity between Bézier segments in box",03-17-02.html,03-17-02.js
+03-19-03,/docs/19/#box-03-19-03,wbsp26_03_check-03-19-03-0,standard,"make the green dot go around the triangle with arc-length parameterization",03-19-03.html,03-19-03.js
+03-20-01,/docs/20/#box-03-20-01,wbsp26_03_check-03-20-01-0,standard,"draw the spiral",03-20-01.html,03-20-01.js
+03-20-01,/docs/20/#box-03-20-01,wbsp26_03_check-03-20-01-1,standard,"checkbox and slider controls",03-20-01.html,03-20-01.js
+03-20-01,/docs/20/#box-03-20-01,wbsp26_03_check-03-20-01-2,optional,"approximate spiral with Beziers, have a switch for lines/Beziers",03-20-01.html,03-20-01.js
+03-21-01,/docs/21/#box-03-21-01,wbsp26_03_check-03-21-01-0,standard,"make a cardinal spline through the points",03-21-01.html,03-21-01.js
+03-21-01,/docs/21/#box-03-21-01,wbsp26_03_check-03-21-01-1,advanced,"draw 20 distinct points on the curve",03-21-01.html,03-21-01.js
+03-21-01,/docs/21/#box-03-21-01,wbsp26_03_check-03-21-01-2,optional,"the 20 points have equal arc-length between consecutive points",03-21-01.html,03-21-01.js
+03-21-02,/docs/21/#box-03-21-02,wbsp26_03_check-03-21-02-0,standard,"split the Bezier",03-21-02.html,03-21-02.js
+03-22-01,/docs/22/#box-03-22-01,wbsp26_03_check-03-22-01-0,standard,"canvas UI demo (something spins)",03-22-01.html,03-22-01.js
+03-22-02,/docs/22/#box-03-22-02,wbsp26_03_check-03-22-02-0,standard,"initial hexagon - ui works",03-22-02.html,03-22-02.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-0,standard,"Cardinal Spline Track (w/UI)",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-1,standard,"Train goes around the track (run button)",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-2,standard,"Train points in the right direction",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-3,standard,"Initial track shows arc-length problem",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-4,advanced,"Arc-length parameterization",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-5,advanced,"Rail Ties",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-6,advanced,"Parallel Rails",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-7,advanced,"Multiple Cars",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-8,advanced,"B-Splines",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-9,creative,"Trucked Wheels",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-10,creative,"Smoke",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-11,creative,"Nicer-Looking Train",03-24-01.html,03-24-01.js
+03-24-01,/docs/24/#box-03-24-01,wbsp26_03_check-03-24-01-12,creative,"Adaptive Scenery",03-24-01.html,03-24-01.js
+03-26-01,/docs/26/#box-03-26-01,wbsp26_03_check-03-26-01-0,standard,"Some curved shapes",03-26-01.html,03-26-01.js
+03-26-01,/docs/26/#box-03-26-01,wbsp26_03_check-03-26-01-1,advanced,"Some curved motion",03-26-01.html,03-26-01.js
+03-26-01,/docs/26/#box-03-26-01,wbsp26_03_check-03-26-01-2,creative,"Something cool",03-26-01.html,03-26-01.js

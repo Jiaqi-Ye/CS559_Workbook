@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 20: Drawing Curves</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On this page, we&rsquo;ll consider how we actually program curves in practice.</p>
+<h2 id="discretizing-curves">Discretizing Curves</h2>
+<p>If we draw a parametric curve <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>, the obvious thing to do is to pick a set of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> values, find the corresponding positions <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">x</span></span></span></span>, and plot those points. The simplest way to do this is to choose a number of points ahead of time, and make equally spaced <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> values.</p>
+<p>This approach has problems. If you pick too many <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> values, it is wasteful: they will all end up in the same place (because ultimately, we have finite-sized pixels). If you pick too few <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> values, you will get gaps between the points. Worse, if the curve varies in how fast it changes (it isn&rsquo;t arc-length parameterized), there may be regions where the points are too dense and others where they are too sparse.</p>
+<p>Things look slightly better if you connect the dots with lines - no more gaps. However, if you have too few points, your curve won&rsquo;t look smooth, and if you have too many points, it is still wasteful.</p>
+<p>In this box, we want you to try out the idea of changing the number of points. We want you to draw a spiral that circles around the origin 4 times, expanding outward. Here&rsquo;s the function to use:</p>
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">200</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">180</span><span class="mspace"> </span><span class="mord mathnormal">u</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">cos</span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mspace"> </span><span class="mord">4</span><span class="mspace"> </span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">200</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">180</span><span class="mspace"> </span><span class="mord mathnormal">u</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">sin</span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mspace"> </span><span class="mord">4</span><span class="mspace"> </span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (1)
+    </div>
+</div>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>If you let <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> go in the range from 0 to 1, this will make a spiral that fits nicely into the 400x400 canvas in 
+<a href="../../for_students/03-20-01.js" class="box-html" data-tag="ex-spiral">03-20-01.js</a>
+ and <a href="../../for_students/03-20-01.html" class="box-html" data-tag="ex-spiral">03-20-01.html</a>.</p>
+<p>Drawing the spiral is relatively easy, but we want you to add 2 features to make it more interesting.</p>
+<ol>
+<li>First, add a checkbox on the page (<a href="../../for_students/03-20-01.html" class="box-html" data-tag="ex-spiral">03-20-01.html</a>) that switches between drawing dots for each point and connecting the dots with lines.</li>
+<li>Second, add a slider that controls the number of points to be drawn. Make sure the slider has a range that goes from too few points (so you can see the spiral, but it looks jagged) to enough points that it looks smooth the whole way around.</li>
+</ol>
+
+<div id="box-03-20-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-20-01</span>&nbsp;
+    <input type="checkbox" id="check-03-20-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-20-01.html class="boxtitlelink">03-20-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-20-01.js" class="boxtitlelink">03-20-01.js</a>
+    <iframe
+        title="ex-spiral"
+        src="../../for_students/03-20-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-20-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-20-01-0"></td>
+                <td>standard</td>
+                <td>draw the spiral</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-20-01-1"></td>
+                <td>standard</td>
+                <td>checkbox and slider controls</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-20-01-2"></td>
+                <td>optional</td>
+                <td>approximate spiral with Beziers, have a switch for lines/Beziers</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>One of the goals here is to make sure you can write programs that use sliders and checkboxes to control your graphics.</p>
+<p>If you&rsquo;re curious, here&rsquo;s what my example solution looks like:</p>
+<p><figure class="">
+<a href="../../docs/20/spiral-dots.png">
+<img src="../../docs/20/spiral-dots_hu_b0a38b2ca20a5c4d.png" alt="spiral-dots.png" />
+</a></figure>
+ <figure class="">
+ <a href="../../docs/20/spiral-lines.png">
+ <img src="../../docs/20/spiral-lines_hu_6a93dcea35a973a9.png" alt="spiral-lines.png" />
+ </a></figure>
+</p>
+<p>Hints:</p>
+<ul>
+<li>To see if a checkbox is checked, access its <code>checked</code> property (not its <code>value</code>).</li>
+<li>You will want to call your draw function when either the checkbox or the slider changes (use <code>onChange</code>).</li>
+<li>You can add the slider and checkbox elements in the HTML file.</li>
+</ul>
+<p>In this simple example (in fact, you can just look at the pictures of mine), you can see how the number of points you need varies over the length of the spiral. The fixed steps are OK near the center, but less effective as you get farther outside.</p>
+<p>If you look in the <code>libs\CS559</code> directory, you will see a file called <code>inputHelpers.js</code> - this has utility functions that can help you make sliders and checkboxes. You do not need to use these utilities (in fact, we don&rsquo;t recommend them). If you want to figure out how to use them, go ahead. They are there for future workbooks.</p>
+<h2 id="better-drawing">Better drawing</h2>
+<p>Fancier drawing algorithms adjust the spacing of the samples as they draw.</p>
+<p>For certain curve types (including lines, circles, and cubic Bezier curves), correct drawing algorithms compute an exact value for every pixel - you always get exactly the right number of dots. We won&rsquo;t show you these algorithms, but you can trust that the web browser does this correctly when it draws with the canvas or SVG drawing commands. For this reason, we often prefer to let Canvas (or SVG) draw Beziers (or circles or lines) for us when we want smooth curves. Indeed, if we have a curve that is not one of these other types, the best strategy is often to convert it to one of the kinds of curves that the underlying library can draw correctly.</p>
+<p>If the curve is not something that Canvas knows how to draw, we need to break it into pieces and convert the pieces to things Canvas can draw. For example, in the previous example, we approximated the spiral by a set of line segments. If we wanted a smoother result, we could have approximated the spiral with a set of Bezier segments. This can be tricky: we must not only compute the spiral&rsquo;s derivatives (to figure out the tangent direction), but scale them accordingly (since the spiral is divided up among a number of Bezier segments).</p>
+<p>If the curve is something that is easy to convert to cubic Bezier form (for example, a different kind of cubic segment), then using canvas Bezier drawing commands is a good idea.</p>
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m?st=531">2023 Video Clip: Cardinal Interpolation and Bezier Curves</a> [8:51 - 20:59 (12.1 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m">Lecture 11</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/11-Curves3-post.pdf">Slides</a>
+</div>
+<p>For something like a spiral, dividing the curve into Bezier segments is still just an approximation to the original curve. It might be a nicer approximation (since we won&rsquo;t have the jagged edges we see with line segments), but it is still an approximation.</p>
+<p>There is a tradeoff: we can make a nice approximation of a complicated curve by dividing it into very small pieces and  using simple pieces (line segments). If we use nicer pieces (like Beziers), we might need fewer pieces, but computing them may be more expensive.</p>
+<p>Optional: actually trying to draw the spiral as Bezier segments (so the approximation is C(1)) is tricky, because it requires thinking about the derivatives of each segment and how they relate to the whole curve. It isn&rsquo;t worth doing, so it is an <em>optional</em> exercise.</p>
+<p>Try making the spiral with Bezier segments, rather than line segments. You can use the Canvas <code>bezierCurveTo</code> command. Figuring out the derivatives of the spiral is easy - it&rsquo;s just calculus like you did on page 1 of the workbook. The harder problem is to convert these derivatives from being with respect to the parameter of the spiral to being with respect to the Bezier curve segment. Hint: with the spiral, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> goes between 0 and 1, with each Bezier segment it also goes between 0 and 1. The Canvas <code>bezierCurveTo</code> command is discussed below.</p>
+<p>Note: if you implement the <em>optional</em> Bezier segments, you must have a checkbox that allows the user to switch between line segments and Beziers. If things work correctly, the spiral should look smoother when you use the curve segments.</p>
+<a href="../../docs/21/" class="Next__Page">Next: Page &nbsp;21&nbsp;-&nbsp;Curve review</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Selected"> 20: Drawing Curves </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p20",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

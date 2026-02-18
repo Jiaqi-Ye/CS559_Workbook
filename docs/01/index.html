@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 1: Introduction: What is a Curve, Anyway?</h1>
+		</header>
+		<div class="content post__content clearfix"><p>So far, everything we&rsquo;ve drawn is made of either straight lines or elliptical arcs. <span class="tooltip-trigger"style="background:lightgray">(Aside: Why These?)
+    <span class="tooltip-box">
+        You can make elliptical arcs by applying affine transformations to circular arcs. In Canvas and SVG you can put lines and arcs together to make combined shapes.
+    </span>
+</span>
+   In this workbook, we&rsquo;ll ask the question &ldquo;what about other shapes?&rdquo;</p>
+<p>A fundamental problem in Computer Graphics is how to represent <strong>shape</strong>. This problem goes beyond Computer Graphics. The field of <em>Shape Modeling</em> or <em>Geometric Modeling</em> considers how we represent shapes mathematically so we can process them with computers, analyze them, or even just talk about them formally.</p>
+<p>Shape modeling is essential to Computer Graphics. But it is also essential to other fields such as mechanical and industrial design, where they need to represent shapes in order to create them. In Computer Graphics, the main thing we do with shapes is make pictures of them. The focus on drawing pictures means we have different needs for how we represent shapes.</p>
+<p>If you notice, I&rsquo;m avoiding defining the word &ldquo;shape&rdquo;. While it&rsquo;s an intuitive concept, defining it in a formal way turns out to be quite tricky. This leads to complex mathematical definitions that won&rsquo;t help us that much.</p>
+<p>I often like to think of a shape as a set of points. It is usually an infinite set. Whether it is a line on the screen, or my car, the &ldquo;shape&rdquo; is a set of points. The task of shape representation is to represent that set in a manner that allows us to compute over it to do the things we need to (in this class, it&rsquo;s usually to draw a picture).</p>
+<h2 id="shape-and-dimensionality">Shape and Dimensionality</h2>
+<p>Warning: I am trying to say this in a non-mathematical way, since if we want to be precise mathematically, it gets complicated quickly.</p>
+<p>When we talk about a shape, there are two different &ldquo;dimensions&rdquo; that are involved: the space it is <strong>embedded</strong> in (where the points live), and the dimensionality of the shape itself (how the points are connected). When I am drawing pictures on the screen or page, the points are in 2D. The shape itself might be 2D (the area inside of a closed region), it might be 1D (such as the boundary of a closed shape), or it might actually just be 0D (just a point, or collection of disconnected points).</p>
+<p>So, consider this picture. It has a bunch of shapes in 2D.</p>
+<figure class="">
+        <a href="../../docs/01/shapes-1.svg">
+            <img src="../../docs/01/shapes-1.svg" alt="shapes-1.svg" />
+        </a>
+    </figure>
+
+
+<p>Let&rsquo;s consider the blue triangle. It &ldquo;lives&rdquo; in the 2D space of the page/screen. We can talk about the area (2D) inside of the triangle (the blue region). We can talk about the boundary of the triangle and the rest of the 2D plane (the screen), which is 1D. Or we can consider one of the corners of the triangle (an individual point, 0D).</p>
+<p>The &ldquo;circle&rdquo; is similar. Technically, the green &ldquo;inside&rdquo; is the <strong>disk</strong> (that is the mathematical technical term), and <strong>circle</strong> refers to the thin 1D shape that is the boundary of the disk and the rest of the plane. Of course, colloquially we might use the term circle more broadly.</p>
+<p>But the point here is that there are 0D, 1D and 2D sets of points that &ldquo;live&rdquo; in the 2D space of the screen (the plane). The formality of what makes it 1D or 2D is mathematical, but we can rely on our intuition of what we mean.</p>
+<p>We will use the term <strong>curve</strong> for these 1D objects - no matter what space they live in.</p>
+<p>Think of curves as something you can draw with a pen. For this workbook, we&rsquo;ll be considering curves in 2D (so the tip of the pen is on a piece of paper). Almost everything applies to curves in higher dimensions (for example, if we recorded the position of the pen in 3D space).</p>
+<p>In the picture, the black things are curves. For the triangle, circle, and purple blobby thing, they are boundaries between the inside and the outside of something. However, for the line segment and the squiggle on the left, it&rsquo;s just a set of positions that the pen visited.</p>
+<p>The &ldquo;pen&rdquo; that creates the curve is infinitely thin. We draw some thickness so we can see it, but conceptually, the curve is &ldquo;thin.&rdquo; With an infinitely thin pen, we really cannot fill areas (there is a mathematical concept of a &ldquo;space-filling curve&rdquo;), but we can trace around the edge of them.</p>
+<p>Important: the curve is a 1D object that lives in some dimension.</p>
+<p>Another way to think about a curve is as a set of points where points have 2 or fewer neighbors, and almost all of the points have exactly 2 neighbors. Think about the line segment: any point on the line has the next and previous point the pen would draw, except for the ends (there are exactly 2 points with 1 neighbor). Some curves (like the boundary of the circle, triangle or blob in the picture) have no endpoints (all their points have two neighbors).</p>
+<h2 id="describing-curves">Describing Curves</h2>
+<p>Some curves have names so it is easy to describe them. I can say &ldquo;circle&rdquo; and you know what I am talking about. I need to specify some <em>parameters</em> like the center and radius of the circle, or the end points of the line segment, but for these simple shapes it is easy to describe them exactly. The harder problem is specifying curves that don&rsquo;t have known names. Like the squiggle or the blobby thing.</p>
+<p>We refer to a curve that doesn&rsquo;t have a simple &ldquo;name&rdquo; as a <strong>free-form</strong> curve. Our goal in this workbook is to understand flexible ways of representing curves that will allow us to create (and draw) free-form curves.</p>
+<p>Because curves are infinite sets, they can be hard to specify.</p>
+<p>There are three main ways to specify curves (and other shapes) mathematically:</p>
+<ul>
+<li><strong>Implicit:</strong> - We define the set of points by a &ldquo;test&rdquo; that determines whether or not a point is part of the curve. This test usually takes the form of a function that we check for a specific value (often 0). <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></li>
+<li><strong>Parametric:</strong> - We define the set of points by generating it as a function of &ldquo;time&rdquo; (the free parameter): where is the pen at time t? This takes the form of a function that takes time as its parameter and maps this to a position in space <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></li>
+<li><strong>Subdivision:</strong> - We define the (infinite) set of points by an initial set of points, and a procedure or rule that generates new points based on the existing set. To get the infinite set of points that is the shape, we apply the rule infinitely many times.</li>
+</ul>
+<p>We will explain each of these on the next 3 pages, and then we&rsquo;ll compare them on <a href="../../docs/05/">Page &nbsp;5&nbsp; (Types of Curves: How to Choose?)</a> to understand why we might choose one over another.</p>
+<p>But, a spoiler: in computer graphics, we usually use <em>parametric</em> representations for curves, and that will be the focus of this workbook (after the first pages that introduce the other types). For surface modeling, we make different choices.</p>
+<p>(optional) If you want to see lectures about this, including a quick overview of the types of curves:
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x?st=123">2023 Video Clip: Agenda and Introduction to Curves</a> [2:03 - 9:36 (7.5 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x">Lecture 9</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/09-Curves-post.pdf">Slides</a>
+</div>
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x?st=576">2023 Video Clip: Curve Representations</a> [9:36 - 20:43 (11.1 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x">Lecture 9</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/09-Curves-post.pdf">Slides</a>
+</div></p>
+<a href="../../docs/02/" class="Next__Page">Next: Page &nbsp;2&nbsp;-&nbsp;Parametric Curves</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Selected"> 1: Introduction: What is a Curve, Anyway? </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p01",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

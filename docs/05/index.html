@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 5: Types of Curves: How to Choose?</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Over the past few pages, we saw the three main approaches to modeling curves.</p>
+<p>Here is a quick summary:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Representation</th>
+          <th style="text-align: left">Pros</th>
+          <th style="text-align: left">Cons</th>
+          <th style="text-align: left">Best For</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>Parametric</strong><br><br><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">))</span></span></span></span></td>
+          <td style="text-align: left">• <strong>Easy to Draw:</strong> Generating points for rendering is trivial (loop <em>u</em> from 0 to 1).<br>• <strong>Control:</strong> Intuitive for design; control points directly manipulate shape.<br>• <strong>Finite:</strong> Naturally represents finite segments with endpoints.</td>
+          <td style="text-align: left">• <strong>Inside/Outside Test:</strong> Hard to determine if a point is on the curve or inside a loop.<br>• <strong>Intersections:</strong> Calculating intersections requires finding the roots of complex polynomials.</td>
+          <td style="text-align: left">• Font design (TrueType)<br>• Vector drawing (SVG, Illustrator)<br>• Animation paths</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Implicit</strong><br><em>(e.g., Circles, Level Sets)</em><br><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></td>
+          <td style="text-align: left">• <strong>Inside/Outside Test:</strong> Trivial (just check if <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>).<br>• <strong>Intersections:</strong> Finding intersections is simpler.<br>• <strong>Topology:</strong> Handles splitting/merging naturally.</td>
+          <td style="text-align: left">• <strong>Hard to Draw:</strong> Requires complex algorithms to find boundary points.<br>• <strong>Infinite:</strong> Naturally represents infinite shapes; hard to define a &ldquo;segment.&quot;<br>• <strong>Hard to Control:</strong> Difficult to manipulate shape intuitively.</td>
+          <td style="text-align: left">• Ray tracing (intersections)<br>• Fluid simulation (blobs)<br>• CSG (Constructive Solid Geometry)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Subdivision</strong><br><em>Iterative refinement</em></td>
+          <td style="text-align: left">• <strong>Topology Independent:</strong> Works on arbitrary meshes (no parameterization needed).<br>• <strong>Scalable:</strong> Level of detail (LOD) is built-in; stop when pixels are small.<br>• <strong>Uniform:</strong> Handles &ldquo;extraordinary points&rdquo; better.</td>
+          <td style="text-align: left">• <strong>Approximation:</strong> The limit surface often has no simple analytic formula.<br>• <strong>Evaluation:</strong> Point evaluation at arbitrary parameters is complex.<br>• <strong>Artifacts:</strong> Can suffer from &ldquo;ripples&rdquo; near extraordinary vertices.</td>
+          <td style="text-align: left">• 3D Character modeling (Pixar/Disney)<br>• Terrain generation<br>• Organic shapes</td>
+      </tr>
+  </tbody>
+</table>
+<p>In this workbook, we&rsquo;ll focus on parametric curves. These are the main representations used in 2D computer graphics because they are easy to draw and convenient for designing shapes.</p>
+<p>Later in the course, we&rsquo;ll revisit these three representations when we consider surfaces in 3D.</p>
+<p>Now might be a good time to make a checkpoint:
+<div id="sheets-status-div" class="status-box">
+<strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-check-span">waiting for check</span>
+<br>
+<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
+<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+</div></p>
+<a href="../../docs/06/" class="Next__Page">Next: Page &nbsp;6&nbsp;-&nbsp;Curve Properties</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Selected"> 5: Types of Curves: How to Choose? </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p05",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

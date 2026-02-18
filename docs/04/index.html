@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 4: Subdivision Curves</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Subdivision is the third main type of shape representation.</p>
+<p>Subdivision isn&rsquo;t often used in practice for 2D curves. However, 2D subdivision curves are often used to explain subdivision and show off the math. In 3D, subdivision is one of the primary ways we model surfaces. We&rsquo;ll discuss them at the end of the semester.</p>
+<h2 id="the-subdivision-concept">The Subdivision Concept</h2>
+<p>One way to think about subdivision is as iterative refinement. We start with a crude object and refine it. This is useful because we only need to refine it until it is &ldquo;good enough&rdquo;. However, the power of subdivision is that if the refinement step is defined correctly, it will converge to a known shape (in the limit).</p>
+<p>Here&rsquo;s a simple example. We start with a set of points. At every step, we insert a new point halfway between each pair of existing points. You can try it with this demo. Press the &ldquo;Subdivide&rdquo; button a few times.</p>
+
+
+
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-subdiv-0">
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas" width="660" height="500" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <label class="curvedemo-label">Scheme:
+                <select class="curvedemo-select" data-curve="schemeSelect">
+                    <option value="2" selected>2 Line</option>
+                    <option value="4">4 Dyn/Levin (C1)</option>
+                    <option value="6">6 Deslauriers-Dubuc (C2)</option>
+                </select>
+            </label>
+
+            <div class="curvedemo-button-row">
+                <button class="curvedemo-button" data-curve="btnSubdivide">Subdivide</button>
+                <button class="curvedemo-button" data-curve="btnReset">Reset to Square</button>
+                <button class="curvedemo-button" data-curve="btnResetStar">Reset to Star</button>
+            </div>
+
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="chkShowDots"> Show Dots
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag points to move. Shift+Click to add points (near existing).<br>
+            Change controls or edit geometry to reset.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/subdiv.js";
+    initDemo("curvedemo-subdiv-0");
+</script>
+
+</div>
+
+<p>At some point, you will have lots of dots. In the limit, if you do an infinite number of subdivision steps, you will get lines connecting the dots. This is not a good way to generate lines. But it does convey the concept: we keep refining; each step, we get closer to the &ldquo;continuous&rdquo; object. And in the (hypothetical) limit, we get the continuous object.</p>
+<p>The key concept here is the <strong>limit curve</strong> - the thing we know we will get if we repeat the process an infinite number of times.</p>
+<p>Here&rsquo;s a slightly different example. Rather than just taking the average of two points, we compute the position of the new points by considering 4 neighbors (two ahead, two behind). If we use <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">+</span><span class="mord mathbf mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span> to refer to the next point (from the existing points, not the other new points), we can compute:
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight" style="margin-right:0.01597em;">new</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord">−</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">16</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathbf mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">16</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">9</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathbf mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">16</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">9</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">+</span><span class="mord mathbf mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">16</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">+</span><span class="mord mathbf mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (1)
+    </div>
+</div>
+The weights (the numbers we multiply the points by) come from mathematicians. These weights are called the &ldquo;Dyn-Levin&rdquo; weights because the mathematicians Dyn and Levin (<a href="https://www.sciencedirect.com/science/article/abs/pii/016783968790001X">ref</a> if you want to see the proof) figured out that if you apply them an infinite number of times, they converge to a &ldquo;smooth&rdquo; curve (we&rsquo;ll get to the formal definition of smooth later in the workbook). Notice what happens as you press &ldquo;Subdivide&rdquo; multiple times.
+
+
+
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-subdiv-1">
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas" width="660" height="500" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <label class="curvedemo-label">Scheme:
+                <select class="curvedemo-select" data-curve="schemeSelect">
+                    <option value="2">2 Line</option>
+                    <option value="4" selected>4 Dyn/Levin (C1)</option>
+                    <option value="6">6 Deslauriers-Dubuc (C2)</option>
+                </select>
+            </label>
+
+            <div class="curvedemo-button-row">
+                <button class="curvedemo-button" data-curve="btnSubdivide">Subdivide</button>
+                <button class="curvedemo-button" data-curve="btnReset">Reset to Square</button>
+                <button class="curvedemo-button" data-curve="btnResetStar">Reset to Star</button>
+            </div>
+
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="chkShowDots"> Show Dots
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag points to move. Shift+Click to add points (near existing).<br>
+            Change controls or edit geometry to reset.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/subdiv.js";
+    initDemo("curvedemo-subdiv-1");
+</script>
+
+</div>
+
+Each time you subdivide, you get a polygon that is a little smoother. (Try turning off the dots). The limit surface is completely smooth, but after a few rounds of subdivision, the shape already looks smooth (it is still made of connected line segments).</p>
+<p>Here is a slightly more complex scheme, this time using 3 points before and after each point (so a total of 6 points). This provides a smoother curve in the limit. On page <a href="../../docs/08/">Page &nbsp;8&nbsp; (Polynomial Pieces)</a> we&rsquo;ll define smoothness. If you&rsquo;re curious, the 6-point Deslauriers-Dubuc scheme is C(2), and the 4-point Dyn-Levin scheme is C(1); we&rsquo;ll explain what that means in the future.</p>
+
+
+
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-subdiv-2">
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas" width="660" height="500" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <label class="curvedemo-label">Scheme:
+                <select class="curvedemo-select" data-curve="schemeSelect">
+                    <option value="2">2 Line</option>
+                    <option value="4">4 Dyn/Levin (C1)</option>
+                    <option value="6" selected>6 Deslauriers-Dubuc (C2)</option>
+                </select>
+            </label>
+
+            <div class="curvedemo-button-row">
+                <button class="curvedemo-button" data-curve="btnSubdivide">Subdivide</button>
+                <button class="curvedemo-button" data-curve="btnReset">Reset to Square</button>
+                <button class="curvedemo-button" data-curve="btnResetStar">Reset to Star</button>
+            </div>
+
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="chkShowDots"> Show Dots
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag points to move. Shift+Click to add points (near existing).<br>
+            Change controls or edit geometry to reset.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/subdiv.js";
+    initDemo("curvedemo-subdiv-2");
+</script>
+
+</div>
+
+<h2 id="approximating-subdivision">Approximating Subdivision</h2>
+<p>All three of the schemes I have shown so far keep the old points and simply add new ones. That means that points in the initial set will be in the final set. The resulting curve will go through these points. We call a curve that goes through the points that specify it an <strong>interpolating</strong> curve. <strong>Interpolation</strong> is the process of connecting points.</p>
+<p>Not all curves are interpolating. Here is an example of a simple subdivision scheme that does not interpolate: Chakin&rsquo;s corner cutting.</p>
+<p>At each step, we replace each point with two new points that &ldquo;cut the corner&rdquo; by placing the new points 1/4 of the way along the edges. Try it in the demo: press Subdivide once and see how it chops off the sharp corners by replacing each corner with two new points.</p>
+
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-chakin-6" >
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas grid" width="660" height="500" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <div class="curvedemo-button-row">
+                <button class="curvedemo-button" data-curve="btnSubdivide">Subdivide</button>
+                <button class="curvedemo-button" data-curve="btnReset">Reset to Square</button>
+                <button class="curvedemo-button" data-curve="btnResetA">Reset to A</button>
+                <button class="curvedemo-button" data-curve="btnResetStar">Reset to Star</button>
+            </div>
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="chkShowDots"> Show Dots
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag black dots to move vertices.<br>
+            Shift+Click on the canvas (near an edge) to add a point.<br>
+            "Subdivide" shows one step of Chakin's algorithm.<br>
+            Moving points will reset the view to the control polygon.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/chakin.js";
+    initDemo("curvedemo-chakin-6");
+</script>
+
+</div>
+
+<p>If you keep subdividing, you will keep chopping off corners and the shape will get smoother and smoother. It will also get further and further from the starting points. This is a tradeoff that we will see in parametric curves as well: we are often willing to give up interpolation for other properties that make curves easier to control.</p>
+<p>Chakin&rsquo;s scheme has another interesting property. Its limit curve converges to piecewise polynomials (parametric curves). Given just the initial points, you can convert it to a parametric form. Many useful subdivision schemes have this property. It provides the ability to move between subdivision and parametric representations, so we can get the best of both worlds.</p>
+<p>For 2D curves, we usually use parametric forms. However, subdivision will be very important when we get to 3D surfaces because smooth parametric surfaces will turn out to be very complicated.</p>
+<a href="../../docs/05/" class="Next__Page">Next: Page &nbsp;5&nbsp;-&nbsp;Types of Curves: How to Choose?</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Selected"> 4: Subdivision Curves </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p04",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

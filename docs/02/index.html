@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 2: Parametric Curves</h1>
+		</header>
+		<div class="content post__content clearfix"><div class="resourcelink">
+<p><strong>Video:</strong> The video <a href="https://www.youtube.com/watch?v=jvPPXbo87ds" target="_blank">The Continuity of Splines</a> is <strong>required</strong> for the workbook. If you haven&rsquo;t watched it yet, I recommend watching it now to get a 60-minute crash course in curves. It focuses on parametric curves. The animations convey the basic concepts, and then dive into math that goes beyond where we&rsquo;ll get in this workbook.</p>
+
+</div>
+<p>If you want to see a lecture-format segment explaining what is going on with the parameter in parametric curves, there is a 2023 lecture video. The 2023 lecture videos are optional (but the <a href="https://www.youtube.com/watch?v=jvPPXbo87ds" target="_blank">The Continuity of Splines</a> is required).
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x?st=1243">2023 Video Clip: The Free Parameter</a> [20:43 - 29:34 (8.8 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x">Lecture 9</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/09-Curves-post.pdf">Slides</a>
+</div></p>
+<p>If we think of curves as something you can draw with a pen, we can use this &ldquo;process&rdquo; (of the pen moving over the curve) to define the curve. The idea of a <strong>parametric</strong> representation is that we use this &ldquo;free parameter&rdquo; (time) to index the set of points. We define a curve by a function that maps from time to a position in space.</p>
+<p>There is a second piece to the definition: we need to know the range of times that we can ask positions about. Without loss of generality, we can always describe the range as going from beginning (0) to end (1), which is quite convenient. Sometimes we might want to use a different range, but we can scale and shift the range accordingly.</p>
+<p>It is often convenient to have the parameter range over the unit interval from 0
+to 1. When the free parameter ranges over the unit interval, we often
+denote it as <em>u</em> (to remind us that this is a unit parameterization). This is a convention, but I will try to use the convention consistently. If you see a different parameter, it may mean something else.</p>
+<h2 id="parametric-curves-and-parameterizations">Parametric Curves and Parameterizations</h2>
+<p>A parametric curve (in 2D) is a shape represented by a function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>, which returns 2D values. We can think of it as either <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> or as separate functions for each dimension, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>.</p>
+<p>The parameter <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> of this function is the &ldquo;free parameter&rdquo; and it spans some range. The curve maps the interval (the range of the parameter) to a set of points in 2D.</p>
+<p>Here is an example: the horizontal line segment from (0,0) to (1,0):
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span></div>
+    <div class="math-number">
+        (1)
+    </div>
+</div></p>
+<p>Hopefully, this makes sense: put in <em>u</em> values, and get out points on the line segment. If we put in &ldquo;all&rdquo; the times, we get &ldquo;all&rdquo; the points (the infinite set).</p>
+<p>Imagine tracing the same line segment twice. The first time, you go slowly at an even speed; the second time, you start slowly and speed up. Or maybe you draw right to left rather than left to right.</p>
+<canvas id="canvas-1" height="50" width="200"></canvas><script type="module">
+{
+    const canvas = document.getElementById('canvas-1');
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.lineJoin = "round";
+let start = 0;
+function circle(x,y,color,r=7) {
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,2*Math.PI);
+    ctx.fillStyle=color;
+    ctx.fill();
+}
+function draw(time) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if (!time && !start) {
+        start=time;
+    }
+    time -= start;
+    ctx.beginPath();
+    ctx.strokeStyle="black";
+    ctx.lineWidth=3;
+    ctx.save();
+    ctx.moveTo(25,25);
+    ctx.lineTo(175,25);
+    ctx.stroke();
+    ctx.restore();
+    let u = (time % 1500)/1000;
+    u -=.25;
+    if (u<0) u = 0;
+    if (u>1) u = 1;
+    circle(25+150*u,25,"red",9);
+    circle(25+150*u*u,25,"green");
+    circle(25+150*(1-u),25,"blue");
+    requestAnimationFrame(draw);
+}
+draw(0);
+}
+</script>
+<p>Notice that all three dots trace over the same line segment over the unit interval. Since we define the curve as the set of points traced, all three ways to draw the line segment are equivalent. We call these different <strong>parameterizations</strong> of the curve.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Aside: Mathematical Definitions</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>When I went looking, I found that mathematicians are not consistent in how they define curves.</p>
+<p>In some cases, they define a curve as &ldquo;the continuous image of some interval&rdquo; or the set of points that are drawn. In this case, we would say that different parameterizations are of the same curve.</p>
+<p>In other cases, they define curves as &ldquo;A continuous map from a one-dimensional space to an n-dimensional space,&rdquo; or the actual process of doing the mapping via the function. In this case, they would consider different parameterizations to be different curves.</p>
+<p>I prefer the nomenclature where the curve is the set of points (the shape), so we speak of different parameterizations of the same curve. But in some places, this might get us in trouble. In those cases where it matters, I&rsquo;ll be specific.</p>
+
+    </div>
+</details>
+</div>
+<p>If you&rsquo;re curious, here are the functions for the different parameterizations of the line segment. (In terms of the unit line segment; in the code, I have transformed it to put it in the right place in the Canvas).</p>
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.5em;vertical-align:-2em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.5em;"><span style="top:-4.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">red</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span><span style="top:-3.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">green</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span><span style="top:-1.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">blue</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.5em;"><span style="top:-4.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span><span style="top:-3.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span><span style="top:-1.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2em;"><span></span></span></span></span></span></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (2)
+    </div>
+</div>
+<p>Notice that all of them map the interval [0,1] to the line segment [(0,0), (1,0)].</p>
+<p>This is a boring function, but hopefully it makes the point that with a <em>parametric representation</em> we define curves as a function of the parameter, and that this is not unique. We can have multiple parameterizations.</p>
+<h2 id="drawing-some-curves">Drawing Some Curves</h2>
+<p>Part of the reason we like parametric representations in computer graphics is that they are easy to draw. All we need to do is try a few different values of <em>u</em>, and connect the dots. Sometimes, it&rsquo;s a little trickier than (since we need to know how many values to try, and how to connect them). But the simple strategy often works well.</p>
+<p>Here is a box that shows some example curves:
+
+
+<div id="box-03-02-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-02-01</span>&nbsp;
+    <input type="checkbox" id="check-03-02-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-02-01.html class="boxtitlelink">03-02-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-02-01.js" class="boxtitlelink">03-02-01.js</a>
+    <iframe
+        title="eg-curves"
+        src="../../for_students/03-02-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-02-01"
+    ></iframe>
+</div>.</p>
+<p>The program is in 
+<a href="../../for_students/03-02-01.js" class="box-html" data-tag="eg-curves">03-02-01.js</a>
+. But let&rsquo;s start by discussing the  curves that it draws. All of these are curves that are defined over a <em>u</em> range of 0-1. You can see how the curve is &ldquo;drawn&rdquo; as u proceeds from 0 to 1. The drawing motion isn&rsquo;t always important, if all we care about is the resulting thing that is drawn.</p>
+<p>For each curve, we simply need to define some function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> that provides a 2D point for each value.</p>
+<p>Notice that the first three functions all draw the same line segment; however, the point moves differently. Notice that in the third line segment, the point starts out slowly and speeds up. This is similar to the earlier demo.</p>
+<p>Here are the functions:</p>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">line1</span><span style="color:#111">(</span><span style="color:#75af00">u</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">return</span> <span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">100</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">line2</span><span style="color:#111">(</span><span style="color:#75af00">u</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">return</span> <span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">100</span> <span style="color:#f92672">*</span> <span style="color:#111">(</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> <span style="color:#75af00">u</span><span style="color:#111">)];</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">line3</span><span style="color:#111">(</span><span style="color:#75af00">u</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">return</span> <span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">100</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>For this demo, we define the functions as functions. We assume that it is defined over the range 0-1.</p>
+<p>The circle and parabola should not be a surprise. You can look in 
+<a href="../../for_students/03-02-01.js" class="box-html" data-tag="eg-curves">03-02-01.js</a>
+ to find them.</p>
+<p>The V-shaped curve is effectively two line segments, with an if statement that switches between them at u=.5. This is an example of how we make a compound shape from simpler pieces.</p>
+
+        
+        
+        <div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">twoLines</span><span style="color:#111">(</span><span style="color:#75af00">u</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">if</span> <span style="color:#111">(</span><span style="color:#75af00">u</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">)</span> <span style="color:#00a8c8">return</span> <span style="color:#111">[</span><span style="color:#ae81ff">20</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">80</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span><span style="color:#111">,</span> <span style="color:#ae81ff">200</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">else</span> <span style="color:#00a8c8">return</span> <span style="color:#111">[</span><span style="color:#ae81ff">20</span><span style="color:#f92672">+</span> <span style="color:#ae81ff">80</span> <span style="color:#f92672">*</span> <span style="color:#75af00">u</span><span style="color:#111">,</span> <span style="color:#ae81ff">100</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">200</span> <span style="color:#f92672">*</span> <span style="color:#111">(</span><span style="color:#75af00">u</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">)];</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>This simple example is important: notice how the curve &ldquo;switches&rdquo; at a <em>u</em> value. For each piece, it is well-behaved. But we may need to consider the switching point as a special case. The next example is connecting pieces from two circles (two arcs). It is similar.</p>
+<p>The last curve - the two line segments on the right - is a single curve; it is just not connected. The pen &ldquo;jumps&rdquo; at .5 (look at the way the function is defined). This is very similar to the V shape, except that rather than just changing direction at .5, the pen jumps to a different spot.</p>
+<p>Now we can look at the <code>plotter</code> function. It draws a curve - the function for the curve is passed as an argument.
+The parametric function is passed into the plotter via its <code>func</code> argument. This allows the plotter to draw any parametric function whose input ranges from 0 to 1. Notice that given a <code>u</code> value, each parametric function returns a list of two values for the position (x,y).</p>
+<p>There is a slight catch that when the curves have discontinuities, we are careful about how we draw them. The code draws by &ldquo;connecting the dots&rdquo;, so it should only connect the dots that should be connected. And, the idea of drawing by taking uniform steps in <em>u</em> is very simple: in practice, we might want to choose the <em>u</em> values strategically (we&rsquo;ll get to that later).</p>
+<p>If you look at the <code>plotter</code> function, you can see that these curves are actually being drawn by approximating them by a number of line segments. Canvas is actually capable of drawing all of these shapes directly, but our code emphasizes the idea that we can draw parametric curves by sampling a bunch of parameter values. We&rsquo;ll return to this idea later in the workbook.</p>
+<p>In this program, we are drawing the curves by choosing parameter values with even spacing, but this means that we need to know how many samples to use when drawing the curve. For line segments, we only need two samples: u=0 and u=1, representing the endpoints of the line segment. However, for the smoother shapes, we use many segments (the circle uses 50) so that the shape looks as if it were a continuous circle. If you look carefully, you&rsquo;d see it&rsquo;s really a 50-sided polygon.</p>
+<p>For curves where there is an abrupt change (such as the abrupt change in direction in the V or the jump in position in the two lines on the right), we need to be careful to choose values around the jump. In fact, for the two lines, we are not using the plotter code (which assumes that things are connected). We will call curves that exhibit a sudden change <strong>discontinuous.</strong> We&rsquo;ll discuss continuity and discontinuity on a future page.</p>
+<p>(optional) The idea that we draw curves by approximating them by a bunch of line segments (or other simple pieces) is described in a lecture video. This also talks about the issues in turning curves into pixels (which we won&rsquo;t actually cover in this workbook).
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x?st=1774">2023 Video Clip: Approximating Curves</a> [29:34 - 32:49 (3.2 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_38sal78x">Lecture 9</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/09-Curves-post.pdf">Slides</a>
+</div></p>
+<h3 id="drawing-curves-in-practice">Drawing Curves in Practice</h3>
+<p>Drawing a curve by sampling a bunch of <em>u</em> values will turn out to be an inefficient strategy: we need to figure out how many <em>u</em> values to choose to convey the curve. If we draw too few, it won&rsquo;t look &ldquo;curvy&rdquo;; if we draw too many, it is wasteful. We want to base the number of curve points on the number of pixels: enough points so there are no gaps, but nothing wasted by drawing the same pixel many times.</p>
+<p>For many kinds of curves, there are highly efficient algorithms for drawing them &ldquo;pixel perfect.&rdquo; Unfortunately, we won&rsquo;t cover them in class. But, we know that the API (or even the graphics hardware) can do this. Therefore, the right strategy for drawing curves efficiently is (almost always) to try to convert them to the kinds of curves that the API knows how to draw efficiently. These include straight line segments, elliptical arcs (affine transformations of circles), and Bezier curve segments (we&rsquo;ll explain those in a bit).</p>
+<h2 id="summary-parametric-functions">Summary: Parametric Functions</h2>
+<p>On this page, we looked at parametric functions and how to draw them. The workbook will explore them in depth. But, before we examine them further, we will look at the alternatives.</p>
+<a href="../../docs/03/" class="Next__Page">Next: Page &nbsp;3&nbsp;-&nbsp;Implicit Curves</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Selected"> 2: Parametric Curves </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p02",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

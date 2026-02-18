@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 13: Approximating curves.</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Interpolating curves have some problems.</p>
+<p>While it is convenient to specify a curve by the points it goes through, it has drawbacks.
+However, such interpolation presents a problem: to go through a point smoothly, we often need to overshoot it.</p>
+<p>Here is a simple example with a Cardinal Spline:
+<figure class="">
+<a href="../../docs/13/cardinal-outside.png">
+<img src="../../docs/13/cardinal-outside_hu_c7bd4bab9eee2ac1.png" alt="cardinal-outside.png" />
+</a></figure>
+
+Notice that to pass through point 3, the curve has to dip below the line.</p>
+<p>In general, interpolation is good for specifying what happens at the specified points, but provides less control over what happens in between.</p>
+<p>A different strategy is <strong>approximation</strong>. In an approximation strategy, the points are used to influence the shape, not necessarily to provide a specific target.</p>
+<p>We saw an example of approximation with the corner cutting subdivision method at the beginning of the workbook. If you remember the corner cutting demonstration from the first page, notice how the resulting curve is controlled by the initial points but doesn&rsquo;t touch them. Here it is again (after 5 rounds of subdivision):</p>
+
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-chakin-1" data-iter="5">
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas grid" width="660" height="500" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <div class="curvedemo-button-row">
+                <button class="curvedemo-button" data-curve="btnSubdivide">Subdivide</button>
+                <button class="curvedemo-button" data-curve="btnReset">Reset to Square</button>
+                <button class="curvedemo-button" data-curve="btnResetA">Reset to A</button>
+                <button class="curvedemo-button" data-curve="btnResetStar">Reset to Star</button>
+            </div>
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="chkShowDots"> Show Dots
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag black dots to move vertices.<br>
+            Shift+Click on the canvas (near an edge) to add a point.<br>
+            "Subdivide" shows one step of Chakin's algorithm.<br>
+            Moving points will reset the view to the control polygon.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/chakin.js";
+    initDemo("curvedemo-chakin-1");
+</script>
+
+</div>
+
+<p>The two most common types of approximating curves in computer graphics are Bezier Splines and B-Splines.</p>
+<p>We&rsquo;ll discuss Bezier Splines over the next few pages, but only touch on B-Splines briefly - they probably deserve an entire workbook!</p>
+<p>The introduction of Approximating Curves in the 2023 lecture sets up Bezier curves nicely.
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_92up5741?st=2715">2023 Video Clip: Non-Interpolating Curves</a> [45:15 - 48:10 (2.9 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_92up5741">Lecture 10</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/10-Curves2-post.pdf">Slides</a>
+</div>
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_92up5741?st=2890">2023 Video Clip: What To Do With 3 Points</a> [48:10 - 52:41 (4.5 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_92up5741">Lecture 10</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/10-Curves2-post.pdf">Slides</a>
+</div></p>
+<a href="../../docs/14/" class="Next__Page">Next: Page &nbsp;14&nbsp;-&nbsp;Bézier Curves</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Selected"> 13: Approximating curves. </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p13",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

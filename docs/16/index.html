@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 16: Bézier Math</h1>
+		</header>
+		<div class="content post__content clearfix"><p>So far, we&rsquo;ve described Bézier curves as general mathematical constructs. They can be any degree and give us a variety of nice properties.</p>
+<p>In computer graphics practice, we almost always use cubic and quadratic Béziers. It makes sense to focus on them. Quadratics are less common than cubics: they were used in places where efficiency was critical (like drawing fonts).</p>
+<p>Cubics are a good tradeoff for computer graphics: they are flexible enough to achieve <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> continuity, but not of a higher degree than necessary. Cubic Béziers have a nice parallel to Hermite cubics that we learned about earlier in the workbook.</p>
+<h2 id="cubic-bézier-curves">Cubic Bézier Curves</h2>
+<p>Hermite cubics are convenient because they make it easy to build <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> curves from pieces. We just need to match the end of one segment to the beginning of the next.</p>
+<p>But, if you wanted to make a user interface for a Hermite cubic, you&rsquo;d have a problem: how do you specify the derivative? The end points are points in the space of the curve, but the derivatives are something different.</p>
+<p>A simple solution might be to do something like what we did to draw the tangent vectors on page 1: we can create a new point that is at the tip of the tangent vector when anchored at the curve&rsquo;s endpoint. Another issue is that the tangent vector is probably too long to be convenient, so we need to scale it down. When we drew the tangents on page 1, we scaled them by 40%, but that was arbitrary. We can also point the end tangent backwards to maintain symmetry. In other words, we can map the four &ldquo;controls&rdquo; of a Hermite cubic (<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.2481em;"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span></span></span></span>) to four &ldquo;control points&rdquo; as:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.6149em;vertical-align:-3.5574em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.0574em;"><span style="top:-6.5389em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span></span></span><span style="top:-4.5574em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span></span></span><span style="top:-0.424em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.5574em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.0574em;"><span style="top:-6.5389em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-4.5574em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.424em;"><span class="pstrut" style="height:3.3214em;"></span><span class="mord"><span class="mord"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.5574em;"><span></span></span></span></span></span></span></span></span></span></span></span>
+<p>Or, as a picture:</p>
+
+        <a href="../../docs/16/bezier.png">
+            <img src="../../docs/16/bezier.png" />
+        </a>
+
+
+<p>Here is that picture as an interactive demo so you can experiment:
+
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;">
+        <h2 style="margin-top: 0;">Hermite vs. Bézier Representations</h2>
+        <div style="display: flex; justify-content: space-between; width: 500px; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; color: #555;">
+            <span style="padding-left: 80px;">Hermite (Position + Derivative)</span>
+            <span style="padding-right: 80px;">Bézier (Control Points)</span>
+        </div>
+        <canvas id="canvas" width="500" height="200" style="border: 1px solid #ddd; cursor: crosshair; touch-action: none;"></canvas>
+        <p style="font-size: 0.85rem; color: #666; max-width: 500px; margin-top: 10px;">
+            These are two views of the <strong>same curve</strong>. Drag any point to see how the mathematical definitions relate.
+            Notice how moving the <strong>Start Point</strong> affects the curve differently in each view.
+        </p>
+    </div>
+<script>
+(function() {
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = 500;
+    const height = 200;
+
+    
+    
+    
+    
+    
+    let state = {
+        p0: { x: 50, y: 100 },
+        p1: { x: 200, y: 100 },
+        h0: { x: 125, y: 10 }, 
+        h1: { x: 125, y: 190 }   
+    };
+
+    
+    function getBezier() {
+        
+        
+        
+        
+        
+        
+        const b0 = { x: state.p0.x, y: state.p0.y };
+        const b3 = { x: state.p1.x, y: state.p1.y };
+        
+        const v0 = { x: state.h0.x - state.p0.x, y: state.h0.y - state.p0.y };
+        const v1 = { x: state.h1.x - state.p1.x, y: state.h1.y - state.p1.y };
+        
+        const b1 = { x: state.p0.x + v0.x / 3, y: state.p0.y + v0.y / 3 };
+        const b2 = { x: state.p1.x - v1.x / 3, y: state.p1.y - v1.y / 3 };
+        
+        return { b0, b1, b2, b3 };
+    }
+
+    
+    let dragTarget = null; 
+    const HIT_RADIUS = 8;
+    
+    function dist(p1, x, y) {
+        return Math.sqrt((p1.x - x)**2 + (p1.y - y)**2);
+    }
+
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left,
+            y: (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top
+        };
+    }
+
+    function onDown(evt) {
+        evt.preventDefault();
+        const pos = getMousePos(evt);
+        
+        
+        if (pos.x < 250) {
+            const lx = pos.x;
+            const ly = pos.y;
+            
+            if (dist(state.p0, lx, ly) < HIT_RADIUS) dragTarget = { view: 'left', index: 0 };
+            else if (dist(state.h0, lx, ly) < HIT_RADIUS) dragTarget = { view: 'left', index: 1 };
+            else if (dist(state.h1, lx, ly) < HIT_RADIUS) dragTarget = { view: 'left', index: 2 };
+            else if (dist(state.p1, lx, ly) < HIT_RADIUS) dragTarget = { view: 'left', index: 3 };
+        } 
+        
+        else {
+            const lx = pos.x - 250;
+            const ly = pos.y;
+            const b = getBezier();
+            
+            if (dist(b.b0, lx, ly) < HIT_RADIUS) dragTarget = { view: 'right', index: 0 };
+            else if (dist(b.b1, lx, ly) < HIT_RADIUS) dragTarget = { view: 'right', index: 1 };
+            else if (dist(b.b2, lx, ly) < HIT_RADIUS) dragTarget = { view: 'right', index: 2 };
+            else if (dist(b.b3, lx, ly) < HIT_RADIUS) dragTarget = { view: 'right', index: 3 };
+        }
+        draw();
+    }
+
+    function onMove(evt) {
+        if (!dragTarget) return;
+        evt.preventDefault();
+        const pos = getMousePos(evt);
+        
+        
+        let lx, ly;
+        if (dragTarget.view === 'left') {
+            lx = pos.x; ly = pos.y;
+        } else {
+            lx = pos.x - 250; ly = pos.y;
+        }
+
+        
+        if (dragTarget.view === 'left') {
+            if (dragTarget.index === 0) { 
+                const dx = lx - state.p0.x;
+                const dy = ly - state.p0.y;
+                state.p0.x = lx; state.p0.y = ly;
+                state.h0.x += dx; state.h0.y += dy; 
+            } else if (dragTarget.index === 1) { 
+                state.h0.x = lx; state.h0.y = ly;
+            } else if (dragTarget.index === 2) { 
+                state.h1.x = lx; state.h1.y = ly;
+            } else if (dragTarget.index === 3) { 
+                const dx = lx - state.p1.x;
+                const dy = ly - state.p1.y;
+                state.p1.x = lx; state.p1.y = ly;
+                state.h1.x += dx; state.h1.y += dy;
+            }
+        } 
+        
+        else {
+            const b = getBezier(); 
+            
+            if (dragTarget.index === 0) { 
+                
+                
+                
+                state.p0.x = lx; state.p0.y = ly;
+                state.h0.x = 3 * b.b1.x - 2 * state.p0.x;
+                state.h0.y = 3 * b.b1.y - 2 * state.p0.y;
+            } else if (dragTarget.index === 1) { 
+                
+                
+                state.h0.x = 3 * lx - 2 * state.p0.x;
+                state.h0.y = 3 * ly - 2 * state.p0.y;
+            } else if (dragTarget.index === 2) { 
+                
+                
+                
+                state.h1.x = 4 * state.p1.x - 3 * lx;
+                state.h1.y = 4 * state.p1.y - 3 * ly;
+            } else if (dragTarget.index === 3) { 
+                
+                state.p1.x = lx; state.p1.y = ly;
+                state.h1.x = 4 * state.p1.x - 3 * b.b2.x;
+                state.h1.y = 4 * state.p1.y - 3 * b.b2.y;
+            }
+        }
+        draw();
+    }
+
+    function onUp() { dragTarget = null; }
+
+    canvas.addEventListener('mousedown', onDown);
+    canvas.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    canvas.addEventListener('touchstart', onDown, {passive: false});
+    canvas.addEventListener('touchmove', onMove, {passive: false});
+    window.addEventListener('touchend', onUp);
+
+    
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#ddd";
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(250, 0); ctx.lineTo(250, 200);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const b = getBezier();
+
+        
+        ctx.save();
+        
+        
+        
+        ctx.beginPath();
+        ctx.moveTo(state.p0.x, state.p0.y);
+        ctx.bezierCurveTo(b.b1.x, b.b1.y, b.b2.x, b.b2.y, b.b3.x, b.b3.y);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        ctx.strokeStyle = "#e11d48"; 
+        ctx.lineWidth = 1;
+        
+        
+        ctx.beginPath(); ctx.moveTo(state.p0.x, state.p0.y); ctx.lineTo(state.h0.x, state.h0.y); ctx.stroke();
+        
+        ctx.beginPath(); ctx.moveTo(state.p1.x, state.p1.y); ctx.lineTo(state.h1.x, state.h1.y); ctx.stroke();
+
+        
+        drawPt(state.p0.x, state.p0.y, "black");
+        drawPt(state.p1.x, state.p1.y, "black");
+        drawHandle(state.h0.x, state.h0.y, "#e11d48");
+        drawHandle(state.h1.x, state.h1.y, "#e11d48");
+        
+        ctx.restore();
+
+        
+        ctx.save();
+        ctx.translate(250, 0);
+
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#94a3b8"; 
+        ctx.lineWidth = 1;
+        ctx.moveTo(b.b0.x, b.b0.y);
+        ctx.lineTo(b.b1.x, b.b1.y);
+        ctx.lineTo(b.b2.x, b.b2.y);
+        ctx.lineTo(b.b3.x, b.b3.y);
+        ctx.stroke();
+
+        
+        ctx.beginPath();
+        ctx.moveTo(b.b0.x, b.b0.y);
+        ctx.bezierCurveTo(b.b1.x, b.b1.y, b.b2.x, b.b2.y, b.b3.x, b.b3.y);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        drawPt(b.b0.x, b.b0.y, "black"); 
+        drawPt(b.b3.x, b.b3.y, "black"); 
+        drawSquare(b.b1.x, b.b1.y, "#2563eb"); 
+        drawSquare(b.b2.x, b.b2.y, "#2563eb"); 
+
+        ctx.restore();
+    }
+
+    function drawPt(x, y, color) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function drawHandle(x, y, color) {
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function drawSquare(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x-3, y-3, 6, 6);
+    }
+
+    draw();
+
+})();
+</script>
+</p>
+<p>It is probably easier to think of the curve tangents in terms of the Bézier points:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0519em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0489em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathbf">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-2.453em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">3</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>
+<p>The connection between cubic Bézier segments and Hermite segments makes them easy to convert. If we have a Hermite segment (or can get one, from some other cubic form like a cardinal), we can easily convert to Bézier form. This will be particularly useful because APIs usually support Béziers.</p>
+<p>The scaling factor 3 is not arbitrary: it is the degree of the polynomial, or <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> (since we like to talk about Bézier segments in terms of the number of points). For quadratic Bézier curves, the scaling factor is 2 (the tangent vector is twice the vector from the first to the second point).</p>
+<p>For cubics, the Bézier form is usually easier to control because the tangent vectors aren&rsquo;t as large as they are with Hermites. However, notice that in order to match the endpoint tangents of two Bézier segments, the control points must line up.</p>
+<h2 id="the-bézier-blending-functions">The Bézier blending functions</h2>
+<p>As we&rsquo;ve discussed, it is convenient to write the equations for polynomial curves as basis function curves, such that each control point is multiplied by a blending function. For cubic Béziers this would be:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span><span class="mpunct mtight">,</span><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mpunct mtight">,</span><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mpunct mtight">,</span><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3</span><span class="mpunct mtight">,</span><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>Here, the <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> are the control points, and the <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> are the Bézier blending functions. Notice that we wrote them with two subscripts: the second one (3) tells us that we want the blending functions of degree 3. Each blending function will be a cubic polynomial, so the overall function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span></span></span> is also a cubic polynomial.</p>
+<p>We can write this more generally for any degree:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.1138em;vertical-align:-1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8361em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>Of course, the big question is &ldquo;what are these Bézier blending functions?&rdquo;  It turns out they have a very simple form:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span><span class="mspace"> </span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.188em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.938em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span></span></span>
+<p>Where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span></span></span></span> are the binomial coefficients</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3074em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">!</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)!</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mclose">!</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>
+<p>These basis functions are also known as the Bernstein Basis Polynomials.</p>
+<h2 id="connecting-bézier-segments">Connecting Bézier Segments</h2>
+<p>In computer graphics, we typically create complicated shapes by connecting low-degree pieces. Most often, we use cubics.</p>
+<p>With Bézier curves, we can control the continuity when we put two segments (each a Bézier curve) together.</p>
+<ul>
+<li>We can get <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span></span></span></span> continuity by making sure that the last control point of the first segment is the same as the first control point of the second segment.</li>
+<li>We can get <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">G</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> continuity by having the last two points of the first segment and the first two points of the second segment be collinear.</li>
+<li>We can get <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> continuity by having the vector between the last two points of the first segment be equal to the vector between the first two points of the second segment.</li>
+</ul>
+<p>These continuity conditions work no matter how many points the Bézier curves have.</p>
+<p>Note: with cubic Bézier curves, we cannot get better than C(1) continuity for chains longer than 2 segments without placing other restrictions on the curves. The video <a href="https://www.youtube.com/watch?v=jvPPXbo87ds" target="_blank">The Continuity of Splines</a> has a nice animated explanation. The next section has a demo.</p>
+<h2 id="a-demo-of-bézier-continuity">A Demo of Bézier Continuity</h2>
+<p>Let&rsquo;s return to the demo at the beginning of the workbook that showed the difference between <em>C(1)</em> and <em>C(2)</em> curves. It uses Bezier curve segments that we now understand.</p>
+
+
+<div class="curvedemo-root curvedemo-embed" id="curvedemo-c1c2-20">
+
+<div class="curvedemo-container">
+    <canvas class="curvedemo-canvas" width="660" height="400" data-curve="canvas"></canvas>
+
+    <div class="curvedemo-panel">
+        <div class="curvedemo-controls">
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="g2Checkbox">
+                Force G2 Continuity (Constrain Q2 to line)
+            </label>
+            <label class="curvedemo-label">
+                <input type="checkbox" checked data-curve="c2Checkbox">
+                Force C2 Continuity (Constrain Q2)
+            </label>
+        </div>
+
+        <div class="curvedemo-instructions">
+            Drag P points (blue) to reshape the first curve.<br>
+            Drag unconstrained Q points (purple) to reshape the second curve.<br>
+            Curvature combs shown in matching colors.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initDemo } from "\/CurveDemos\/c1c2.js";
+    initDemo("curvedemo-c1c2-20");
+</script>
+
+</div>
+
+<p>The blue segment is defined by points P0,P1,P2,P3. The purple segment is defined by points Q0,Q1,Q2,Q3.</p>
+<p>You can move the blue and purple points around. The gray points are constrained to make sure that the two curves always meet with <em>C(1)</em>. Depending on whether the checkboxes are checked, the curves will be forced to meet with either <em>G(2)</em> or <em>C(2)</em> continuity. You can turn these restrictions off and see what happens when you break the 2nd order continuity.</p>
+<p>The demo also has &ldquo;curvature combs&rdquo;; these are the little hairs that stick out of the curve to show how the normal vectors change over the curve. You can look at where the curves meet to see the 2nd order continuity.</p>
+<p>In order to meet with positional continuity, P3 and Q0 need to be in the same place (they are, and the labels overwrite each other).</p>
+<p>In order to meet with tangent continuity, P2, P3/Q0 and Q1 need to be collinear. They are locked to this.</p>
+<p>In order to have <em>C(2)</em> continuity, point Q2 must be in a specific place determined by P1,P2, and P3. There is a checkbox that locks it there. Because Q2 must be in a specific place, it is not free to adapt to meet any other needs. So, if there were a third segment after this one, we could not match the derivatives.</p>
+<p>To have <em>G(2)</em> continuity, point Q2 can be anywhere on a line (called the <em>locus</em>) that is determined by P1, P2 and P3. There is a checkbox that puts Q2 on the line. Remember that since <em>C(2)</em> implies <em>G(2)</em>, the point that produces <em>C(2)</em> is on the line that produces <em>G(2)</em>.</p>
+<h2 id="general-bézier-curves">General Bézier Curves</h2>
+<p>Cubic Bézier curves are a specific case: Bézier curves can be created for any degree. A first degree (two points) Bézier curve is a line segment. We can have degree 2 (quadratic, 3 points), degree 3 (cubic, 4 points), or any higher degree Bézier curves.</p>
+<p>Bézier curves have many useful properties. These are described in the book, but they are so important, we will repeat them here:</p>
+<ol>
+<li>A Bézier curve can be constructed for any number of points <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>.</li>
+<li>A Bézier curve with <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> control points is an <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> degree polynomial.</li>
+<li>Bézier curves are parameterized for <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> in the range 0 to 1.</li>
+<li>A Bézier curve <strong>interpolates</strong> its first and last points. That is, at <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> it has the value of its first point and at <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> it has the value of its last point.</li>
+<li>Bézier curves are <strong>symmetric</strong>. If you reverse the order you get the same curve backwards. The parameter goes in the opposite direction.</li>
+<li>The first derivative at the beginning of the curve (<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>) is proportional to the vector between the first and second point. By symmetry, the first derivative at the end of the curve (<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>) is proportional to the vector between the last two points. The scaling factor is the degree of the curve. So, for a cubic curve, the tangent vector is three times the vector between the first two points.</li>
+<li>The Bézier curve is bounded by the <strong>convex hull</strong> of its control points. If you make a polygon from the control points, the curve stays inside of it.</li>
+<li>Bézier curves are <strong>affine invariant</strong> &ndash; the affine transform of a Bézier curve is the curve created by performing the transform on the control points.</li>
+<li>Bézier curves are <strong>variation-diminishing.</strong> A Bézier curve has fewer &ldquo;wiggles&rdquo; than it does control points.</li>
+</ol>
+<h2 id="really-using-bézier-curves">Really using Bézier Curves</h2>
+<p>On the <a href="../../docs/17/" class="Next__Page">next page</a>, we will discuss how Bézier curves are presented in APIs.</p>
+<a href="../../docs/17/" class="Next__Page">Next: Page &nbsp;17&nbsp;-&nbsp;Béziers in APIs</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Selected"> 16: Bézier Math </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p16",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

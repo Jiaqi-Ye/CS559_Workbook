@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 19: Arc-Length Parameterizations</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Arc length parameterization is discussed in Section 15.1.1 of FCG4 Chapter 15. <a href="https://www.youtube.com/watch?v=aVwxzDHniEw" target="_blank">The Beauty of Bezier Curves</a> has a nice animated explanation, including the approximation methods I describe here.</p>
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m?st=1995">2023 Video Clip: Arc Length</a> [33:15 - 41:48 (8.6 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m">Lecture 11</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/11-Curves3-post.pdf">Slides</a>
+</div>
+<h2 id="arc-length-and-non-arc-length">Arc-Length and Non-Arc-Length</h2>
+<p>We usually like to define our parameterizations such that each piece goes from 0 to 1. However, this means that if we move at a constant speed in the parameter, the pen would move at a variable speed. An arc-length parameterization is a parameterization where the pen moves at a constant speed (assuming the parameter changes at a constant speed).</p>
+
+<p>For an example in 
+<a href="../../for_students/03-19-01.js" class="box-html" data-tag="eg-arc-length-box">03-19-01.js</a>
+, consider a set of line segments that go around a rectangle. Let the four corners be <strong>p0, p1, p2</strong> and <strong>p3</strong>, and let the rectangle be (20,20) to (120,40). So it is 20 pixels high and 100 pixels wide. The most obvious parameterization has each line segment with a unit parameterization. The top segment would be 0-1, the right segment would be 1-2, the bottom segment would be 2-3, and the left segment would be 3-4. Each segment takes the same amount of &ldquo;parameter&rdquo;, so if we change u at a constant rate, the pen will be moving 5 times faster in the horizontal segments than in the vertical ones. This is the red dot in the animation. Click the checkbox to start the animation, or scrub with the slider.</p>
+
+<div id="box-03-19-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-19-01</span>&nbsp;
+    <input type="checkbox" id="check-03-19-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-19-01.html class="boxtitlelink">03-19-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-19-01.js" class="boxtitlelink">03-19-01.js</a>
+    <iframe
+        title="eg-arc-length-box"
+        src="../../for_students/03-19-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-19-01"
+    ></iframe>
+</div>
+<p>The green dot takes the same amount of time (t=0 to 4) to move around the rectangle, but it moves at a constant speed on the screen.</p>
+<p>Consider measuring distance along the curve (starting at the zero point). The total curve (the perimeter of the rectangle) is 240 units. We can measure how far we&rsquo;ve moved along the curve (from 0 at the start to 240 when we complete the loop). We could use this distance as the parameter (interpreting the parameter as &ldquo;move this many distance units along the curve&rdquo;). This is an <em>arc-length parameterization</em>. Because we&rsquo;re measuring distance with the parameter, if we move a certain amount of parameter, we will always move the same amount of distance along the curve.</p>
+<p>Of course, we can scale things so that the units of distance match the range we have of the parameter - we can scale the parameter that goes from 0-4 so that each unit of parameter means 60 units of distance. But the speed remains constant as we go around the rectangle. Each animation step is 0.05 units of parameter, and goes 3 pixels of distance (<code>60 * .05</code>). This is the same whether we&rsquo;re on a long horizontal or a short vertical. In contrast, using the per-segment parameterization, the speed was 5 pixels per step on the horizontals (<code>100 * .05</code>), and 1 pixel per step on the verticals (<code>20 * .05</code>).</p>
+<h2 id="another-arc-length-example">Another Arc-Length Example</h2>
+
+<p>Here&rsquo;s an even simpler example in 
+<a href="../../for_students/03-19-02.js" class="box-html" data-tag="eg-arc-length-line">03-19-02.js</a>
+: a single straight line segment in 1D. We have two parameterizations: <code>f(u)=u</code> and <code>g(u)=u*u</code>. Since <code>u</code> is in the range 0 to 1, both begin and end in the same place, and sweep out the same set of points (if we took infinitely small steps). With the two functions, the &ldquo;pen&rdquo; traces out the same curve (a line), but with different timings.</p>
+
+<div id="box-03-19-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-19-02</span>&nbsp;
+    <input type="checkbox" id="check-03-19-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-19-02.html class="boxtitlelink">03-19-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-19-02.js" class="boxtitlelink">03-19-02.js</a>
+    <iframe
+        title="eg-arc-length-line"
+        src="../../for_students/03-19-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-19-02"
+    ></iframe>
+</div>
+<p>You should note that <code>f</code> (red dot) is an arc-length parameterization, while <code>g</code> (green dot) is not. Given a constant rate for u, <code>f</code> moves at a constant rate, whereas <code>g</code> starts out slowly and speeds up.</p>
+<p>The speed of the pen &ndash; how fast the dot moves for a given change in the parameter &ndash; is determined by the magnitude of the derivative of the position with respect to the parameter. For an arc-length parameterization, this is constant. Note that <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mord">/</span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> &ndash; so f has the same derivative everywhere, so it meets this definition. In contrast, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord">/</span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mord mathnormal">u</span></span></span></span>, which depends on u, and therefore changes as we move around the curve.</p>
+<h2 id="arc-length-re-parameterizations">Arc-Length Re-Parameterizations</h2>
+<p>Arc-length parameterizations are often useful, especially when we are doing animation and want to have things move at a constant speed. However, it is usually easier to define curves in a way that is not an arc-length parameterization. We can then get an arc-length parameterization by <em>re-parameterizing</em> - defining a function that converts from an arc-length parameterization to the given parameterization.</p>
+<p>For example, in the second example above, we could define a &ldquo;re-parameterization function&rdquo; <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.2397em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8003em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord mathnormal">s</span></span></span><span style="top:-2.7603em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2397em;"><span></span></span></span></span></span></span></span></span> that allows us to convert an arc-length parameterization of the line into the parameterization given by the function g.</p>
+<p>For a polyline (a connected set of line segments, as in the first example), we can implement re-parameterization by building a table. For different values of the parameter, we can compute its distance from the start. We&rsquo;ll use t as the parameter that goes from 0-4, and u as the parameter that goes from 0-1 for each individual segment:</p>
+<table>
+  <thead>
+      <tr>
+          <th>t</th>
+          <th>distance</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>0</td>
+          <td>0</td>
+      </tr>
+      <tr>
+          <td>1</td>
+          <td>100</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>120</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td>220</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td>240</td>
+      </tr>
+  </tbody>
+</table>
+<p>Now, given a distance, we can figure out the appropriate value of t. For example, if we want to know the parameter value for s=170, we can see that it falls between 120 and 220 in the table. Since it&rsquo;s halfway between 120 and 220, we know that it should be halfway between the corresponding t values (since we are doing linear interpolation). So, s=170 corresponds to t=2.5.</p>
+<p>This works out easily for line segments, since we know that linear interpolation works (halfway in distance is halfway in parameter space), and that we only need entries in the table for the breakpoints (where we switch segments), since linear interpolation holds between them.</p>
+<p>For more complicated, non-linear functions, we can approximate the re-parameterization function by sampling: we pick a set of values for t, compute the positions for each of these parameter values (which we can do because we have the parametric function), and then use the polyline connecting these points to approximate the distance. The larger the number of values of t we sample, the better the approximation.</p>
+<p>Here&rsquo;s an example for a parabola <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">100</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">100</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>t</th>
+          <th>x</th>
+          <th>y</th>
+          <th>distance (to previous)</th>
+          <th>total distance</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>N/A</td>
+          <td>0</td>
+      </tr>
+      <tr>
+          <td>.2</td>
+          <td>20</td>
+          <td>4</td>
+          <td>20.4</td>
+          <td>20.4</td>
+      </tr>
+      <tr>
+          <td>.4</td>
+          <td>40</td>
+          <td>16</td>
+          <td>23.3</td>
+          <td>43.7</td>
+      </tr>
+      <tr>
+          <td>.6</td>
+          <td>60</td>
+          <td>36</td>
+          <td>28.3</td>
+          <td>72.0</td>
+      </tr>
+      <tr>
+          <td>.8</td>
+          <td>80</td>
+          <td>64</td>
+          <td>34.4</td>
+          <td>106.4</td>
+      </tr>
+      <tr>
+          <td>1</td>
+          <td>100</td>
+          <td>100</td>
+          <td>41.2</td>
+          <td>147.6</td>
+      </tr>
+  </tbody>
+</table>
+<p>If we wanted to know where halfway in distance was (s = 147.6 / 2 = 73.8), we look it up in the table and see that it&rsquo;s between t=0.6 and t=0.8. Since it is (73.8-72)/(106.4-72)=0.052 of the way between rows, we can approximate that as 0.052*0.2 +0.6 = 0.61. Note that 0.2 is the step between rows of t.</p>
+<p>You&rsquo;ll get to implement this to arc-length parameterize the train track when we do that later in the workbook.</p>
+<h2 id="arc-length-parameterize-me">Arc-Length Parameterize Me</h2>
+<p>
+
+
+
+</p>
+<p>Function <code>myTri</code> in 
+<a href="../../for_students/03-19-03.js" class="box-html" data-tag="ex-arc-length-triangle">03-19-03.js</a>
+ goes around a 50, 120, 130 right triangle (similar to a 5,12,13 triangle), but not in an arc-length parameterization. That&rsquo;s the red dot. Fill in the function <code>myTriAL</code> that goes around the same triangle, but with an arc-length parameterization. You only need to modify <code>myTriAL</code>. You may use other functions defined in the file. If things are working correctly, the green dot will go around the triangle at a constant speed when you click the &ldquo;run&rdquo; checkbox (whereas the red dot speeds up and slows down).</p>
+
+<div id="box-03-19-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-19-03</span>&nbsp;
+    <input type="checkbox" id="check-03-19-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-19-03.html class="boxtitlelink">03-19-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-19-03.js" class="boxtitlelink">03-19-03.js</a>
+    <iframe
+        title="ex-arc-length-triangle"
+        src="../../for_students/03-19-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-19-03"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-19-03-0"></td>
+                <td>standard</td>
+                <td>make the green dot go around the triangle with arc-length parameterization</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<h2 id="arc-length-parameterizations">Arc-Length Parameterizations</h2>
+<p>Arc-length parameterizations are a tricky concept.</p>
+<p>Consider what &ldquo;arc length&rdquo; is (before we get to parameterization): it is the length along the curve. Imagine wrapping a tape measure along the curve to measure how &ldquo;long it is,&rdquo; or straightening out the curve to measure its length.</p>
+<p>Given the idea of arc-length, you can think about its connection to parameterizations. Normally, we think about the length of the whole curve. But given a curve <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>, we could consider the &ldquo;first part of the curve starting at 0 and going to <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span>, and create a new function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> that represents the arc length of that curve. Every parameter value <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> corresponds to some distance <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>.</p>
+<p>Arc-length parameterization reverses this process: we use the distance along the curve as the parameter. We specify the distance <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> (the arc-length parameter), and compute the &ldquo;regular parameter&rdquo; from this using the inverse of the <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> function above, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span>. Because this function changes from one parameterization to another, we call it a <em>reparameterization</em>. You could imagine a new &ldquo;curve function&rdquo; <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">))</span></span></span></span> that is an <em>arc-length parameterization</em> of the original <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span></span></span> - it is the same curve, except with an arc-length parameter.</p>
+<p>You should notice that doing arc-length parameterization (or reparameterization) requires not just finding the arc-length function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>, but its inverse. Computing the arc length is hard enough - it requires solving an integral to compute the length, which usually cannot be done analytically. In practice, we usually estimate <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> using numerical techniques, and estimate its inverse using numerical techniques.</p>
+<h3 id="why-use-arc-length-parameterization">Why use arc-length parameterization?</h3>
+<p>It may be best to think in terms of the &ldquo;pen&rdquo; as a moving object. With a regular parameterization, the curve may speed up and slow down. With an arc-length parameterization, the &ldquo;speed&rdquo; (the magnitude of the velocity) is constant.</p>
+<p>Consider a simple example: a cubic <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span>. The first derivative of this curve (tangent, or velocity if we think about the curve as the pen moving along the curve) is <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal">u</span><span class="mclose">]</span></span></span></span>. At the beginning of the curve the velocity is [1,0], at the end it is [1,1]. The pen &ldquo;sped up&rdquo; as it moves along the curve.</p>
+
+<p>If we take uniform steps in <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span>, the steps we take in the world will be differently sized. Here&rsquo;s a simple example, taking 10 steps along <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> (0, 0.1, etc) and drawing this curve. (see 
+<a href="../../for_students/03-19-04.js" class="box-html" data-tag="eg-arc-length-curve">03-19-04.js</a>
+). Notice how the steps towards the end are longer than the steps at the beginning.</p>
+
+<div id="box-03-19-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-19-04</span>&nbsp;
+    <input type="checkbox" id="check-03-19-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-19-04.html class="boxtitlelink">03-19-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-19-04.js" class="boxtitlelink">03-19-04.js</a>
+    <iframe
+        title="eg-arc-length-curve"
+        src="../../for_students/03-19-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-19-04"
+    ></iframe>
+</div>
+<p>An arc-length parameterization would trace the same curve, but with even steps. The way to think about it is a way to change parameters - we make <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> (the arc-length parameter) move in even steps, and compute the corresponding <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> values. We just need to come up with a reparameterization function <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> that does this. We can think of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> as being distance along the curve (hence the name arc-length parameterization).</p>
+<p>In general, these functions are hard to derive analytically - we usually need to use numerical approximations. Even for this really simple parabola, the arc-length is a complicated function. Above, we looked at how to compute a table of approximate arc lengths to approximate <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> (distance along the curve) from <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span>. Given the table, we can use lookups and interpolation to find the inverse.</p>
+<h2 id="summary-arc-length-parameterization">Summary: Arc-Length Parameterization</h2>
+<p>Hopefully, you now have an intuition for what arc-length parameterization is, so you can read the mathematical definition in the textbook. You&rsquo;ll need it in the future to make the train.</p>
+<p>Now, on to <a href="../../docs/20/" class="Next__Page">Next: Page &nbsp;20&nbsp;-&nbsp;Drawing Curves</a> !</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Selected"> 19: Arc-Length Parameterizations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p19",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

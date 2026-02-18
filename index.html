@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+	<meta name="generator" content="Hugo 0.155.1">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="./css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="./js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+
+
+<main class="main list" role="main">
+	<header class="main__header">
+		<h1 class="main__title">Workbook 3: Curves</h1>
+	</header>
+	<div class="content main__content clearfix"><p>In this workbook, we&rsquo;ll get beyond straight lines to consider curves in 2D.</p>
+<p>This workbook will teach you about how we represent curved shapes in 2D. The focus is on parametric curves (we&rsquo;ll explain what that means), but you will see other approaches to curves in Computer Graphics (that are mainly useful for surfaces in 3D). We&rsquo;ll start with some underlying mathematics that we need to talk about curves and then use those to build some useful curve forms. We&rsquo;ll look at the most common types of curves used in Computer Graphics.</p>
+<p>The workbook ends with a substantial programming assignment, the Train, and a &ldquo;creative&rdquo; assignment after that. But be aware: there are smaller required programming assignments and type-in boxes throughout. You can keep track of your work by using the checkboxes on the boxes and rubrics.</p>
+<h2 id="workbook-operations">Workbook Operations</h2>
+<p>The workbook uses both type-in forms that rely on browser local storage and &ldquo;page boxes&rdquo; that are files that must be checked in to GitHub.</p>
+<p>Right now, please put your name on the workbook and press the &ldquo;checkpoint&rdquo; button so that we know that you have at least seen this workbook.</p>
+<p><div class="netid">
+<label for="netid">NetID:</label>
+<input 
+  type="text" 
+  id="netid" 
+  class="netid-input sitekey" 
+  placeholder="e.g. bbadger123" 
+  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
+  title="NetID must start with a letter and contain only letters and numbers."
+  required
+  oninput="validateNetID(this)"
+> <span id="netid-error" class="netid-error"></span>
+<script>
+  function validateNetID(input) {
+    const errorSpan = document.getElementById("netid-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "NetID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "NetID can only contain letters and numbers.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div class="netid">
+<label for="github">GithubID (user name):</label>
+<input 
+  type="text" 
+  id="github" 
+  class="netid-input sitekey" 
+  placeholder="e.g. octocat" 
+  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
+  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
+  required
+  oninput="validateGithubID(this)"
+> <span id="github-error" class="netid-error"></span>
+<script>
+  function validateGithubID(input) {
+    const errorSpan = document.getElementById("github-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "Github ID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div id="sheets-status-div" class="status-box">
+<strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-check-span">waiting for check</span>
+<br>
+<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
+<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+</div></p>
+<p>This workbook makes more use of type-in forms for actual content than the previous workbook.
+This workbook contains type-ins that are part of the assignment. Some of these have specific rubric checkboxes at the end of the page.</p>
+<p>The checkboxes for boxes and rubric elements are to help students keep track of their work. The <a href="./docs/27/">Last Page (rubric)</a> has a list of all boxes and rubric items.</p>
+<p>Remember to save your local storage to the json file periodically in case something goes wrong. You should also make a checkpoint periodically.</p>
+<p>Remember to commit your work as you edit files in <code>for_students</code> (you should not need to edit files outside of that directory). Remember to push your work to GitHub - at least at the end, or periodically after you commit, to make a backup. And, when you have completed the workbook, remember to use the submit button on the last page to signal us that your workbook is ready for grading.</p>
+<p>We only grade the <code>main</code> branch. It must be pushed to GitHub. And you must use the &ldquo;submit&rdquo; button.</p>
+<h2 id="required-readingwatching">Required Reading/Watching</h2>
+<p>As an experiment, this year I am not asking you to read the textbook chapter.
+I don&rsquo;t think it is as effective a way of learning the material as the visual approach in the videos and workbook. I can say that because I wrote the chapter. I have adapted the textbook into a set of web pages: <a href="https://cs559.github.io/559Tutorials/splines/">Curves Tutorial</a>. <em>The Curves Notes are optional.</em></p>
+<p>My favorite tutorial on curves is the amazing video <a href="https://www.youtube.com/watch?v=jvPPXbo87ds" target="_blank">The Continuity of Splines</a>. It is over an hour long, but it covers an amazing amount of material in a very compelling way. The author is a designer and game developer who put an amazing amount of effort into creating animated demonstrations. I recommend watching it first. You won&rsquo;t get the details, but you&rsquo;ll be exposed to the concepts and intuitions. A warning: she covers things in a different order than I like to teach them. (She does Bezier curves first, I prefer to introduce them later.) She also mentions some topics we won&rsquo;t get to in class. <strong>This video is required.</strong></p>
+<p>There is a shorter video focused just on Bezier curves (<a href="https://www.youtube.com/watch?v=aVwxzDHniEw" target="_blank">The Beauty of Bezier Curves</a>) - I recommend watching that one later, when you get to the web pages on Bezier curves (I&rsquo;ll put a reminder there).</p>
+<h2 id="optional-videos">Optional Videos</h2>
+<p>Graphics in 5 Minutes has a series on Curves in 2D. It has some different math than we cover, but is a nice alternate approach to the materials. I strongly recommend them as an alternate way to appreciate curves.</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=YMl25iCCRew&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=17">Splines in 5 minutes: Part 1 &ndash; cubic curves</a></li>
+<li><a href="https://www.youtube.com/watch?v=DLsqkWV6Cag&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=18">Splines in 5 Minutes: Part 2 &ndash; Catmull-Rom and Natural Cubic Splines</a></li>
+<li><a href="https://www.youtube.com/watch?v=JwN43QAlF50&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=19">Splines in 5 minutes: Part 3 &ndash; B-splines and 2D</a></li>
+</ul>
+<p>Many of the concepts in the workbook are explained in the 2023 Lecture Videos. We have included links to relevant pieces of these videos where they may be helpful.</p>
+<p>If you think you prefer the &ldquo;traditional lecture style&rdquo; (e.g., 75-minute monologues on the topic), you can watch the 2023 lectures whole:</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_38sal78x" target="_blank" rel="noopener">2023 Video: Lecture 9</a>
+        Curves 1&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/09-Curves-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_92up5741" target="_blank" rel="noopener">2023 Video: Lecture 10</a>
+        Curves 2&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/10-Curves2-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m" target="_blank" rel="noopener">2023 Video: Lecture 11</a>
+        Curves 3&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/11-Curves3-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<h2 id="learning-goals">Learning Goals</h2>
+<ol>
+<li>Understand the types of curve representations and how to select among them.</li>
+<li>Understand curve parameterizations, tangents, derivatives, and continuity conditions.</li>
+<li>Understand piecewise polynomial representations of curves and the use of different polynomial forms.</li>
+<li>Understand the concept of interpolation and the tradeoffs in approaches to implement it.</li>
+<li>Understand the ideas and properties of Bezier curves including their geometric and algebraic formulations</li>
+<li>Understand arc-length parameterizations and how we approximate it.</li>
+<li>Understand practical issues in using curves in practice.</li>
+</ol>
+<h2 id="get-started">Get Started</h2>
+<p>Let&rsquo;s get started on <a href="./docs/01/">Page &nbsp;1&nbsp; (Introduction: What is a Curve, Anyway?)</a>!</p>
+</div>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Selected">Index (Curves in 2D) </li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="./storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="./wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "np",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "\u003cnil\u003e",
+            solution: false
+        };
+</script><script src="./js/localstore.js"></script><script src="./js/check-protocol.js"></script>
+    </body>
+</html>

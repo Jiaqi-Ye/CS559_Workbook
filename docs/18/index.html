@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 18: B-Splines</h1>
+		</header>
+		<div class="content post__content clearfix"><p>B-Splines (which is short for &ldquo;Basis Splines&rdquo;) are an important type of curve in computer graphics.</p>
+<p>They are very general and mathematically elegant. However, this makes them hard to learn about. The <a href="https://cs559.github.io/559Tutorials/splines/6bsp/">Curves Notes</a> provides a pretty extensive introduction. Here, I will try to convey some of the basic intuitions of a specific type of B-Spline: uniform cubic B-Splines.</p>
+<p>This page seeks to give you some intuition about B-Splines. That&rsquo;s about all we&rsquo;ve had time for in previous years as well.</p>
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m?st=3378">2023 Video Clip: B-Splines</a> [56:18 - 68:20 (12.0 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_qhk9gd0m">Lecture 11</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/11-Curves3-post.pdf">Slides</a>
+</div>
+<div class="resourcelink">
+<p>Another good (optional) resource: the Graphics in 5 Minutes Video:</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=JwN43QAlF50&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=19">Splines in 5 minutes: Part 3 &ndash; B-splines and 2D</a></li>
+</ul>
+
+</div>
+<h2 id="a-cubic-b-spline-segment">A Cubic B-Spline Segment</h2>
+<p>A cubic B-Spline segment is a cubic polynomial that is defined by 4 points. It is influenced by these points, but it does not interpolate them.</p>
+<p><canvas style="border: 1px solid black" id="canvas1" height="300" width="500"></canvas></p>
+<p>Try this&hellip;</p>
+<p>Initially, the curve is a single segment; a B-Spline segment is controlled by four control points. Move the points around and notice how it is influenced by them; it does not interpolate them.</p>
+<p>Shift-click to add another control point. With 5 points, there are two segments: the blue segment (its control points are marked blue), and the red segment (red control points). The segments share 3 control points (they are both red and blue). Notice how the segments stay attached with C(2) continuity as the points are moved.</p>
+<p>Shift-click again to add yet another control point, and another segment. Each segment is shown in a different color, and the control points that influence it have a circle of that color. Each segment is controlled by 4 consecutive points - and it shares 3 points with its neighbors.</p>
+<p>Add more points&hellip; notice how any point influences at most 4 segments. And each segment is influenced by 4 control points.</p>
+<h2 id="more-points">More Points</h2>
+<p>Here is the same demo, with some more points.</p>
+<p><canvas style="border: 1px solid black" id="canvas2" height="300" width="500"></canvas></p>
+<p>Move the points around to see:</p>
+<ol>
+<li>The curve stays C(2)</li>
+<li>Control is local (each point influences up to 4 segments)</li>
+<li>The points influence the curve, but the curve doesn&rsquo;t necessarily go through them</li>
+</ol>
+<p>Try &ldquo;doubling&rdquo; the points (putting two consecutive points in the same place). Notice how this puts a &ldquo;kink&rdquo; in the curve (the 2nd derivative vanishes, so it acts like a C(2) discontinuity; it is like a C(1) curve there).</p>
+<p>If you triple the points, the curve will interpolate this spot (with 3 points on it).</p>
+<p>This is particularly useful to make the curve interpolate its endpoints.</p>
+<p>On the <a href="../../docs/19/" class="Next__Page">Next: Page &nbsp;19&nbsp;-&nbsp;Arc-Length Parameterizations</a>, we will consider a general problem with parametric curves.</p>
+<script src="../../CurveDemos/bspline-01.js" type="module" defer></script>
+
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Selected"> 18: B-Splines </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p18",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

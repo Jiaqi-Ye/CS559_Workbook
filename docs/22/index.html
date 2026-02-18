@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 22: The 559 2D UI Code</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The next pages will have a substantial programming assignment: creating the train.</p>
+<p>To prepare, we want you to get used to some of the software infrastructure we use in class; these are libraries that we have been using in demos, and you will use in upcoming assignments. The boxes on this page are designed to give you some experience working with the libraries. That way you won&rsquo;t have to spend your time figuring them out on future pages (when you are trying to make the train).</p>
+<p>You will note that the scripts at the top of the programs on these pages load the required code as a module from the <code>libs</code> directory; this is code we provide. <strong>You should not edit the library code.</strong> You should use it as is.</p>
+<p>While what we ask you to do is quite trivial, it will be good for you to understand how to use these libraries, since you will need them in the future. It is also good practice to learn how to work with code that someone else wrote.</p>
+<h2 id="runcanvas">RunCanvas</h2>
+<p>The <code>runCanvas</code> library provides a simple way to implement an animation loop with a start/stop control and a time slider. We’ll continue to use runCanvas in workbooks throughout the semester.</p>
+<p>The simple way to use <code>runCanvas</code> is to call the function. Provide it with the canvas that you want this to be applied to and a function that you want to be called every time the time changes. The function will be called with two parameters: the canvas and the time. By default, the time goes between 0 and 1 (so you can assume the time will be between those) - but you can configure the range and step size through the parameters (read the code - the <code>runCanvas</code> function is at the end).</p>
+<p>
+
+
+
+</p>
+<p>Try it out. There is some starter code in 
+<a href="../../for_students/03-22-01.js" class="box-html" data-tag="ex-canvas-ui">03-22-01.js</a>
+ (<a href="../../for_students/03-22-01.html" class="box-html" data-tag="ex-canvas-ui">03-22-01.html</a>) that you can edit. Edit the code so that the time slider (1) goes between 0 and 2, and (2) as the time slider is moved (whether running or dragged), something spins around. (You should draw something and have its rotation be affected by time.)</p>
+
+<div id="box-03-22-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-22-01</span>&nbsp;
+    <input type="checkbox" id="check-03-22-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-22-01.html class="boxtitlelink">03-22-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-22-01.js" class="boxtitlelink">03-22-01.js</a>
+    <iframe
+        title="ex-canvas-ui"
+        src="../../for_students/03-22-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-22-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-22-01-0"></td>
+                <td>standard</td>
+                <td>canvas UI demo (something spins)</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<h2 id="dragpoints">DragPoints</h2>
+<p>The other helper is called <code>dragPoints</code>; it keeps track of a list of points and allows the user to drag them around. The function in the <code>dragPoints</code> file is called <code>draggablePoints</code>.</p>
+<p>When <code>dragPoints</code> is integrated correctly, the user will be able to click near a point to drag it; Shift-Click to add a new point (at the end of the list); and Ctrl-Click (or Command-Click on a Mac) to delete a point.</p>
+<p>The <code>dragPoints</code> system needs the function you use to redraw the canvas and the list of points (it will change the list as needed). Your redraw function needs to draw the dots for the points. You pass the redraw function to <code>draggablePoints</code> so it gets called when the points are moved. The redraw function should be the same kind of function that you pass to <code>requestAnimationFrame</code>, taking the same argument.</p>
+<p>
+
+
+
+</p>
+<p>You&rsquo;ve actually been using this for a while in the demos. Now, make sure you can use the code. Have a draw function that connects the points into a polygon (connect neighboring pairs of points with line segments). You should also draw circles for the points so you know where to click. Change the initial value for the points so the program draws a hexagon when it is loaded. You should edit 
+<a href="../../for_students/03-22-02.js" class="box-html" data-tag="ex-points-ui">03-22-02.js</a>
+.</p>
+<p>Your program might draw something like this:
+<figure class="">
+<a href="../../docs/22/hexagon.png">
+<img src="../../docs/22/hexagon_hu_9566e1c7cf4ad98c.png" alt="hexagon.png" />
+</a></figure>
+
+It doesn&rsquo;t have to look exactly like this (any hexagon is OK, and you don&rsquo;t have to make everything all black).</p>
+<p><code>dragPoints</code> lets you move, add, and remove points - it does not let you re-order them.</p>
+
+<div id="box-03-22-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-22-02</span>&nbsp;
+    <input type="checkbox" id="check-03-22-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-22-02.html class="boxtitlelink">03-22-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-22-02.js" class="boxtitlelink">03-22-02.js</a>
+    <iframe
+        title="ex-points-ui"
+        src="../../for_students/03-22-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-22-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-22-02-0"></td>
+                <td>standard</td>
+                <td>initial hexagon - ui works</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<a href="../../docs/23/" class="Next__Page">Next: Page &nbsp;23&nbsp;-&nbsp;The Train: Intro</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Selected"> 22: The 559 2D UI Code </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p22",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

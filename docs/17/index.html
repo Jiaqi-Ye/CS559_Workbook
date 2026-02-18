@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 17: Béziers in APIs</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Both Canvas and SVG support Bézier curves. Both APIs provide commands for both cubic and quadratic Béziers. Technically, they support linear Béziers, but we usually call these lines.</p>
+<h2 id="bézier-curves-in-canvas">Bézier Curves in Canvas</h2>
+<p>The HTML Canvas API provides both quadratic and cubic Bézier curves. It allows you to use these curves as pieces of longer paths.</p>
+<p>One slightly surprising thing about Bézier segments in Canvas is that they take one fewer control point as an argument than the curve requires. The first control point is always the most recent pen position. So, if you want to specify the four points of a Bézier segment, you need to do a <code>moveTo</code> first to establish that initial point:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">moveTo</span><span style="color:#111">(</span><span style="color:#75af00">ax</span><span style="color:#111">,</span> <span style="color:#75af00">ay</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">context</span><span style="color:#111">.</span><span style="color:#75af00">bezierCurveTo</span><span style="color:#111">(</span><span style="color:#75af00">bx</span><span style="color:#111">,</span> <span style="color:#75af00">by</span><span style="color:#111">,</span> <span style="color:#75af00">cx</span><span style="color:#111">,</span> <span style="color:#75af00">cy</span><span style="color:#111">,</span> <span style="color:#75af00">dx</span><span style="color:#111">,</span> <span style="color:#75af00">dy</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is convenient because we often want to connect segments. The end of the last segment becomes the beginning of the next. <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span></span></span></span> continuity is easy. If you want <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> or <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">G</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> continuity, you need to choose the position of the point (bx,by) appropriately.</p>
+<h2 id="bézier-curves-in-svg">Bézier Curves in SVG</h2>
+<p>SVG supports Bézier curves as part of its &ldquo;path language&rdquo;. When you make a path, you can include commands to add quadratic and cubic Bézier segments.</p>
+<p>Here is an example of a path created in SVG.
+The file is 
+        <a href="../../docs/17/quadratic.svg">quadratic.svg</a>
+
+</p>
+<p><div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-svg" data-lang="svg"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#f92672">&lt;svg</span> <span style="color:#75af00">xmlns=</span><span style="color:#d88200">&#34;http://www.w3.org/2000/svg&#34;</span> <span style="color:#75af00">width=</span><span style="color:#d88200">&#34;200px&#34;</span> <span style="color:#75af00">height=</span><span style="color:#d88200">&#34;200px&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#f92672">&lt;path</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>        <span style="color:#75af00">stroke=</span><span style="color:#d88200">&#34;black&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>        <span style="color:#75af00">fill =</span><span style="color:#d88200">&#34;#CCC&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>        <span style="color:#75af00">stroke-width=</span><span style="color:#d88200">&#34;5&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>        <span style="color:#75af00">d=</span><span style="color:#d88200">&#34;M150,100 
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span><span style="color:#d88200">           Q 150,150  100,150
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span><span style="color:#d88200">           Q  50,150   50,100
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span><span style="color:#d88200">           Q  50, 50  100, 50
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span><span style="color:#d88200">           Q 100,100  150,100
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span><span style="color:#d88200">           z&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    <span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span><span style="color:#f92672">&lt;/svg&gt;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>
+</span></span></code></pre></div>
+
+
+<figure class="">
+        <a href="../../docs/17/quadratic.svg">
+            <img src="../../docs/17/quadratic.svg" alt="quadratic.svg" />
+        </a>
+    </figure>
+
+</p>
+<p>Notice that the shape is a single path, made up of 4 quadratic Bézier segments. The path description is in a string, broken up over lines 6-12. You can see it starts with a move to (M) command (line 6), and then the 4 quadraticBezierCurveTo commands (Q). It also has a &ldquo;close path&rdquo; (Z) command at the end.</p>
+<p>Notice that the quadratic Bézier commands take two points as parameters. Like the Canvas commands, the first point is the current pen position. The first curve starts at the move to position. The others connect to the ends of the previous segments, so they have <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span></span></span></span> continuity. Because of the positions of the control points, most connections are <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> (except for the ones that obviously aren&rsquo;t).</p>
+<p>
+
+
+
+
+
+
+
+</p>
+<p><strong>Practice:</strong> To practice reading SVG and writing Canvas Bézier curves, I would like you to reproduce the picture above (in 
+        <a href="../../docs/17/quadratic.svg">quadratic.svg</a>
+
+) using the Canvas API in the files 
+<a href="../../for_students/03-17-01.js" class="box-html" data-tag="ex-bezier-svg">03-17-01.js</a>
+.</p>
+<p>But, to make this more interesting: you are not allowed to use the <code>quadraticBezierTo</code> command in your JavaScript program; you must use the <code>bezierCurveTo</code> function (which is cubic). You will need to convert the quadratic (3 point) curves to cubic (4 point) curves. In general, converting Bézier curves between degrees is tricky, but for the special case of 2 to 3, it is easy. A hint: figure out the tangent vectors for the quadratic, and use them to determine the control points of the cubic. The end points are easy.</p>
+
+<div id="box-03-17-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-17-01</span>&nbsp;
+    <input type="checkbox" id="check-03-17-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-17-01.html class="boxtitlelink">03-17-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-17-01.js" class="boxtitlelink">03-17-01.js</a>
+    <iframe
+        title="ex-bezier-svg"
+        src="../../for_students/03-17-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-17-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-17-01-0"></td>
+                <td>standard</td>
+                <td>recreated the picture using Canvas</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-17-01-1"></td>
+                <td>standard</td>
+                <td>didn&#39;t use quadratic commands but got the correct shape using cubics</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<h2 id="your-turn-a-picture">Your turn: A Picture</h2>
+<p>In this box, you can practice using the canvas Bézier drawing commands. The canvas context has functions that put Bézier segments onto the end of the current path. Just as <code>context.lineTo(x,y)</code> extends the current path with a line segment from the current end of the path to <code>x,y</code>, the <code>context.bezierCurveTo</code> function extends the path with a cubic Bézier segment. The function takes 3 points (the segment uses 4 points as it includes the end of the path before the function is called). Paths with curves can be stroked and filled like any other paths.</p>
+<p>
+
+
+
+
+
+
+
+
+Make a picture in the box below using Canvas drawing commands. Your picture must use curves (cubic Bézier curves - with the Canvas <code>bezierCurveTo</code> function). You should edit 
+<a href="../../for_students/03-17-02.js" class="box-html" data-tag="ex-bezier">03-17-02.js</a>
+. Your picture must have shapes that are obviously curves (not straight lines) - it should be clear that they are not circles or arcs.</p>
+<p>In at least one place in your picture, you must connect two Bézier segments with <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">G</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> or <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> continuity. Describe one or two places where you connected Bézier segments with continuity (tell us where to look; we should see a place with continuity). For example, &ldquo;at the top of the mountain, two lines come together with <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span></span></span></span> continuity&rdquo; - except that your example must be <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">G</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> or <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>.</p>
+<p>This must be a static picture. You&rsquo;ll get to make something animated or interactive later in the workbook.</p>
+
+<div id="box-03-17-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-17-02</span>&nbsp;
+    <input type="checkbox" id="check-03-17-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-17-02.html class="boxtitlelink">03-17-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-17-02.js" class="boxtitlelink">03-17-02.js</a>
+    <iframe
+        title="ex-bezier"
+        src="../../for_students/03-17-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-17-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-17-02-0"></td>
+                <td>standard</td>
+                <td>draw a picture that demonstrates the use of bezierCurveTo in Canvas</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-17-02-1"></td>
+                <td>standard</td>
+                <td>explained where there is G(1) continuity between Bézier segments in box</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Explain your use of continuity:
+<div class="input-group">
+    <label for="continuity-explanation" style="vertical-align: top;">Continuity Explanation</label>
+    <textarea id="continuity-explanation" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<p>And after writing that, it might be a good time for checkpointing and writing your JSON file in case something goes astray&hellip;
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-widget-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div></p>
+<h2 id="summary-bézier-curves">Summary: Bézier Curves</h2>
+<p>More details of Bézier curves can be found in the <a href="https://cs559.github.io/559Tutorials/splines/6bez/">Curves Notes</a>. This is a much more mathematical approach to them. I actually like the approach in the workbook better.</p>
+<p>Here, we focused on the specific kinds of Bézier curves we see in Canvas. Cubic Beziers have a connection with Hermite (and therefore Cardinal) cubics and how they are drawn in Canvas.</p>
+<p>The list of properties of Bezier curves is important. Here are some key ones:</p>
+<ol>
+<li>Bezier curves can be defined for any number of control points <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>.</li>
+<li>Bezier curves are symmetric. Anything that applies to &ldquo;first&rdquo; also applies to &ldquo;last&rdquo;.</li>
+<li>Bezier curves interpolate their first point. And, because of symmetry, their last.</li>
+<li>Bezier curves&rsquo; tangents are determined by the first (last) two points. The scaling factor is determined by the number of points (n-1).</li>
+<li>Bezier curves stay within the convex hull of their points.</li>
+<li>Bezier curves are variation diminishing.</li>
+<li>Bezier curves are affine invariant.</li>
+<li>Bezier curves for <em>n</em> points can be represented by an <em>n-1</em> degree polynomial.</li>
+</ol>
+<p>The geometric constructions are also valuable, as they lead to algorithms.</p>
+<p>On the next page, we&rsquo;ll briefly consider B-Splines, a different kind of approximating curve.</p>
+<a href="../../docs/18/" class="Next__Page">Next: Page &nbsp;18&nbsp;-&nbsp;B-Splines</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Selected"> 17: Béziers in APIs </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p17",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

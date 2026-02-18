@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 10: Comparing Interpolation Methods</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Before we learn how to use cubics to interpolate points, we will first motivate why we like to use cubics by comparing them with their alternatives.</p>
+<p>The Graphics in 5 Minutes Video introduces this topic:</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=YMl25iCCRew&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=17">Splines in 5 minutes: Part 1 &ndash; cubic curves</a></li>
+</ul>
+<h2 id="interpolation">Interpolation</h2>
+<p>We say a curve <strong>interpolates</strong> a value if it takes that value given a certain value of its parameter. We call that value of the parameter the <strong>site.</strong> So, when we specify that a curve <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> has value <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> at its beginning (i.e., <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>), we would say &ldquo;the curve interpolates <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> at site 0.&rdquo;</p>
+<p>When we specify interpolation, we might not specify the site - we might just specify that the curve has the value at some point in its range. Also, interpolation might specify the value of the derivative, not just the position.</p>
+<p>However, the most common form of interpolation problem is to &ldquo;connect the dots.&rdquo; We are given a list of points (the sites), and we need to make a curve through it. The problem might specify the <em>t</em> value for the curve when it reaches each of those sites. But it is common just to assume uniform spacing at the integers.</p>
+<p>There are an infinite number of ways to connect the dots. An implementation method effectively chooses one.</p>
+<h2 id="comparing-interpolation-types">Comparing Interpolation Types</h2>
+<p>Here, we look at three ways to do interpolation to compare them and bring out some of the pros and cons of the approaches. All of the demos are linked. Move the points in any one of them to see how the others behave.</p>
+<p>The simplest way to connect the dots is with straight lines. Besides being simple and easy to describe, it has the property of being the shortest curve that interpolates the points.</p>
+<div style="position: relative; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 10px; text-align: center;">
+    <span style="font-weight: bold; margin-bottom: 5px; display: block; color: #444;">1. Linear Interpolation</span>
+    <span style="display: block; font-size: 0.8rem; color: #888; margin-bottom: 8px;">Straight lines (C0 Continuity)</span>
+    <canvas id="cLinear" width="600" height="200" style="background: #fff; border: 1px solid #eee; cursor: move; touch-action: none; display: block;"></canvas>
+</div>
+<p>A problem with the connected line segments is that the resulting curve is not smooth. It is just <em>C(0)</em>.</p>
+<p>But notice two positives that you might take for granted. First, when you move one point, only the line segments close to that point move. If you move something at the beginning, things at the end don&rsquo;t change. We call this property <strong>locality.</strong></p>
+<p>And second, notice how there are no extra wiggles. It&rsquo;s pretty easy to predict and control the curve. We just cannot get smoothness.</p>
+<p>Our next example is the opposite: we will fit a single eighth-degree polynomial through the nine points. In general, we can fit an <em>n-1</em> degree polynomial through <em>n</em> points. The particular version we are using here is called a <em>Lagrange Polynomial</em>. You can look the equation up in the <a href="https://cs559.github.io/559Tutorials/splines/3/#interpolating-polynomials">curve notes</a> or some other book. It&rsquo;s a neat demo for a graphics class.</p>
+<div style="position: relative; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 10px; text-align: center;">
+    <span style="font-weight: bold; margin-bottom: 5px; display: block; color: #444;">2. Lagrange Polynomial (Degree 8)</span>
+    <span style="display: block; font-size: 0.8rem; color: #888; margin-bottom: 8px;">Single global polynomial. Note the oscillation (Runge's Phenomenon).</span>
+    <canvas id="cLagrange" width="600" height="200" style="background: #fff; border: 1px solid #eee; cursor: move; touch-action: none; display: block;"></canvas>
+</div>
+<p>Because this is a single polynomial, we can take the derivative as many times as we want. It will never have a discontinuity. It is as &ldquo;smooth&rdquo; (in the continuity sense) as it can be.</p>
+<p>However, this curve does not have locality: notice how if you move the first point, the entire curve changes - including things near the end. The changes to the end are subtle if you move the beginning; but if you change the middle notice how big the changes are everywhere. Also, notice how it tends to wiggle all over the place; often overshooting its target so it can smoothly return after taking a long route.</p>
+<p>In practice, higher-degree polynomials are rarely used in graphics. In addition to these issues that make them hard to control, there are numerical issues when you raise small numbers to large powers.</p>
+<p>In the final example, we consider something that tries to balance the two. This is a curve made of a series of cubic segments. A cubic polynomial is used between every pair of points. The neighboring points are used to determine the tangents at the interpolation points. This particular curve is called a Cardinal Spline, and we will learn more about it on the upcoming pages.</p>
+<div style="position: relative; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 10px; text-align: center;">
+    <span style="font-weight: bold; margin-bottom: 5px; display: block; color: #444;">3. Cardinal Spline (Catmull-Rom)</span>
+    <span style="display: block; font-size: 0.8rem; color: #888; margin-bottom: 8px;">Piecewise cubic. Stable and local control.</span>
+    <canvas id="cSpline" width="600" height="200" style="background: #fff; border: 1px solid #eee; cursor: move; touch-action: none; display: block;"></canvas>
+</div>
+<script src="../../Interpolation/gemini-interpolation.js" type="module" defer></script>
+<p>But, for now, notice that it does have local control. Moving one point only affects a few parts of the curve close to it. It is pretty smooth (it is <em>C(1)</em>), and doesn&rsquo;t overshoot points too much.</p>
+<p>In computer graphics, we prefer these kinds of piecewise polynomial representations (like the Cardinal Spline) because they balance smoothness and control. Because the pieces are cubics, the math is also well behaved.</p>
+<h2 id="choosing-cubics">Choosing Cubics</h2>
+<p>In Computer Graphics, we often use piecewise polynomial curves, but rarely use curves of more than degree 3 (cubics). Cubics provide a good balance of smoothness and control. We can achieve <em>C(1)</em> or <em>C(2)</em> relatively easily, which is sufficient for most graphics applications.</p>
+<p>The term for a piecewise polynomial curve is a <strong>spline</strong>.</p>
+<a href="../../docs/11/" class="Next__Page">Next: Page &nbsp;11&nbsp;-&nbsp;Interpolation and Hermite Cubics</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Selected"> 10: Comparing Interpolation Methods </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p10",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

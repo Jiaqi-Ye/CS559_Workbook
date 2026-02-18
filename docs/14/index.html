@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 14: Bézier Curves</h1>
+		</header>
+		<div class="content post__content clearfix"><p>There are two common types of approximating curves in computer graphics: Bézier curves and B-Splines. Both are splines - they make complex shapes out of a series of smaller segments, with each segment being a polynomial. Both are very general; they work for any degree of polynomial. Both have elegant mathematics behind them, and good methods. Bézier curves are more common in 2D, so we will focus on them. (B-Splines deserve their own workbook)</p>
+<p>A note: the correct (French) spelling of Bézier has an accent over the first e. Leaving off the accent is acceptable because the curves are so common; the word &ldquo;Bezier&rdquo; has basically become an English word.</p>
+<p>The YouTube Video <a href="https://www.youtube.com/watch?v=aVwxzDHniEw" target="_blank">The Beauty of Bezier Curves</a> is a really nice introduction to Bézier curves. It is more focused than the longer video <a href="https://www.youtube.com/watch?v=jvPPXbo87ds" target="_blank">The Continuity of Splines</a>. The video is a very nicely animated version of the same math in the workbook and my whiteboard derivations below. It goes on to explain arc length, and the methods for computing it (that we will get to later in the workbook). There is some overlap between the videos - but the redundant parts are important, so seeing them multiple times isn&rsquo;t a problem.</p>
+<p>Note: The correct spelling for the name of the key Bezier algorithms, and their inventor, is <strong>de Casteljau</strong>. I have been misspelling it for years. I am trying to clean up the misspellings.</p>
+<p>The video for 2023 introduces Beziers:
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_92up5741?st=3161">2023 Video Clip: Bezier Curves</a> [52:41 - 58:23 (5.7 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_92up5741">Lecture 10</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/10-Curves2-post.pdf">Slides</a>
+</div></p>
+<h2 id="motivating-bézier-curves">Motivating Bézier Curves</h2>
+<p>Most discussions of Bézier curves dive into the math. Even the old version of this workbook introduced them by showing how they connected to Hermite cubics from previous pages.</p>
+<p>Often, you are shown Bézier curves (either as math or just drawing with them). Then you are given a list of nice properties and expected to remember them.</p>
+<p>To motivate Bézier, we will consider a single curve segment where we know the beginning and end points. Because we may have many points, we will refer to the first and last as <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> (we have <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> points). We will interpolate these two points. This is a choice because it lets us connect things together.</p>
+<p><strong>1. Bézier curve segments interpolate their first and last points</strong></p>
+<p>What should the curve do between these two points? If we have no other information, a straight line is an obvious choice. In fact, a Bézier curve with just 2 points is the straight line between them.</p>
+<p>The idea of Bézier curves is that we will add additional control points that influence what happens between <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>. With Bézier curves, we can add any number of control points.</p>
+<p><strong>2. Bézier curve segments can have any number (<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>) of control points</strong></p>
+<p>Note: each Bézier segment can have many control points, and we can have many segments to make up an overall curve.</p>
+<p>Bézier curves are created so that each segment only depends on its control points, not the control points of other segments. The independence of segments gives them <strong>locality</strong> - although, sometimes Bézier curves are said to <strong>not</strong> have locality because the entire segment depends on all of its control points.</p>
+<p><strong>3. Bézier curve segments only depend on their control points</strong></p>
+<p>Let us start by adding a single point. We now have 3 points, so we can call them <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>.</p>
+<p>What should we do with the &ldquo;middle&rdquo; control point that we added between the beginning and end? One possibility is to interpolate it - but this has the problem that it prevents us from getting a single smooth piece. We want each segment to be smooth.</p>
+<p><strong>4. Bézier curve segments are smooth (they are single polynomials)</strong></p>
+<p>If we make a smooth curve that interpolates, the curve has to go out of its way to approach the point smoothly. Think about interpolating the middle point:</p>
+<figure class="">
+<a href="../../docs/14/not-bezier-inside.png">
+<img src="../../docs/14/not-bezier-inside_hu_d6b4470678f00f92.png" alt="not-bezier-inside.png" />
+</a><figcaption>not a Bezier</figcaption></figure>
+
+<p>Instead of interpolating the interior control point, we will approximate it; it will influence the shape (the curve will go towards it, just not through it).</p>
+<p>We want to keep the curve inside the triangle; this is useful because it gives us a clear way to keep the curve within a boundary. It will also be useful algorithmically, because we have bounds on where the curve can go.</p>
+<figure class="">
+<a href="../../docs/14/bezier-inside.png">
+<img src="../../docs/14/bezier-inside_hu_c1ef30c1f9690599.png" alt="bezier-inside.png" />
+</a><figcaption>Bezier stays inside its controls</figcaption></figure>
+
+<p>The inside of a triangle (or any convex polygon) is well-defined. In general, we need to consider the &ldquo;convex hull&rdquo; of the control polygon. Intuitively, the convex hull is the shape you get if you enclose the points with a convex shape. For a convex shape (like a triangle), it is just the polygon itself.</p>
+<p><strong>5. Bézier curve segments stay within the convex hull of their control points.</strong></p>
+<p>We can use the polygon to suggest how the curve should go. If we start at <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, we should expect to &ldquo;go towards&rdquo; <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>. This tells us the direction of the tangent - a scaling factor will be determined to make all of the other properties work out. But the length of tangents doesn&rsquo;t have a direct &ldquo;user experience&rdquo; meaning. The scaling factor works out to be <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> (where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> is the number of points).</p>
+<p><strong>6. The tangent at the beginning of a Bézier curve segment is the vector from the first (beginning) point to the second point, scaled by <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>.</strong></p>
+<p>Notice that this works out for line segments as well. The scaling factor is 1 for line segments. The <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> Bezier curve is a line segment.</p>
+<p>I could write all the rules for the beginning and end of the curve, but it would be nice if the curve were symmetric. Going backwards should be the same as going forward. If you reverse the order of the points, you should get the same curve (just in reverse order).</p>
+<p><strong>7. Bézier curves are symmetric. If you reverse the points, you get the same curve (with the parameter going the opposite way).</strong></p>
+<p>We have specified how things start and end, and where the curve must stay, but what else happens between?</p>
+<p>We want the curve to be &ldquo;relatively direct&rdquo; based on the influence of the control points. We don&rsquo;t want it making extra wiggles if it doesn&rsquo;t have to. There shouldn&rsquo;t be &ldquo;extra&rdquo; turns.</p>
+<p>All of this is a bit hand-wavy - but it can be stated mathematically. Intuitively, the curve should turn as much as it needs to (since it does need to change direction), but have no &ldquo;extra&rdquo; changes in direction.</p>
+<p>One way to think about it: if the curve has <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> points, it has <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> line segments connecting them; each line gives a direction the curve might go at some point; this means it must make <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> changes in direction, but it doesn&rsquo;t need to make any more. The curve has fewer wiggles than control points.</p>
+<p>A mathematical way to describe this is <strong>variation diminishing</strong>. If you draw any line, the curve can only cross that line at most <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> times. To see this, imagine the control polygon: it has <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> segments, so any other line can only cross it that many times (since a line can cross each segment at most once). The curve has the same property.</p>
+<p>The old lecture discusses this concept:
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_92up5741?st=4296">2023 Video Clip: Wiggle Theorem and Crossing Property</a> [71:36]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_92up5741">Lecture 10</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/10-Curves2-post.pdf">Slides</a>
+</div></p>
+<p><strong>8. Bézier curves are variation diminishing. A segment has fewer wiggles than control points.</strong></p>
+<p>Here is a picture that shows the features for a Bézier segment with 4 points (it is a cubic):</p>
+<figure class="">
+<a href="../../docs/14/bezier-diminish.png">
+<img src="../../docs/14/bezier-diminish_hu_4398dd50d076b2bf.png" alt="bezier-diminish.png" />
+</a></figure>
+
+<p>The four points (black dots) are connected by thick cyan lines to show the &ldquo;control polyline&rdquo;. The resulting cubic Bézier curve is dark blue.</p>
+<p>Notice that the &ldquo;convex hull&rdquo; shape is the light blue parallelogram - the dark blue curve stays inside it. Also notice that any line we draw in the plane (I drew some dark red lines) can cross the polyline or the curve at most 3 (i.e., <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>) times.</p>
+<p>And, one more feature that you might forget to ask for:</p>
+<p><strong>9. Bézier curves are affine invariant.</strong></p>
+<p>If you perform an affine transformation on a Bézier curve, you get a Bézier curve. More specifically, if you perform an affine transformation on the <em>control points</em> of a Bézier curve, you get the affine transformation of the curve itself. You only have to transform the control points (and draw the curve based on those new points): you do not need to compute all the points in the curve and transform them.</p>
+<p>This property - that transforming the points is sufficient to transform the curve - is called <strong>affine invariance</strong>.</p>
+<p>There are actually even more features of Bézier curves that make them extremely useful, which is why they are the most common form of curves in computer graphics. They are built into most APIs.</p>
+<p>Bézier curves are very general. You can make them for any number of control points. In computer graphics, we generally use cubic (4 points) and quadratic (3 points) Bézier curves. We also use linear Bézier curves, but it&rsquo;s easier to call these line segments. Almost always, we use these simpler pieces and create complex shapes by combining pieces.</p>
+<p>There are applications of higher-order Bézier curves in design. For applications where smoothness is critical, designers might need very high levels of continuity. For example, boat designers and airfoil designers need to create curves with more than <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span> continuity, so they use higher-order Bézier curves.</p>
+<p>And what makes Bézier curves even cooler is that you can get all these properties using curves that have very elegant mathematical derivations.</p>
+<h2 id="ok-what-are-bézier-curves">OK, What are Bézier Curves?</h2>
+<p>Before defining them mathematically, you should &ldquo;feel&rdquo; one - try it out and play with it.</p>
+<p>You probably already have if you&rsquo;ve used a drawing program (like Adobe Illustrator or Inkscape) or just about any graphics creation program; the curves are Bézier (probably cubics).</p>
+<p>First, here&rsquo;s a diagram with Bézier curves with 2, 3, 4 and 5 points. You can see how the parameter goes from 0 to 1 with the slider.</p>
+<p>
+
+<div id="box-03-14-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-14-01</span>&nbsp;
+    <input type="checkbox" id="check-03-14-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-14-01.html class="boxtitlelink">03-14-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-14-01.js" class="boxtitlelink">03-14-01.js</a>
+    <iframe
+        title="eg-bezier"
+        src="../../for_students/03-14-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-14-01"
+    ></iframe>
+</div></p>
+<p>Move the points around (you can drag the blue dots). Notice how the curves respond. They always interpolate the first and last points. The other points <em>influence</em> the shape of the curve, even though they are not interpolated. Notice how the curve stays in the convex hull, how it never gets too many wiggles, how its starting (ending) directions follow the first (last) line segments.</p>
+<p>Don&rsquo;t worry about looking at the programs (
+<a href="../../for_students/03-14-01.js" class="box-html" data-tag="eg-bezier">03-14-01.js</a>
+ and <a href="../../for_students/03-14-01.html" class="box-html" data-tag="eg-bezier">03-14-01.html</a>) - you&rsquo;ll see how these things work soon enough.</p>
+<p>On the <a href="../../docs/15/" class="Next__Page">next page</a>, we will see how we can construct these curves geometrically.</p>
+<a href="../../docs/15/" class="Next__Page">Next: Page &nbsp;15&nbsp;-&nbsp;Geometric Approaches to Beziers</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Selected"> 14: Bézier Curves </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p14",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 27: Last Page (rubric)</h1>
+		</header>
+		<div class="content post__content clearfix"><p>You have made it to the end of the third workbook!</p>
+<p>This workbook has introduced you to curves. Curves are important for making shapes. While we focused on 2D curves, all the concepts extend to 3D and will provide the basis for how we create surfaces in 3D.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">NotebookLM&#39;s Summary</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>I fed the Workbook to Notebook LM to see what an AI had to say about it&hellip;</p>
+<p>This workbook serves as a comprehensive guide to 2D curves within the context of computer graphics, with a primary focus on parametric representations. It introduces three main mathematical approaches—implicit, parametric, and subdivision—while highlighting why parametric forms like Bézier curves are the industry standard for drawing and design. Students learn critical concepts such as continuity (C and G levels), derivatives for computing tangents and normals, and the geometric construction of curves via the de Casteljau algorithm. The material transitions from simple line segments to complex piecewise polynomials, specifically exploring Hermite, Cardinal, and B-Splines. Practical application is emphasized through technical exercises in Canvas and SVG APIs, culminating in a project to build a functional train track. Key advanced topics like arc-length reparameterization are included to ensure smooth, constant-speed animation and accurate placement of track elements.</p>
+
+    </div>
+</details>
+</div>
+<p>Hopefully, you got here by going through every page and completing the work on it. The boxes are the most significant components. Here is a list of all the boxes and whether or not you checked the checkbox. This way you can keep track of what you&rsquo;ve completed. We will not look at these checks: they are for student convenience.</p>
+                        
+<div class="page-rubric-container">
+<details class="page__rubric">
+<summary>List of Boxes</summary>
+<table  style="background-color: #f0f0f0;">
+    <thead>
+        <tr>
+            <th><span class="boxframekind tooltip-trigger">Box<span class="tooltip-box" style="text-align:left">
+The box name links back to the box.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Check<span class="tooltip-box" style="text-align:left">
+These checkboxes indicate whether you have checked the checkbox for the box.
+If you didn't check the box, go back to it, make sure the work is completed, and check it.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Tag (internal)<span class="tooltip-box" style="text-align:left">
+This is our "internal code name" for the box.
+</span>
+</span></span></th>
+            <th><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span></th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><a href="../../docs/02/#box-03-02-01" class="boxlink">03-02-01</a></td>
+        <td><span id="wbsp26_03_p02_check-03-02-01" class="localcheck"></span></td>
+        <td>eg-curves</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/06/#box-03-06-01" class="boxlink">03-06-01</a></td>
+        <td><span id="wbsp26_03_p06_check-03-06-01" class="localcheck"></span></td>
+        <td>ex-curves</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/07/#box-03-07-01" class="boxlink">03-07-01</a></td>
+        <td><span id="wbsp26_03_p07_check-03-07-01" class="localcheck"></span></td>
+        <td>eg-two-circles</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/07/#box-03-07-02" class="boxlink">03-07-02</a></td>
+        <td><span id="wbsp26_03_p07_check-03-07-02" class="localcheck"></span></td>
+        <td>eg-draw-two-circles</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/14/#box-03-14-01" class="boxlink">03-14-01</a></td>
+        <td><span id="wbsp26_03_p14_check-03-14-01" class="localcheck"></span></td>
+        <td>eg-bezier</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/15/#box-03-15-01" class="boxlink">03-15-01</a></td>
+        <td><span id="wbsp26_03_p15_check-03-15-01" class="localcheck"></span></td>
+        <td>eg-decasteljau-higher</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/15/#box-03-15-02" class="boxlink">03-15-02</a></td>
+        <td><span id="wbsp26_03_p15_check-03-15-02" class="localcheck"></span></td>
+        <td>eg-decasteljau</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/17/#box-03-17-01" class="boxlink">03-17-01</a></td>
+        <td><span id="wbsp26_03_p17_check-03-17-01" class="localcheck"></span></td>
+        <td>ex-bezier-svg</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/17/#box-03-17-02" class="boxlink">03-17-02</a></td>
+        <td><span id="wbsp26_03_p17_check-03-17-02" class="localcheck"></span></td>
+        <td>ex-bezier</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/19/#box-03-19-01" class="boxlink">03-19-01</a></td>
+        <td><span id="wbsp26_03_p19_check-03-19-01" class="localcheck"></span></td>
+        <td>eg-arc-length-box</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/19/#box-03-19-02" class="boxlink">03-19-02</a></td>
+        <td><span id="wbsp26_03_p19_check-03-19-02" class="localcheck"></span></td>
+        <td>eg-arc-length-line</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/19/#box-03-19-03" class="boxlink">03-19-03</a></td>
+        <td><span id="wbsp26_03_p19_check-03-19-03" class="localcheck"></span></td>
+        <td>ex-arc-length-triangle</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/19/#box-03-19-04" class="boxlink">03-19-04</a></td>
+        <td><span id="wbsp26_03_p19_check-03-19-04" class="localcheck"></span></td>
+        <td>eg-arc-length-curve</td>
+        <td>view</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/20/#box-03-20-01" class="boxlink">03-20-01</a></td>
+        <td><span id="wbsp26_03_p20_check-03-20-01" class="localcheck"></span></td>
+        <td>ex-spiral</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/21/#box-03-21-01" class="boxlink">03-21-01</a></td>
+        <td><span id="wbsp26_03_p21_check-03-21-01" class="localcheck"></span></td>
+        <td>ex-cardinal</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/21/#box-03-21-02" class="boxlink">03-21-02</a></td>
+        <td><span id="wbsp26_03_p21_check-03-21-02" class="localcheck"></span></td>
+        <td>ex-split</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/22/#box-03-22-01" class="boxlink">03-22-01</a></td>
+        <td><span id="wbsp26_03_p22_check-03-22-01" class="localcheck"></span></td>
+        <td>ex-canvas-ui</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/22/#box-03-22-02" class="boxlink">03-22-02</a></td>
+        <td><span id="wbsp26_03_p22_check-03-22-02" class="localcheck"></span></td>
+        <td>ex-points-ui</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/24/#box-03-24-01" class="boxlink">03-24-01</a></td>
+        <td><span id="wbsp26_03_p24_check-03-24-01" class="localcheck"></span></td>
+        <td>ex-train</td>
+        <td>rubric</td>
+    </tr>
+    <tr>
+        <td><a href="../../docs/26/#box-03-26-01" class="boxlink">03-26-01</a></td>
+        <td><span id="wbsp26_03_p26_check-03-26-01" class="localcheck"></span></td>
+        <td>student</td>
+        <td>rubric</td>
+    </tr>
+    </tbody>
+</table>
+</details>
+</div>
+
+<p>Here is a list of all the box rubric items in this workbook. You should make sure that you have completed all the items you intend to do. They are marked as completed if you have selected the checkbox. You should only check the boxes that you have completed.</p>
+                        <div class="page-rubric-container">
+<details class="page__rubric">
+    <summary>Workbook Rubric</summary>
+    <br/>
+    <table class="page-rubric-table" style="background-color: #f0f0f0;">
+        <thead>
+            <tr>
+                <th style="min-width: 6em;"><span class="boxframekind tooltip-trigger">Box<span class="tooltip-box" style="text-align:left">
+The box name links back to the box.
+</span>
+</span></span></th>
+                <th><span class="boxframekind tooltip-trigger"><span class="tooltip-box" style="text-align:left">
+These checkboxes indicate whether you have checked the box for the rubric item.
+If you didn't check the box, go back to it, make sure the work is completed, and then check the checkbox.
+</span>
+</span></span></th>
+                <th><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody><tr>
+                <td><a href="../../docs/06/#box-03-06-01"  class="boxlink">03-06-01</a></td>
+                <td><span id="wbsp26_03_check-03-06-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>implement the correct tangent vector for the parabola</td>
+            </tr><tr>
+                <td><a href="../../docs/17/#box-03-17-01"  class="boxlink">03-17-01</a></td>
+                <td><span id="wbsp26_03_check-03-17-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>recreated the picture using Canvas</td>
+            </tr><tr>
+                <td><a href="../../docs/17/#box-03-17-01"  class="boxlink">03-17-01</a></td>
+                <td><span id="wbsp26_03_check-03-17-01-1" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>didn&#39;t use quadratic commands but got the correct shape using cubics</td>
+            </tr><tr>
+                <td><a href="../../docs/17/#box-03-17-02"  class="boxlink">03-17-02</a></td>
+                <td><span id="wbsp26_03_check-03-17-02-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>draw a picture that demonstrates the use of bezierCurveTo in Canvas</td>
+            </tr><tr>
+                <td><a href="../../docs/17/#box-03-17-02"  class="boxlink">03-17-02</a></td>
+                <td><span id="wbsp26_03_check-03-17-02-1" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>explained where there is G(1) continuity between Bézier segments in box</td>
+            </tr><tr>
+                <td><a href="../../docs/19/#box-03-19-03"  class="boxlink">03-19-03</a></td>
+                <td><span id="wbsp26_03_check-03-19-03-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>make the green dot go around the triangle with arc-length parameterization</td>
+            </tr><tr>
+                <td><a href="../../docs/20/#box-03-20-01"  class="boxlink">03-20-01</a></td>
+                <td><span id="wbsp26_03_check-03-20-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>draw the spiral</td>
+            </tr><tr>
+                <td><a href="../../docs/20/#box-03-20-01"  class="boxlink">03-20-01</a></td>
+                <td><span id="wbsp26_03_check-03-20-01-1" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>checkbox and slider controls</td>
+            </tr><tr>
+                <td><a href="../../docs/20/#box-03-20-01"  class="boxlink">03-20-01</a></td>
+                <td><span id="wbsp26_03_check-03-20-01-2" class="localcheck sitekey">X</span></td>
+                <td>optional</td>
+                <td>approximate spiral with Beziers, have a switch for lines/Beziers</td>
+            </tr><tr>
+                <td><a href="../../docs/21/#box-03-21-01"  class="boxlink">03-21-01</a></td>
+                <td><span id="wbsp26_03_check-03-21-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>make a cardinal spline through the points</td>
+            </tr><tr>
+                <td><a href="../../docs/21/#box-03-21-01"  class="boxlink">03-21-01</a></td>
+                <td><span id="wbsp26_03_check-03-21-01-1" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>draw 20 distinct points on the curve</td>
+            </tr><tr>
+                <td><a href="../../docs/21/#box-03-21-01"  class="boxlink">03-21-01</a></td>
+                <td><span id="wbsp26_03_check-03-21-01-2" class="localcheck sitekey">X</span></td>
+                <td>optional</td>
+                <td>the 20 points have equal arc-length between consecutive points</td>
+            </tr><tr>
+                <td><a href="../../docs/21/#box-03-21-02"  class="boxlink">03-21-02</a></td>
+                <td><span id="wbsp26_03_check-03-21-02-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>split the Bezier</td>
+            </tr><tr>
+                <td><a href="../../docs/22/#box-03-22-01"  class="boxlink">03-22-01</a></td>
+                <td><span id="wbsp26_03_check-03-22-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>canvas UI demo (something spins)</td>
+            </tr><tr>
+                <td><a href="../../docs/22/#box-03-22-02"  class="boxlink">03-22-02</a></td>
+                <td><span id="wbsp26_03_check-03-22-02-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>initial hexagon - ui works</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Cardinal Spline Track (w/UI)</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-1" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Train goes around the track (run button)</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-2" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Train points in the right direction</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-3" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Initial track shows arc-length problem</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-4" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Arc-length parameterization</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-5" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Rail Ties</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-6" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Parallel Rails</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-7" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Multiple Cars</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-8" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>B-Splines</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-9" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Trucked Wheels</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-10" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Smoke</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-11" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Nicer-Looking Train</td>
+            </tr><tr>
+                <td><a href="../../docs/24/#box-03-24-01"  class="boxlink">03-24-01</a></td>
+                <td><span id="wbsp26_03_check-03-24-01-12" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Adaptive Scenery</td>
+            </tr><tr>
+                <td><a href="../../docs/26/#box-03-26-01"  class="boxlink">03-26-01</a></td>
+                <td><span id="wbsp26_03_check-03-26-01-0" class="localcheck sitekey">X</span></td>
+                <td>standard</td>
+                <td>Some curved shapes</td>
+            </tr><tr>
+                <td><a href="../../docs/26/#box-03-26-01"  class="boxlink">03-26-01</a></td>
+                <td><span id="wbsp26_03_check-03-26-01-1" class="localcheck sitekey">X</span></td>
+                <td>advanced</td>
+                <td>Some curved motion</td>
+            </tr><tr>
+                <td><a href="../../docs/26/#box-03-26-01"  class="boxlink">03-26-01</a></td>
+                <td><span id="wbsp26_03_check-03-26-01-2" class="localcheck sitekey">X</span></td>
+                <td>creative</td>
+                <td>Something cool</td>
+            </tr>
+        </tbody>
+    </table>
+</details>
+</div>
+<h2 id="handing-things-in">Handing things in&hellip;</h2>
+<p>Please check one more time that your NetID and GitHub Username are correct:</p>
+<p><div class="netid">
+<label for="netid">NetID:</label>
+<input 
+  type="text" 
+  id="netid" 
+  class="netid-input sitekey" 
+  placeholder="e.g. bbadger123" 
+  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
+  title="NetID must start with a letter and contain only letters and numbers."
+  required
+  oninput="validateNetID(this)"
+> <span id="netid-error" class="netid-error"></span>
+<script>
+  function validateNetID(input) {
+    const errorSpan = document.getElementById("netid-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "NetID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "NetID can only contain letters and numbers.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div class="netid">
+<label for="github">GithubID (user name):</label>
+<input 
+  type="text" 
+  id="github" 
+  class="netid-input sitekey" 
+  placeholder="e.g. octocat" 
+  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
+  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
+  required
+  oninput="validateGithubID(this)"
+> <span id="github-error" class="netid-error"></span>
+<script>
+  function validateGithubID(input) {
+    const errorSpan = document.getElementById("github-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "Github ID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+</p>
+<p>Please tell us how you used AI tools in doing this workbook. Remember, disclosing AI usage is part of the class policy on AI usage.</p>
+<div class="netid">
+<label for="ainote" style="vertical-align: top;">AI Usage Note:</label><textarea id="ainote" class="sitekey" rows="5" cols="60" style="ZgotmplZ" placeholder="Describe your use of AI for this workbook. You can say 'None' (if that's true) but you cannot leave this blank." ></textarea>
+<script>
+const textArea = document.getElementById('ainote');function updateStyle() {
+    if (textArea.value.length <= 3) {
+        textArea.style.border = '2px solid red';
+        textArea.style.backgroundColor = '#ffcccc';
+    } else {
+        textArea.style.border = '2px solid #ccc';
+        textArea.style.backgroundColor = '#ffffff';
+    }
+}
+
+
+updateStyle();
+
+
+textArea.addEventListener('input', updateStyle);</script>
+</div>
+<p>In the following section, you should give attributions for any included work—for example, if you took an image or model from the web.</p>
+<div class="input-group">
+    <label for="attributions" style="vertical-align: top;">Attributions</label>
+    <textarea id="attributions" class="sitekey" rows="3" cols="60" placeholder="describe any pieces you&#39;ve used from others"></textarea>
+</div>
+<p>Check that the local store is correctly written (and the json file has moved to the correct location)  -  it probably changed after you filled in the AI Note and Attributions.</p>
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-widget-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+<p>If you&rsquo;ve done that, you are ready to submit your workbook!</p>
+<p>Make sure to commit and push your work. Then press the &ldquo;Submit&rdquo; button to tell us that your assignment is ready for grading.</p>
+<div id="sheets-status-div" class="status-box">
+<strong>Google Sheets Submission:</strong><span class="sheets-status-span" id="sheets-submit-span">waiting for check</span>
+<br><p>This button is for <b>final</b> submission of the workbook. Do not press it unless you have completed the workbook and are ready for it to be graded.</p>
+<p>Make sure that you have saved the localstore to JSON (and put the file in the right place), committed the changes to GitHub, and pushed before submitting to the Google Sheet.</p>
+<p>Remember: you should push your work to GitHub <b>before</b> pressing the submit button.</p>
+<button id="submit-sheet-button" class="submit-submit" onclick="submitSheet(event)">Submit to Google Sheet</button>
+</div>
+<p>After pressing the Submit button, the File Status may say &ldquo;The json file does not match the local store&rdquo; because the submission time is now in the local store. You don&rsquo;t have to worry about that.</p>
+<p>If you&rsquo;ve made something you are particularly proud of, we encourage you to submit it for the gallery. Look for instructions in a class announcement.</p>
+<p>Congratulations! You&rsquo;ve completed Workbook 3.</p>
+<div style="display:none">
+Link for grading information: <a href="../../rubric.csv">rubric.csv</a>
+</div>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Curve Properties </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Selected"> 27: Last Page (rubric) </li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p27",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 6: Curve Properties</h1>
+		</header>
+		<div class="content post__content clearfix"><p>In order to work with curves, we&rsquo;ll need to understand the definitions of some of their basic properties.</p>
+<p>Most of these you would learn in a Calculus class. Here, I want to give the visual intuitions (and a refresher if you don&rsquo;t remember the calculus).</p>
+<p>Some properties of curves describe only a single place on the
+curve, while other properties require knowledge of the whole
+curve. For an intuition of the difference, imagine that the curve
+is a train track. If you are standing on the track on a foggy day
+you can tell that the track is straight or curving and whether
+or not you at at an end point. These are <strong>local</strong> properties.
+You cannot tell whether or not the track is a closed curve, or
+crosses itself, or how long it is. We call the second kind a <strong>global</strong> property.</p>
+<p>Global properties include whether or not a curve is closed, how long it is (from beginning to end), whether it crosses itself, and its bounding box.</p>
+<p>Local properties refer to specific points on a curve.</p>
+<h2 id="tangents">Tangents</h2>
+<p>The <strong>tangent</strong> is a concept that you are hopefully familiar with from Calculus. We will review it here to give some geometric intuitions.</p>
+<p>The <em>tangent</em> to a curve at a particular point is the velocity vector of the pen as it moves along the curve. To use a different metaphor, imagine the curve is a road and the &ldquo;pen&rdquo; is a car driving along the road. At any given time (parameter value) the car has a position on the road (that is given by the parametric function). Instantaneously, the car is going in a specific direction - the way the headlights are pointing. The line of that direction, the way the headlights go, is the tangent line.</p>
+<canvas id="tangent-1-circle" width="200" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-1-circle');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 60;
+    let angle = 0;
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        const px = centerX + radius * Math.cos(angle);
+        const py = centerY + radius * Math.sin(angle);
+
+        
+        const tx = -1 * Math.sin(angle);
+        const ty = Math.cos(angle);
+
+        
+        ctx.beginPath();
+        const lineLen = 300;
+        ctx.moveTo(px - tx * lineLen, py - ty * lineLen);
+        ctx.lineTo(px + tx * lineLen, py + ty * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const vectorScale = 40;
+        drawArrow(ctx, px, py, px + tx * vectorScale, py + ty * vectorScale, 'red', 3);
+
+        
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        angle += 0.02;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>The tangent can also be described as the line that touches the curve at a particular point. If the curve isn&rsquo;t straight the tangent line will touch the curve at this one point. The idea of &ldquo;touching&rdquo; is local - if it touches at the current point, it doesn&rsquo;t touch nearby (but it might touch farther away).</p>
+<canvas id="tangent-2-wiggly" width="400" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-2-wiggly');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function getPoint(t) {
+        return {
+            x: 200 + 150 * Math.cos(t),
+            y: 100 + 60 * Math.sin(3 * t)
+        };
+    }
+
+    function getDerivative(t) {
+        return {
+            dx: -150 * Math.sin(t),
+            dy: 180 * Math.cos(3 * t)
+        };
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        
+        ctx.beginPath();
+        for (let i = 0; i <= Math.PI * 2; i += 0.05) {
+            const p = getPoint(i);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        }
+        const pStart = getPoint(0);
+        ctx.lineTo(pStart.x, pStart.y);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        const p = getPoint(t);
+        const d = getDerivative(t);
+        
+        
+        const len = Math.sqrt(d.dx * d.dx + d.dy * d.dy);
+        const ndx = d.dx / len;
+        const ndy = d.dy / len;
+
+        
+        const lineLen = 400;
+        ctx.beginPath();
+        ctx.moveTo(p.x - ndx * lineLen, p.y - ndy * lineLen);
+        ctx.lineTo(p.x + ndx * lineLen, p.y + ndy * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const arrowLen = 50;
+        drawArrow(ctx, p.x, p.y, p.x + ndx * arrowLen, p.y + ndy * arrowLen, 'red', 3);
+
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        t += 0.015;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>If the curve is a straight line, then the tangent line is this straight line.
+Notice here that when the point transitions from one line segment to the next as it goes around the triangle, the tangent jumps.</p>
+<canvas id="tangent-3-triangle" width="200" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-3-triangle');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+    
+    
+    const v0 = {x: 100, y: 40};
+    const v1 = {x: 160, y: 160};
+    const v2 = {x: 40, y: 160};
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    
+    function getPoint(t) {
+        
+        let section = Math.floor(t) % 3;
+        let localT = t - Math.floor(t);
+        
+        if (section === 0) { 
+             return {
+                x: v0.x + (v1.x - v0.x) * localT,
+                y: v0.y + (v1.y - v0.y) * localT
+             };
+        } else if (section === 1) { 
+             return {
+                x: v1.x + (v2.x - v1.x) * localT,
+                y: v1.y + (v2.y - v1.y) * localT
+             };
+        } else { 
+             return {
+                x: v2.x + (v0.x - v2.x) * localT,
+                y: v2.y + (v0.y - v2.y) * localT
+             };
+        }
+    }
+    
+    function getDerivative(t) {
+        let section = Math.floor(t) % 3;
+        if (section === 0) {
+            return { dx: v1.x - v0.x, dy: v1.y - v0.y };
+        } else if (section === 1) {
+            return { dx: v2.x - v1.x, dy: v2.y - v1.y };
+        } else {
+            return { dx: v0.x - v2.x, dy: v0.y - v2.y };
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        
+        ctx.beginPath();
+        ctx.moveTo(v0.x, v0.y);
+        ctx.lineTo(v1.x, v1.y);
+        ctx.lineTo(v2.x, v2.y);
+        ctx.closePath();
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        const effectiveT = t % 3;
+        const p = getPoint(effectiveT);
+        const d = getDerivative(effectiveT);
+
+        
+        const len = Math.sqrt(d.dx*d.dx + d.dy*d.dy);
+        const ndx = d.dx / len;
+        const ndy = d.dy / len;
+
+        
+        const lineLen = 300;
+        ctx.beginPath();
+        ctx.moveTo(p.x - ndx * lineLen, p.y - ndy * lineLen);
+        ctx.lineTo(p.x + ndx * lineLen, p.y + ndy * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const arrowLen = 40;
+        drawArrow(ctx, p.x, p.y, p.x + ndx * arrowLen, p.y + ndy * arrowLen, 'red', 3);
+
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        t += 0.02;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>In fact, one way to think about the tangent is that even for a &ldquo;curvy&rdquo; curve, if you look at the curve at a point locally, you can think of it as an infinitesimal line segment. The tangent is a vector in the direction of this line, whose magnitude (length) is how fast the parameterization is &ldquo;moving&rdquo; through the point. If things move faster, the tangent has the same direction, but a greater magnitude.</p>
+<p>This demo illustrates that. The smaller circle has the same angular rate, so its actual point velocity is much smaller, so it has a smaller tangent vector.
+On the right the point is moving faster (it goes around the circle twice), so its vector is longer.</p>
+<canvas id="tangent-4-velocity" width="400" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-4-velocity');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+    
+    
+    const radiusOuter = 60;
+    const radiusInner = 30;
+    const centerLeft = {x: 100, y: 100};
+    const centerRight = {x: 300, y: 100};
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function drawSet(centerX, centerY, radius, speedMultiplier, color) {
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        
+        const angle = t * speedMultiplier;
+        const px = centerX + radius * Math.cos(angle);
+        const py = centerY + radius * Math.sin(angle);
+
+        
+        const w = speedMultiplier;
+        const vx = -radius * w * Math.sin(angle);
+        const vy = radius * w * Math.cos(angle);
+
+        
+        const len = Math.sqrt(vx*vx + vy*vy);
+        const nx = vx / len;
+        const ny = vy / len;
+
+        
+        const lineLen = 300;
+        ctx.beginPath();
+        ctx.moveTo(px - nx * lineLen, py - ny * lineLen);
+        ctx.lineTo(px + nx * lineLen, py + ny * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const scaleFactor = 2/3;
+        const visualLen = len * scaleFactor;
+        
+        drawArrow(ctx, px, py, px + nx * visualLen, py + ny * visualLen, color, 3);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        
+        drawSet(centerLeft.x, centerLeft.y, radiusOuter, 1, 'red');
+        
+        
+        drawSet(centerLeft.x, centerLeft.y, radiusInner, 1, 'orange');
+        
+        
+        drawSet(centerRight.x, centerRight.y, radiusOuter, 2, 'red');
+
+        t += 0.02;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>Here is another illustration of that. There are two line segments: in one, the curve &ldquo;speeds up&rdquo;, in the other, it slows down.</p>
+<canvas id="tangent-1c-linespeed" width="400" height="150" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-1c-linespeed');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+
+        
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 50);
+        ctx.lineTo(400, 50);
+        ctx.strokeStyle = '#ccc'; 
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        
+        
+        
+        let px1 = 50 + 40 * t * t;
+        let py1 = 50;
+        let vx1 = 80 * t;
+        let vy1 = 0;
+
+        
+        ctx.beginPath();
+        ctx.arc(px1, py1, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        
+        
+        const scale = 0.5; 
+        drawArrow(ctx, px1, py1, px1 + vx1 * scale, py1 + vy1 * scale, 'red', 3);
+
+
+        
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(400, 100);
+        ctx.strokeStyle = '#ccc'; 
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        
+        
+        
+        
+        
+        let u = t / 2;
+        let px2 = 50 + 160 * (1 - Math.pow(1 - u, 2));
+        let py2 = 100;
+        let vx2 = 160 * (1 - u);
+        let vy2 = 0;
+
+        
+        ctx.beginPath();
+        ctx.arc(px2, py2, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        
+        drawArrow(ctx, px2, py2, px2 + vx2 * scale, py2 + vy2 * scale, 'red', 3);
+
+        t += 0.02;
+        if (t > 2.2) t = 0; 
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>Here&rsquo;s a pair of circles, parameterized in opposite directions. Notice that at the point where the two circles meet, the positions and tangents are the same (the tangents both point downward).</p>
+<canvas id="tangent-6-meeting" width="300" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-6-meeting');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    const R = 40;
+    const C1 = {x: 100, y: 100};
+    const C2 = {x: 180, y: 100};
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.beginPath();
+        ctx.arc(C1.x, C1.y, R, 0, Math.PI * 2);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(C2.x, C2.y, R, 0, Math.PI * 2);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        
+        let cycle = t % (Math.PI * 2);
+
+        
+        let theta1 = cycle;
+        let p1 = { x: C1.x + R * Math.cos(theta1), y: C1.y + R * Math.sin(theta1) };
+        let v1 = { x: -R * Math.sin(theta1), y: R * Math.cos(theta1) }; 
+
+        
+        let theta2 = Math.PI - cycle;
+        let p2 = { x: C2.x + R * Math.cos(theta2), y: C2.y + R * Math.sin(theta2) };
+        let v2 = { x: -R * Math.sin(theta2) * -1, y: R * Math.cos(theta2) * -1 }; 
+
+        const arrowLen = 40;
+        const lineLen = 300;
+
+        
+        let len1 = Math.sqrt(v1.x*v1.x + v1.y*v1.y);
+        let u1x = v1.x / len1;
+        let u1y = v1.y / len1;
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x - u1x * lineLen, p1.y - u1y * lineLen);
+        ctx.lineTo(p1.x + u1x * lineLen, p1.y + u1y * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ctx, p1.x, p1.y, p1.x + u1x * arrowLen, p1.y + u1y * arrowLen, 'red', 3);
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        
+        let len2 = Math.sqrt(v2.x*v2.x + v2.y*v2.y);
+        let u2x = v2.x / len2;
+        let u2y = v2.y / len2;
+
+        ctx.beginPath();
+        ctx.moveTo(p2.x - u2x * lineLen, p2.y - u2y * lineLen);
+        ctx.lineTo(p2.x + u2x * lineLen, p2.y + u2y * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrow(ctx, p2.x, p2.y, p2.x + u2x * arrowLen, p2.y + u2y * arrowLen, 'red', 3);
+        ctx.beginPath();
+        ctx.arc(p2.x, p2.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        t += 0.05;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>Here is a curve made of half of each of those circles. Notice that when we &ldquo;switch&rdquo; from one circle to the other, the tangent vector is the same. However, the way that it is changing switches.</p>
+<canvas id="tangent-5-scurve" width="200" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('tangent-5-scurve');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    const R = 40;
+    const C1 = {x: 50, y: 100};
+    const C2 = {x: 130, y: 100};
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.beginPath();
+        
+        ctx.arc(C1.x, C1.y, R, Math.PI, 0, false);
+        
+        ctx.arc(C2.x, C2.y, R, Math.PI, 0, true);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        let p, v;
+        let localT = t % 2; 
+        
+        if (localT < 1) { 
+            
+            let theta = Math.PI * (1 - localT); 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            let angle = Math.PI + Math.PI * localT;
+            p = { x: C1.x + R * Math.cos(angle), y: C1.y + R * Math.sin(angle) };
+            
+            
+            v = { x: -R * Math.sin(angle) * Math.PI, y: R * Math.cos(angle) * Math.PI };
+        } else { 
+            
+            
+            
+            
+            
+            
+            let angle = Math.PI - Math.PI * (localT - 1);
+            p = { x: C2.x + R * Math.cos(angle), y: C2.y + R * Math.sin(angle) };
+            
+            
+            v = { x: R * Math.sin(angle) * Math.PI, y: -R * Math.cos(angle) * Math.PI };
+        }
+
+        
+        const len = Math.sqrt(v.x*v.x + v.y*v.y);
+        const ux = v.x / len;
+        const uy = v.y / len;
+        const lineLen = 300;
+        ctx.beginPath();
+        ctx.moveTo(p.x - ux * lineLen, p.y - uy * lineLen);
+        ctx.lineTo(p.x + ux * lineLen, p.y + uy * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const arrowLen = 40;
+        drawArrow(ctx, p.x, p.y, p.x + ux * arrowLen, p.y + uy * arrowLen, 'red', 3);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        t += 0.02;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<h2 id="computing-tangents">Computing Tangents</h2>
+<p>We compute the tangent vector by taking the derivative of the parametric function with respect to the parameter. If the parametric function is a vector valued function of the parameter, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span>, then the tangent is also a vector valued function (I&rsquo;ll call it <strong>f&rsquo;</strong>)</p>
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0519em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathbf mtight">′</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.113em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">u</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathbf" style="margin-right:0.10903em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (1)
+    </div>
+</div>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Avoiding multi-variable calculus</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>If writing things in vector notation (or, in that case, a mix of vector and scalar notation) is uncomfortable, we can write things out as individual scalars. We write the parametric function as separate functions for x and y:</p>
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:3em;vertical-align:-1.25em;"></span><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.75em;"><span style="top:-3.91em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">x</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.75em;"><span style="top:-3.91em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span></span></span><span class="tag"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.75em;"><span style="top:-3.75em;"><span class="pstrut" style="height:2.84em;"></span><span class="eqn-num"></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:2.84em;"></span><span class="eqn-num"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (2)
+    </div>
+</div>
+<p>So the tangent (at <em>u</em>) is:</p>
+<div class="math-display" >
+    <div class="math-content"><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.826em;vertical-align:-2.163em;"></span><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.663em;"><span style="top:-4.663em;"><span class="pstrut" style="height:3.427em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.427em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.163em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.663em;"><span style="top:-4.663em;"><span class="pstrut" style="height:3.427em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">u</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.427em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">u</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.163em;"><span></span></span></span></span></span></span></span><span class="tag"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.663em;"><span style="top:-4.663em;"><span class="pstrut" style="height:3.427em;"></span><span class="eqn-num"></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.427em;"></span><span class="eqn-num"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.163em;"><span></span></span></span></span></span></span></span></span></div>
+    <div class="math-number">
+        (3)
+    </div>
+</div>
+
+    </div>
+</details>
+</div>
+<p>When we program, we need to define the tangent function somehow. There are many different ways to compute derivatives. For now, we&rsquo;ll use a straightforward way: we&rsquo;ll do the calculus by hand (take the derivative of the parametric function), and put that function into the code along with the parametric function.</p>
+<p>Here is another version of the demo from <a href="../../docs/02/">Page &nbsp;2&nbsp; (Parametric Curves)</a> that shows the tangent vectors for each of the curves. This means the program must compute the tangents for each of the functions. In this case, I chose to compute the position and tangent in one function; it is convenient to keep these things together. If you look at the parametric functions, you will notice that they return a list of four numbers: <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>.</p>
+<p>
+
+
+
+
+
+<div id="box-03-06-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">03-06-01</span>&nbsp;
+    <input type="checkbox" id="check-03-06-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/03-06-01.html class="boxtitlelink">03-06-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/03-06-01.js" class="boxtitlelink">03-06-01.js</a>
+    <iframe
+        title="ex-curves"
+        src="../../for_students/03-06-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-03-06-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-03-06-01-0"></td>
+                <td>standard</td>
+                <td>implement the correct tangent vector for the parabola</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>.</p>
+<p>Note that we did not put the tangent in for the parabola; that is left as an <strong>exercise.</strong> Have the <code>parabola</code> function in 
+<a href="../../for_students/03-06-01.js" class="box-html" data-tag="ex-curves">03-06-01.js</a>
+ return the correct derivatives. This is good practice at doing calculus in code for curves. We&rsquo;ll do more later. (Note: the <em>drawing code</em> does the 40% scaling; the function should return the actual derivatives that make up the tangent.)</p>
+<p>This figure is similar to Figure 1, except that we are now drawing the tangent vectors (the drawing code scales the tangents by 40% so they fit nicely in the box).</p>
+<p>Observe that in all cases (after you fix the derivatives for the parabola), the tangent vector points in the direction that the pen moves as the parameter goes up in value.</p>
+<p>Notice that for the first two lines the tangent is constant, while for the third line (the one that starts slowly and speeds up) the tangent grows as the point moves downward.</p>
+<p>And notice how the tangent changes abruptly for the V shape and disconnected lines. This is a discontinuity in the derivatives.</p>
+<h2 id="beyond-tangents">Beyond Tangents</h2>
+<p>A few other properties of curves will be useful for our discussion.</p>
+<p>The second derivative of the curve, the rate that the tangent vector changes, is often useful. If we think of the tangent vector as the velocity, then the second derivative is the acceleration.</p>
+<p>Here, we draw the acceleration vector in green (along with the tangent vector). For the circle, the tangent vector is constantly changing, it is always turning towards the center of the circle. Because the dot is moving at a constant rate around the circle, there is no change in the velocity in the direction the dot is traveling; all of the change is perpendicular to the direction of travel.</p>
+<canvas id="accvector-1-circle" width="200" height="200" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('accvector-1-circle');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 60;
+    let angle = 0;
+    
+    const ACC_SCALE = 0.6;
+
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function drawAcceleration(ctx, p, d2, color='green') {
+        const ax = d2.dx * ACC_SCALE;
+        const ay = d2.dy * ACC_SCALE;
+        drawArrow(ctx, p.x, p.y, p.x + ax, p.y + ay, color, 3);
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        
+        const px = centerX + radius * Math.cos(angle);
+        const py = centerY + radius * Math.sin(angle);
+
+        
+        const d1 = {
+            dx: -radius * Math.sin(angle),
+            dy: radius * Math.cos(angle)
+        };
+        
+        
+        const d2 = {
+            dx: -radius * Math.cos(angle),
+            dy: -radius * Math.sin(angle)
+        };
+
+        
+        const len = Math.sqrt(d1.dx*d1.dx + d1.dy*d1.dy);
+        const ndx = d1.dx/len; 
+        const ndy = d1.dy/len;
+        const lineLen = 300;
+        ctx.beginPath();
+        ctx.moveTo(px - ndx * lineLen, py - ndy * lineLen);
+        ctx.lineTo(px + ndx * lineLen, py + ndy * lineLen);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        const vectorScale = 40; 
+        drawArrow(ctx, px, py, px + ndx * vectorScale, py + ndy * vectorScale, 'red', 3);
+
+        
+        drawAcceleration(ctx, {x:px, y:py}, d2);
+
+        
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        angle += 0.02;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>In contrast, here is the example from above where things do not change direction, but they do change speed. Here, the acceleration is constant (the motion is parabolic, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>) and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
+<canvas id="accvector-1c-linespeed" width="400" height="150" style="border: 1px solid #ccc; display: block; margin: 20px auto;"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('accvector-1c-linespeed');
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+    const ACC_SCALE = 0.6;
+    
+    function drawArrow(ctx, fromX, fromY, toX, toY, color, width) {
+        const headLength = 10;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 1) return;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(toX, toY);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    
+    function drawAcceleration(ctx, p, d2, color='green') {
+        const ax = d2.dx * ACC_SCALE;
+        const ay = d2.dy * ACC_SCALE;
+        drawArrow(ctx, p.x, p.y, p.x + ax, p.y + ay, color, 3);
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 50);
+        ctx.lineTo(400, 50);
+        ctx.strokeStyle = '#ccc'; 
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        
+        
+        let px1 = 50 + 40 * t * t;
+        let py1 = 50;
+        let vx1 = 80 * t;
+        let vy1 = 0;
+        let ax1 = 80;
+        let ay1 = 0;
+
+        ctx.beginPath();
+        ctx.arc(px1, py1, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        
+        const scale = 0.5;
+        drawArrow(ctx, px1, py1, px1 + vx1 * scale, py1 + vy1 * scale, 'red', 3);
+        
+        drawAcceleration(ctx, {x:px1, y:py1}, {dx:ax1, dy:ay1});
+
+
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(400, 100);
+        ctx.strokeStyle = '#ccc'; 
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        
+        let u = t / 2;
+        let px2 = 50 + 160 * (1 - Math.pow(1 - u, 2));
+        let py2 = 100;
+        let vx2 = 160 * (1 - u);
+        let vy2 = 0;
+        
+        
+        let ax2 = -80;
+        let ay2 = 0;
+
+        ctx.beginPath();
+        ctx.arc(px2, py2, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+
+        drawArrow(ctx, px2, py2, px2 + vx2 * scale, py2 + vy2 * scale, 'red', 3);
+        
+        drawAcceleration(ctx, {x:px2, y:py2}, {dx:ax2, dy:ay2});
+
+        t += 0.02;
+        if (t > 2.2) t = 0;
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+<p>We can think of acceleration in two parts: the amount of change in the direction of travel, and the amount of change in other directions (perpendicular to the tangent, or direction of travel).</p>
+<p>We use the term <strong>normal</strong> to mean &ldquo;perpendicular to the tangent.&rdquo; As a direction, it is just perpendicular (the infinite line), but as a vector we use it to be pointing in the direction towards the center of the turn. For example, with the circle, the normal vector is always inward. For the line, we can define a normal direction line, but we don&rsquo;t know if it should be right or left of the direction of travel.</p>
+<p>More formally, the <strong>normal</strong> is the projection of the 2nd derivative vector into the space perpendicular to the tangent (the tangent line in 2D).</p>
+<h2 id="why-do-we-care">Why do we care?</h2>
+<p>Tangents and normals are important properties in graphics because they convey how things curve. This is important when we think about describing shape. It is essential when we try to define what it means for a shape to be &ldquo;smooth&rdquo;, which we will do on the next page.</p>
+<a href="../../docs/07/" class="Next__Page">Next: Page &nbsp;7&nbsp;-&nbsp;Smoothness and Continuity</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 3: Curves</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Curves in 2D)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Introduction: What is a Curve, Anyway? </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Parametric Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Implicit Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Subdivision Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Types of Curves: How to Choose? </a></li>
+        <li class="Side__Item Side__Selected"> 6: Curve Properties </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Smoothness and Continuity </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Polynomial Pieces </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Comparing Interpolation Methods </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Interpolation and Hermite Cubics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Cardinal Cubics and Interpolation </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Approximating curves. </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Bézier Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Geometric Approaches to Beziers </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Bézier Math </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Béziers in APIs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: B-Splines </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Arc-Length Parameterizations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Drawing Curves </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Curve review </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: The 559 2D UI Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: The Train: Intro </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Train </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: The Train: Assignment </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Student&#39;s Choice! </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_03",  
+            pageId:     "p06",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "03",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

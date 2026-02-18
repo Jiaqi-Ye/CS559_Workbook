@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f4f9; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0;">
+
+    <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
+        <h2 style="margin: 0 0 10px 0;">Piecewise Cubic Hermite Interpolation</h2>
+        <p style="color: #666; margin: 0 0 20px 0; font-size: 0.9rem; max-width: 600px; line-height: 1.4;">
+            6 points connected by cubic segments. <br>
+            Drag the <strong>Black Dots</strong> to move positions.<br>
+            Drag the <strong>Red Handles</strong> to define the tangent vectors.
+        </p>
+        
+        <canvas id="cHermite" width="660" height="400" style="background: #fff; border: 1px solid #eee; cursor: crosshair; touch-action: none; display: block; margin: auto;"></canvas>
+    </div>
+
+<script>
+(function() {
+    // --- Configuration ---
+    const WIDTH = 660;
+    const HEIGHT = 400;
+    const PT_RADIUS = 8;
+    const HANDLE_RADIUS = 6;
+    const HIT_THRESHOLD = 20;
+
+    const canvas = document.getElementById('cHermite');
+    const ctx = canvas.getContext('2d');
+
+    // --- State ---
+    // points array holds objects: { p: {x,y}, h: {x,y} }
+    // p = main point, h = handle endpoint
+    const points = [];
+    const numPoints = 6;
+    
+    // Initialize in a wavy pattern with some default tangents
+    for (let i = 0; i < numPoints; i++) {
+        const x = 50 + i * ((WIDTH - 100) / (numPoints - 1));
+        const y = 200 + Math.sin(i * 1.0) * 80;
+        points.push({
+            p: { x: x, y: y },
+            // Initial handle placed 50px to the right, slightly tilted
+            h: { x: x + 50, y: y + Math.cos(i * 1.0) * 50 }
+        });
+    }
+
+    // dragInfo: { index: number, type: 'point'|'handle' }
+    let dragInfo = null;
+
+    // --- Interaction Logic ---
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function distSq(p1, p2) {
+        return (p1.x - p2.x)**2 + (p1.y - p2.y)**2;
+    }
+
+    function handleStart(evt) {
+        evt.preventDefault();
+        const pos = getMousePos(evt);
+        const threshSq = HIT_THRESHOLD * HIT_THRESHOLD;
+        
+        // Hit test logic: Check handles first (they are smaller targets on top)
+        for (let i = 0; i < points.length; i++) {
+            if (distSq(pos, points[i].h) < threshSq) {
+                dragInfo = { index: i, type: 'handle' };
+                draw();
+                return;
+            }
+        }
+        // Check main points next
+        for (let i = 0; i < points.length; i++) {
+            if (distSq(pos, points[i].p) < threshSq) {
+                dragInfo = { index: i, type: 'point' };
+                draw();
+                return;
+            }
+        }
+    }
+
+    function handleMove(evt) {
+        if (!dragInfo) return;
+        evt.preventDefault();
+        const pos = getMousePos(evt);
+
+        // Clamp to bounds
+        pos.x = Math.max(0, Math.min(WIDTH, pos.x));
+        pos.y = Math.max(0, Math.min(HEIGHT, pos.y));
+        
+        const ptObj = points[dragInfo.index];
+
+        if (dragInfo.type === 'handle') {
+            // Just move the handle endpoint
+            ptObj.h.x = pos.x;
+            ptObj.h.y = pos.y;
+        } else {
+            // Moving the main point.
+            // Crucial: We must maintain the relative tangent vector!
+            const dx = pos.x - ptObj.p.x;
+            const dy = pos.y - ptObj.p.y;
+            
+            ptObj.p.x = pos.x;
+            ptObj.p.y = pos.y;
+            
+            // Move handle by same amount
+            ptObj.h.x += dx;
+            ptObj.h.y += dy;
+        }
+        draw();
+    }
+
+    function handleEnd() {
+        dragInfo = null;
+        draw();
+    }
+
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    // Touch support
+    canvas.addEventListener('touchstart', handleStart, {passive: false});
+    canvas.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('touchend', handleEnd);
+
+
+    // --- Math: Cubic Hermite ---
+    // t: 0->1
+    // p0, p1: start/end positions
+    // v0, v1: start/end tangent vectors
+    function getHermitePt(t, p0, p1, v0, v1) {
+        const t2 = t * t;
+        const t3 = t2 * t;
+
+        // Hermite Basis Functions
+        const h00 = 2*t3 - 3*t2 + 1;      // Weight for P0
+        const h10 = t3 - 2*t2 + t;        // Weight for V0
+        const h01 = -2*t3 + 3*t2;         // Weight for P1
+        const h11 = t3 - t2;              // Weight for V1
+
+        return {
+            x: h00*p0.x + h10*v0.x + h01*p1.x + h11*v1.x,
+            y: h00*p0.y + h10*v0.y + h01*p1.y + h11*v1.y
+        };
+    }
+
+    // --- Rendering ---
+    function draw() {
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        
+        // 1. Grid
+        ctx.strokeStyle = "#f5f5f5";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for(let x=0; x<WIDTH; x+=50) { ctx.moveTo(x,0); ctx.lineTo(x,HEIGHT); }
+        for(let y=0; y<HEIGHT; y+=50) { ctx.moveTo(0,y); ctx.lineTo(WIDTH,y); }
+        ctx.stroke();
+
+        // 2. The CurveSegments
+        ctx.lineWidth = 3;
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0Obj = points[i];
+            const p1Obj = points[i+1];
+            
+            // Calculate vectors from the handle positions
+            const v0 = { x: p0Obj.h.x - p0Obj.p.x, y: p0Obj.h.y - p0Obj.p.y };
+            const v1 = { x: p1Obj.h.x - p1Obj.p.x, y: p1Obj.h.y - p1Obj.p.y };
+
+            // Alternating colors
+            ctx.strokeStyle = (i % 2 === 0) ? "#2563eb" : "#3b82f6"; // Dark/Light Blue
+            ctx.beginPath();
+            ctx.moveTo(p0Obj.p.x, p0Obj.p.y);
+            // Increase steps for smoother tangents
+            for (let t = 0; t <= 1; t += 0.02) {
+                const pt = getHermitePt(t, p0Obj.p, p1Obj.p, v0, v1);
+                ctx.lineTo(pt.x, pt.y);
+            }
+            // Ensure exact endpoint connection
+            ctx.lineTo(p1Obj.p.x, p1Obj.p.y);
+            ctx.stroke();
+        }
+
+        // 3. UI Elements (Points and Handles)
+        points.forEach((ptObj, idx) => {
+            const isDraggingP = dragInfo && dragInfo.index === idx && dragInfo.type === 'point';
+            const isDraggingH = dragInfo && dragInfo.index === idx && dragInfo.type === 'handle';
+
+            // Tangent Line connector
+            ctx.strokeStyle = "#ef4444"; // Red
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ptObj.p.x, ptObj.p.y);
+            ctx.lineTo(ptObj.h.x, ptObj.h.y);
+            ctx.stroke();
+
+            // Main Point
+            ctx.beginPath();
+            ctx.arc(ptObj.p.x, ptObj.p.y, PT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = "#000";
+            if (isDraggingP) {
+                ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 8;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Handle Point
+            ctx.beginPath();
+            //Draw handle as a square to differentiate visually
+            const hr = HANDLE_RADIUS;
+            ctx.rect(ptObj.h.x - hr, ptObj.h.y - hr, hr*2, hr*2);
+            ctx.fillStyle = "#ef4444"; // Red
+            if (isDraggingH) {
+                ctx.shadowColor = "rgba(239, 68, 68, 0.4)"; ctx.shadowBlur = 8;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+    }
+
+    // Init
+    draw();
+
+})();
+</script>
+</body>
+</html>
