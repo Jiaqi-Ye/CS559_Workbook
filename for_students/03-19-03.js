@@ -17,8 +17,21 @@ function myTri(t) {
 }
 
 function myTriAL(t) {
-  // students should write this!
-  return [0, 0];
+  // t is expected to be in range [0, 3]
+  // Total perimeter is 130 + 120 + 50 = 300
+  // Map t to distance: s = (t / 3) * 300 = 100 * t
+  let s = 100 * t;
+
+  if (s < 130) {
+    // Progress on segment 1 (0 to 1)
+    return lerpPt(triPt1, triPt2, s / 130);
+  } else if (s < 250) {
+    // Progress on segment 2 (0 to 1)
+    return lerpPt(triPt2, triPt3, (s - 130) / 120);
+  } else {
+    // Progress on segment 3 (0 to 1)
+    return lerpPt(triPt3, triPt1, (s - 250) / 50);
+  }
 }
 
 

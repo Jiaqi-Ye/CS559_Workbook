@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="300px" height="200px">
-    <path stroke="black" fill ="none" stroke-width="5" d="M20,20 C 128,20 128,128 236,74" />
-</svg>
 
+  <!-- First third -->
+  <path stroke="red" fill="none" stroke-width="5"
+        d="M20,20 C56,20 80,32 100,46" />
+
+  <!-- Second third -->
+  <path stroke="green" fill="none" stroke-width="5"
+        d="M100,46 C120,60 144,76 156,84" />
+
+  <!-- Final third -->
+  <path stroke="blue" fill="none" stroke-width="5"
+        d="M156,84 C168,92 200,92 236,74" />
+
+</svg>

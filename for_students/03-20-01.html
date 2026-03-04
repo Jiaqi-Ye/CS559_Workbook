@@ -2,17 +2,41 @@
 <html>
   <head>
     <link rel="stylesheet" href="../libs/CS559/style559.css" />
+    <title>Page 20: Drawing Curves</title>
+    <style>
+      body { font-family: sans-serif; }
+      .controls { margin: 10px 0; }
+    </style>
   </head>
 
   <body>
-    <canvas id="canvas1" height="400" width="400"></canvas>
+    <h2>Spiral Drawing</h2>
 
-    <!-- students should add slider and checkbox -->
+    <div class="controls">
+      <!-- Checkbox to switch between dots and lines -->
+      <label>
+        <input type="checkbox" id="lineCheck" checked />
+        Connect dots with lines
+      </label>
+      <br/><br/>
+
+      <!-- Checkbox to switch to Bezier approximation -->
+      <label>
+        <input type="checkbox" id="bezierCheck" />
+        Use Bezier approximation
+      </label>
+      <br/><br/>
+
+      <!-- Slider to control number of points -->
+      <label>
+        Number of points: 
+        <span id="numPointsLabel">100</span>
+      </label>
+      <input type="range" id="numPointsSlider" min="10" max="1000" value="100" />
+    </div>
+
+    <canvas id="canvas1" width="400" height="400" style="border:1px solid #ccc;"></canvas>
 
     <script src="03-20-01.js" type="module" defer></script>
   </body>
 </html>
-
-
-
-<!-- CS559 2026 Workbook -->

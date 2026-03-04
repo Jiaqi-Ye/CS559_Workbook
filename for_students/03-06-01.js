@@ -72,9 +72,12 @@ function disconnect(u) {
  * be the actual functions
  */
 function parabola(u) {
-    return [20+80 * u, 100 - 400 * (u - 0.5) * (u - 0.5), 
-        // student changes these numbers to something else
-        -100,100 ];
+    return [
+        20 + 80 * u, 
+        100 - 400 * (u - 0.5) * (u - 0.5), 
+        80,                // x'
+        -800 * (u - 0.5)   // y'
+    ];
 }
 
 /**
