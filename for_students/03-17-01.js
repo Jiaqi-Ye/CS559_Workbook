@@ -16,7 +16,7 @@ function quadraticAsCubic(ctx, p0x, p0y, p1x, p1y, p2x, p2y) {
     const c2y = p2y + (2 / 3) * (p1y - p2y);
     ctx.bezierCurveTo(c1x, c1y, c2x, c2y, p2x, p2y);
 }
-
+  
 ctx.lineWidth = 5;
 ctx.fillStyle = "#CCC";
 ctx.strokeStyle = "black";
