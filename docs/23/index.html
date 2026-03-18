@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 23: Sky Boxes</h1>
+		</header>
+		<div class="content post__content clearfix"><p>One use of an environment map is a <strong>Sky Box</strong>. A sky box basically places a picture as the background, using an environment map instead of a solid color.</p>
+<p>The idea of a sky box (and environment maps in general) is that the environment is infinitely far away (so all regular objects are in front of it). This means that moving doesn&rsquo;t change what you see (if you move, the environment is still infinitely far away). Direction does matter: if you turn your head, you see different things.</p>
+<p>A Sky Box is not just a big box (or Sphere) around the objects in the world. It needs to do special things to be &ldquo;infinitely far away&rdquo;.</p>
+<ol>
+<li>A SkyBox moves with the camera (so you can never get close to/pass through the wall). Think about it: if something is &ldquo;infinitely far away&rdquo; then moving towards it doesn&rsquo;t make it get any closer.</li>
+<li>A SkyBox is drawn with its depth values to be infinitely far away, so any object drawn is closer than it. Think about it: if something is &ldquo;infinitely far away&rdquo; everything that is finite is closer.</li>
+<li>A SkyBox isn&rsquo;t too huge (because then it might be beyond the far plane of the camera), but it works as if it is infinitely far because it is drawn first and #2. Think about it: &ldquo;infinitely far&rdquo; is beyond the &ldquo;far&rdquo; distance of the camera, so it wouldn&rsquo;t be drawn unless we did something special.</li>
+</ol>
+<h2 id="fake-sky-boxes">Fake Sky Boxes</h2>
+<p>Implementing the three things listed above can be tricky. A standard approach is to make a &ldquo;fake sky box&rdquo;. It makes a big box (or sphere) to surround the world, and places the environment map as a texture on its surface.</p>
+<p>This is bad for a number of reasons: the camera can move to get close to the box, which can break the illusion; it isn&rsquo;t infinitely far away, so objects can move beyond it; there can be problems with it interfering with the far cutoff of the camera; etc.</p>
+<p>Fortunately, three.js builds in correct sky boxes.</p>
+<h2 id="sky-boxes-in-threejs">Sky Boxes in Three.js</h2>
+<p>Using a sky box in three.js is easy. Create an environment map, and assign it to the <code>background</code> of the <code>Scene</code> object. It can take any type of environment map, include a <code>CubeTexture</code> or an equirectangular projection map. For the CS559 Framework, we can refer to it with <code>world.scene</code>, given <code>world</code> is of class <code>GrWorld</code>.</p>
+<p>Of course, confirming that the built-in SkyBoxes are really SkyBoxes is hard because it&rsquo;s not well documented. I went and looked at the source code to confirm it.</p>
+<p><code>Scene</code> objects have two different slots that we can assign environments to: <code>scene.background</code> and <code>scene.environment</code>.</p>
+<p>In Three.js, both <code>scene.background</code> and <code>scene.environment</code> are used to apply textures (usually 360-degree HDR environments) to your scene, but they serve completely different purposes in the rendering pipeline.</p>
+<p>The short answer is: <code>background</code> is what the camera sees, while <code>environment</code> is what the 3D objects feel (in terms of light and reflection). The <code>background</code> creates the skybox. The <code>environment</code> serves as the source of reflections (for environment mapping, which we will discuss soon), and physically-based lighting (again, coming soon).</p>
+<h2 id="the-not-really-a-skybox-exercise">The Not-Really-A-SkyBox Exercise</h2>
+<p>Enough things on the web use the term &ldquo;Sky Box&rdquo; (but aren&rsquo;t really &ldquo;Sky Boxes&rdquo;) that we will let you make &ldquo;A Big Box with a texture on it that surrounds your world&rdquo; for this exercise. Just make sure you realize why this isn&rsquo;t really a sky box (which will make for a good exam question).</p>
+<p>This is strange because real SkyBoxes are built-in (maybe it&rsquo;s a newer feature?) and really easy.</p>
+<p>In the past, we had students implement fake skyboxes, which is why this was called the &ldquo;Not-Really-A-SkyBox Exercise&rdquo;. Now, you just need to make a real skybox - which is easy. This is more about checking that you can find reasonable environment maps.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>What you must do:</p>
+<ol>
+<li>Put some objects onto the ground plane. You can use stuff from other exercises, or just some primitives.</li>
+<li>Find (or create) a cubic texture appropriate for a SkyBox and use it.</li>
+</ol>
+<p>Don&rsquo;t forget to add the texture to the repo and answer the type-in box about where you got the environment!</p>
+<p>The code goes into 
+<a href="../../for_students/05-23-01.js" class="box-html" data-tag="ex-real-sky">05-23-01.js</a>
+.</p>
+
+<div id="box-05-23-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-23-01</span>&nbsp;
+    <input type="checkbox" id="check-05-23-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-23-01.html class="boxtitlelink">05-23-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-23-01.js" class="boxtitlelink">05-23-01.js</a>
+    <iframe
+        title="ex-real-sky"
+        src="../../for_students/05-23-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-23-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-23-01-0"></td>
+                <td>standard</td>
+                <td>correct skybox</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<div class="input-group">
+    <label for="how-did-you-get-your-environment" style="vertical-align: top;">How did you get your environment?</label>
+    <textarea id="how-did-you-get-your-environment" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<h2 id="a-hint-finding-environment-maps">A Hint: Finding Environment Maps</h2>
+<p>To make an environment map, you need to make a full 360 picture - one that covers all directions. Taking these with a camera can be tricky (even if you have a special lens, you have to worry about having your feet in the picture). You can try painting one. Or you can find them on the web.</p>
+<p>In the past, we had a long section about format conversions. But now, three.js can take most common formats. If you find an equirectangular projection? Three.js can use it. If you find a high dynamic range image? No problem (three.js can even use it for lighting).</p>
+<p>There is a slight catch. Creators often make massive environment map textures. Please don&rsquo;t put these into your repository. We need to keep the file sizes small (we have to download a whole class&rsquo; assignments, and if everyone gave gigabytes of imagery and models, we would have a problem). Most places where you find environment maps provide them in various sizes. For example, at <a href="https://ambientcg.com/">ambientcg.com</a>, they offer the maps in sizes ranging from small (1K) to huge (16K). These numbers are the resolution (width in pixels) - the file sizes grow rapidly (the 1K image is 1.9MB, the 4K image is 26MB, the 16K image is 373MB). The small sizes are sufficient for what we are doing.</p>
+<p>So, part of this exercise is for you to explore the web to find interesting things, and then to figure out how to identify the right format and appropriate data. If you go to <a href="https://ambientcg.com/">ambientcg.com</a>, you need to make good choices. Even when you find an environment you like, you need to choose the right data, and the right files in that data (hint: you probably need the <code>.exr</code> file). If they don&rsquo;t provide an appropriate size, you will need to reduce the size.</p>
+<h2 id="environment-maps-for-backgrounds">Environment maps for backgrounds.</h2>
+<p>We saw how we can use an environment map to provide a background for our 3D graphics, and you practiced programming with environment maps.</p>
+<p>Before we go on, now might be a good time to make a checkpoint and write out the <code>.json</code> for your localstore.</p>
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-widget-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+<a href="../../docs/24/" class="Next__Page">Next: Page &nbsp;24&nbsp;-&nbsp;Environment Mapping (Reflectance)</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Selected"> 23: Sky Boxes </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p23",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

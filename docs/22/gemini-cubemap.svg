@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 580" width="100%" height="100%" style="background-color: #ffffff;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <style>
+    .title { font-family: sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .label { font-family: sans-serif; font-size: 14px; font-weight: bold; fill: #333; text-anchor: middle; }
+    .sub-label { font-family: sans-serif; font-size: 13px; fill: #555; text-anchor: middle; }
+    .tiny-label { font-family: sans-serif; font-size: 11px; font-weight: bold; fill: #333; text-anchor: middle; dominant-baseline: middle; }
+    .desc { font-family: sans-serif; font-size: 13px; fill: #666; text-anchor: middle; }
+    
+    /* Face Colors */
+    .face-px { fill: #FF8A8A; } /* Right +X: Red */
+    .face-nx { fill: #85E085; } /* Left -X: Green */
+    .face-py { fill: #82C0FF; } /* Top +Y: Blue */
+    .face-ny { fill: #FFE066; } /* Bottom -Y: Yellow */
+    .face-pz { fill: #D9A6FF; } /* Front +Z: Purple */
+    .face-nz { fill: #FFB3E6; } /* Back -Z: Pink */
+    
+    .cube-face { stroke: #333; stroke-width: 1.5; stroke-linejoin: round; opacity: 0.9; }
+    .flat-face { stroke: #333; stroke-width: 1.5; }
+  </style>
+
+  <text x="200" y="40" text-anchor="middle" class="title">1. 3D Cube (Viewed from Inside)</text>
+  
+  <g transform="translate(0, 40)">
+    <polygon points="200,200 122,155 200,110 278,155" class="face-py cube-face" />
+    <polygon points="200,200 122,155 122,245 200,290" class="face-pz cube-face" />
+    <polygon points="200,200 278,155 278,245 200,290" class="face-px cube-face" />
+
+    <line x1="200" y1="200" x2="239" y2="222.5" stroke="#333" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrow)"/> <line x1="200" y1="200" x2="161" y2="222.5" stroke="#333" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrow)"/> <line x1="200" y1="200" x2="200" y2="155" stroke="#333" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrow)"/> <circle cx="200" cy="200" r="4" fill="#111"/>
+    <rect x="175" y="176" width="50" height="16" fill="#fff" opacity="0.7" rx="3"/>
+    <text x="200" y="188" class="tiny-label" fill="#111">viewer</text>
+
+    <text x="200" y="145" class="label">Top (+Y)</text>
+    <text x="160" y="245" class="label">Front (+Z)</text>
+    <text x="245" y="245" class="label">Right (+X)</text>
+  </g>
+
+  <line x1="335" y1="210" x2="400" y2="210" stroke="#555" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="367" y="200" class="label" fill="#555">unfold</text>
+
+  <text x="580" y="40" text-anchor="middle" class="title">2. Horizontal Cross Layout (1 Image File)</text>
+
+  <g transform="translate(0, 10)" filter="url(#shadow)">
+    <rect x="530" y="50" width="100" height="100" class="face-py flat-face"/>
+    <text x="580" y="95" class="label">Top</text>
+    <text x="580" y="115" class="sub-label">(+Y)</text>
+
+    <rect x="430" y="150" width="100" height="100" class="face-nx flat-face"/>
+    <text x="480" y="195" class="label">Left</text>
+    <text x="480" y="215" class="sub-label">(-X)</text>
+
+    <rect x="530" y="150" width="100" height="100" class="face-pz flat-face"/>
+    <text x="580" y="195" class="label">Front</text>
+    <text x="580" y="215" class="sub-label">(+Z)</text>
+
+    <rect x="630" y="150" width="100" height="100" class="face-px flat-face"/>
+    <text x="680" y="195" class="label">Right</text>
+    <text x="680" y="215" class="sub-label">(+X)</text>
+
+    <rect x="730" y="150" width="100" height="100" class="face-nz flat-face"/>
+    <text x="780" y="195" class="label">Back</text>
+    <text x="780" y="215" class="sub-label">(-Z)</text>
+
+    <rect x="530" y="250" width="100" height="100" class="face-ny flat-face"/>
+    <text x="580" y="295" class="label">Bottom</text>
+    <text x="580" y="315" class="sub-label">(-Y)</text>
+  </g>
+
+  <line x1="100" y1="410" x2="900" y2="410" stroke="#E5E7EB" stroke-width="2"/>
+
+  <text x="500" y="440" text-anchor="middle" class="title">3. Common Storage Formats (Memory / Disk)</text>
+
+  <g transform="translate(130, 470)">
+    <rect x="0" y="0" width="30" height="30" class="face-px flat-face"/>
+    <text x="15" y="16" class="tiny-label">+X</text>
+    
+    <rect x="40" y="0" width="30" height="30" class="face-nx flat-face"/>
+    <text x="55" y="16" class="tiny-label">-X</text>
+    
+    <rect x="80" y="0" width="30" height="30" class="face-py flat-face"/>
+    <text x="95" y="16" class="tiny-label">+Y</text>
+    
+    <rect x="120" y="0" width="30" height="30" class="face-ny flat-face"/>
+    <text x="135" y="16" class="tiny-label">-Y</text>
+    
+    <rect x="160" y="0" width="30" height="30" class="face-pz flat-face"/>
+    <text x="175" y="16" class="tiny-label">+Z</text>
+    
+    <rect x="200" y="0" width="30" height="30" class="face-nz flat-face"/>
+    <text x="215" y="16" class="tiny-label">-Z</text>
+    
+    <text x="115" y="55" class="desc" font-weight="bold">Array of 6 Images</text>
+    <text x="115" y="75" class="desc">(THREE.CubeTextureLoader)</text>
+  </g>
+
+  <g transform="translate(435, 470)">
+    <rect x="0" y="0" width="30" height="30" class="face-nx flat-face"/>
+    <rect x="30" y="0" width="30" height="30" class="face-pz flat-face"/>
+    <rect x="60" y="0" width="30" height="30" class="face-px flat-face"/>
+    <rect x="90" y="0" width="30" height="30" class="face-nz flat-face"/>
+    <rect x="120" y="0" width="30" height="30" class="face-py flat-face"/>
+    <rect x="150" y="0" width="30" height="30" class="face-ny flat-face"/>
+    
+    <text x="90" y="55" class="desc" font-weight="bold">Horizontal Strip</text>
+    <text x="90" y="75" class="desc">(6:1 Aspect Ratio)</text>
+  </g>
+
+  <g transform="translate(730, 460)">
+    <rect x="30" y="0" width="25" height="25" class="face-py flat-face"/>
+    <rect x="5" y="25" width="25" height="25" class="face-nx flat-face"/>
+    <rect x="30" y="25" width="25" height="25" class="face-pz flat-face"/>
+    <rect x="55" y="25" width="25" height="25" class="face-px flat-face"/>
+    <rect x="30" y="50" width="25" height="25" class="face-ny flat-face"/>
+    <rect x="30" y="75" width="25" height="25" class="face-nz flat-face"/>
+    
+    <text x="42" y="125" class="desc" font-weight="bold">Vertical Cross</text>
+    <text x="42" y="145" class="desc">(3:4 Aspect Ratio)</text>
+  </g>
+
+</svg>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 5: Meshes in Three.js</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Confusingly, THREE.js uses the term <code>Geometry</code> to mean a collection of triangles, and uses the term <a href="https://threejs.org/docs/#Mesh" target="_blank">Mesh</a> to mean a <code>Geometry</code> (collection of triangles) that has a material associated with it, and all of the other stuff that a &ldquo;Graphics Object&rdquo; has (e.g., transformations and hierarchy). A THREE <code>Mesh</code> &ldquo;has a&rdquo; <code>Geometry</code>, but a <code>Geometry</code> is the collection of triangles that is more like the common graphics usage of &ldquo;mesh&rdquo;.</p>
+<p>THREE&rsquo;s terminology gets more confusing&hellip; <code>Geometry</code> doesn&rsquo;t exist in three.js anymore. We only have <code>BufferGeometry.</code></p>
+<p>In the old days, THREE had a <code>Geometry</code> class. This was a very flexible way to represent a set of triangles. <code>Geometry</code> had an API that would allow a programmer to specify collections of triangles in many different ways. It also had a class called <code>BufferGeometry</code> that organizes triangle data using data structures that are inflexible, but efficient to send to graphics hardware. Three.js deprecated and removed <code>Geometry</code>, so now we only have <code>BufferGeometry</code>. All of the workbook code has been updated, but sometimes I might refer to <code>Geometry</code> by mistake. The term <code>Geometry</code> is even part of some of Three&rsquo;s code and documentation.</p>
+<p>In this workbook, we are using <code>BufferGeometry</code>. Some of the old lecture videos may refer to the old-fashioned geometry.</p>
+<h2 id="buffers-attributes-and-geometry">Buffers, Attributes, and Geometry</h2>
+<p><code>BufferGeometry</code> is designed to use data structures that are efficient for the hardware to use for drawing. Information is stored per-vertex. The only information we store per-triangle is the list of three vertices. We store the same information for all vertices on an object.</p>
+<p>Because all vertices are the same, we can make simple blocks of memory that store the values for all the vertices as one-dimensional arrays. For example, the positions of vertices are just a long list of numbers (3 per vertex). We call blocks of memory &ldquo;buffers&rdquo;. We call a block of memory that is meant to store a list of attributes (per vertex) an <strong>attribute buffer</strong>. THREE calls them <code>BufferAttributes</code>. But they are just simple arrays of values - stored in a slightly special way to allow them to be transferred efficiently to the graphics hardware. This has to do with some technical details on how JavaScript handles types.</p>
+<p>THREE&rsquo;s <code>BufferGeometry</code> class stores a collection of triangles. It can have a number of <code>BufferAttributes</code> for the different attributes that you want associated with the vertices. It can handle the triangle indices in two ways: either it will assume that your vertices are in order (basically, your triangles are (0,1,2), (3,4,5), etc.), or you can give it a list of 3n (n=number of triangles) integers which are the indices of the vertices in the vertex list (3 per triangle).</p>
+<h2 id="a-first-example">A First Example</h2>
+<p>Here is a simple triangle:</p>
+<p>
+
+<div id="box-05-05-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-01</span>&nbsp;
+    <input type="checkbox" id="check-05-05-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-01.html class="boxtitlelink">05-05-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-01.js" class="boxtitlelink">05-05-01.js</a>
+    <iframe
+        title="eg-triangle"
+        src="../../for_students/05-05-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-01"
+    ></iframe>
+</div></p>
+<p>Here are the important lines from the code (comments removed, so the line numbers don&rsquo;t match):
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">geometry</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">BufferGeometry</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">vertices</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// bottom-left
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>     <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// bottom-right
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>     <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span>  <span style="color:#75715e">// top-center
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span><span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">positionBuffer</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">vertices</span><span style="color:#111">,</span> <span style="color:#ae81ff">3</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span><span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#39;position&#39;</span><span style="color:#111">,</span> <span style="color:#75af00">positionBuffer</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">MeshBasicMaterial</span><span style="color:#111">({</span> <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0xffff00</span><span style="color:#111">,</span> <span style="color:#75af00">side</span><span style="color:#f92672">:</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">DoubleSide</span> <span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">triangle</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">Mesh</span><span style="color:#111">(</span><span style="color:#75af00">geometry</span><span style="color:#111">,</span> <span style="color:#75af00">material</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span><span style="color:#75af00">scene</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">triangle</span><span style="color:#111">);</span></span></span></code></pre></div></p>
+<p>Because this triangle is drawn using <code>MeshBasicMaterial</code>, the only information we need is the positions. We need to create a <code>BufferGeometry</code> object that has a single attribute for <code>position</code>. Notice that there is nothing special about position: it is just an attribute (something that we will have values for each vertex).</p>
+<p>The code first creates the geometry object, as type <code>BufferGeometry</code> (line 1). We then create a buffer of the positions. To do this, it creates an array of positions (line 3-7). Notice that it is a 1D array with 9 numbers, x, y, and z for each of 3 vertices. Also, notice that it uses the special JavaScript type <code>Float32Array</code>. This is a special kind of array where all values must be floating point numbers. Using this data structure is important: it puts the numbers in memory in a form that can be used efficiently by the hardware.</p>
+<p>Once we have the memory array of values, we need to create the <code>BufferAttribute</code> object (line 9). This adds information to help three.js know how to interpret the numbers in the array. Here, we tell it that each vertex has 3 values. We assign this as the <code>position</code> attribute in the <code>BufferGeometry</code> we had created (line 10). The <code>BufferGeometry</code> can be used to create a <code>Mesh</code> that combines it with a material (line 14).</p>
+<p>Here is an extended version of the program. We will use lighting, so we need normal vectors, which need to be assigned per-vertex. We will also give each vertex its own color. This means we need to tell the material to use the per-vertex color, not a per-object color.</p>
+<p>
+
+<div id="box-05-05-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-02</span>&nbsp;
+    <input type="checkbox" id="check-05-05-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-02.html class="boxtitlelink">05-05-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-02.js" class="boxtitlelink">05-05-02.js</a>
+    <iframe
+        title="eg-triangle-colors"
+        src="../../for_students/05-05-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-02"
+    ></iframe>
+</div></p>
+<p>Notice how we can create other attributes just as we created the position attribute. Three numbers per vertex.
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Define normals (facing +Z)
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">normals</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#39;normal&#39;</span><span style="color:#111">,</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">normals</span><span style="color:#111">,</span> <span style="color:#ae81ff">3</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Define colors (RGB for each vertex)
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">colors</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// Red
+</span></span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// Green
+</span></span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span>  <span style="color:#75715e">// Blue
+</span></span></span><span style="display:flex;"><span><span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#39;color&#39;</span><span style="color:#111">,</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">colors</span><span style="color:#111">,</span> <span style="color:#ae81ff">3</span><span style="color:#111">));</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+In the future, we will see other attributes with different numbers of numbers per vertex. In fact, we can even define our own attributes. The important thing about attributes is that the information is <strong>per vertex</strong>.</p>
+<h2 id="more-than-one-triangle">More than one triangle</h2>
+<p>If we have more than one triangle, we simply have bigger arrays.</p>
+<p>
+
+<div id="box-05-05-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-03</span>&nbsp;
+    <input type="checkbox" id="check-05-05-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-03.html class="boxtitlelink">05-05-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-03.js" class="boxtitlelink">05-05-03.js</a>
+    <iframe
+        title="eg-triangle3"
+        src="../../for_students/05-05-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-03"
+    ></iframe>
+</div></p>
+<p>All we had to change from the first example is to add more data.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">vertices</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// bottom-left
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// bottom-right
+</span></span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// top-center
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> 
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> 
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> 
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> 
+</span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">]);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Notice that we repeat the vertex at (0,0,0).</p>
+<p>By default, three.js interprets the list of vertices as being consecutive for each triangle. Instead, we can specify which vertices each triangle should use. We do this by specifying an index array, which has 3 integers per triangle, each specifying which vertex to use.</p>
+<p>The default would have been equivalent to <code>[0,1,2,  3,4,5,  6,7,8]</code>. But, using indices, we can do vertex sharing, or re-order things as we wish.</p>
+<p>
+
+<div id="box-05-05-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-04</span>&nbsp;
+    <input type="checkbox" id="check-05-05-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-04.html class="boxtitlelink">05-05-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-04.js" class="boxtitlelink">05-05-04.js</a>
+    <iframe
+        title="eg-triangle3-share"
+        src="../../for_students/05-05-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-04"
+    ></iframe>
+</div></p>
+<p>This example is identical to the previous, except that it shares the vertex at the origin. Notice how we have fewer vertices in the array, and we use the <code>setIndex</code> method to specify which triangles connect to which other ones.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">vertices</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 0
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 1
+</span></span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 2
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 3
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 4
+</span></span></span><span style="display:flex;"><span>    <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 5
+</span></span></span><span style="display:flex;"><span>     <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2.0</span><span style="color:#111">,</span>  <span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#75715e">// 6
+</span></span></span><span style="display:flex;"><span><span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// technically, this needs a BufferAttribute - but three is
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// smart enough to make it for us
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0,1,2, 1,3,4, 5,6,1]), 1));
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setIndex</span><span style="color:#111">([</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">3</span><span style="color:#111">,</span><span style="color:#ae81ff">4</span><span style="color:#111">,</span> <span style="color:#ae81ff">5</span><span style="color:#111">,</span><span style="color:#ae81ff">6</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">]);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>In the code, I did things the &ldquo;correct&rdquo; way (by creating a <code>BufferAttribute</code>), but also the concise way of just passing an array. Three.js is smart enough to figure out how to convert things when needed.</p>
+<h2 id="normals">Normals</h2>
+<p>Specifying normals can be laborious. Fortunately, Three has a nice method to compute them for us. This works well when the triangles convey the shape.</p>
+<p>The <code>computeVertexNormals</code> function is a method of <code>BufferGeometry</code> documented <a href="https://threejs.org/docs/#BufferGeometry.computeVertexNormals">here</a>. It creates a buffer for the normals, fills it with reasonable values, and attaches it to the <code>BufferGeometry</code>.</p>
+<p>For non-indexed geometries, each vertex belongs to one triangle, so <code>computeVertexNormals</code> computes the normal for the triangle and uses that.</p>
+<p>For indexed geometries, a vertex can be shared among several triangles. So <code>computeVertexNormals</code> computes the normal vector for each triangle, and then sets each vertex to be the average of all the triangles it is part of. This helps create a smooth-looking shape.</p>
+<h2 id="another-example">Another Example</h2>
+<p>Here is another example where we make two triangles, with different colorings. Color per mesh, color per triangle, and color per vertex.</p>
+<p>
+
+<div id="box-05-05-05" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-05</span>&nbsp;
+    <input type="checkbox" id="check-05-05-05">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-05.html class="boxtitlelink">05-05-05.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-05.js" class="boxtitlelink">05-05-05.js</a>
+    <iframe
+        title="eg-different-colors"
+        src="../../for_students/05-05-05.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-05"
+    ></iframe>
+</div></p>
+<p>The example (<a href="../../for_students/05-05-05.html" class="box-html" data-tag="eg-different-colors">05-05-05.html</a>, 
+<a href="../../for_students/05-05-05.js" class="box-html" data-tag="eg-different-colors">05-05-05.js</a>
+) shown uses <code>BufferGeometry</code>. Here it is again:</p>
+<p>Read the code. You will see that I make objects (using the class framework) for &ldquo;TwoTriangles&rdquo; in three different ways.</p>
+<p>Here is the version of the code using <code>BufferGeometry</code>. This is the code for the two-color version:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">class</span> <span style="color:#75af00">TwoColoredTriangles</span> <span style="color:#00a8c8">extends</span> <span style="color:#75af00">GrObject</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">constructor</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">geometry</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BufferGeometry</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span>      <span style="color:#75715e">// while the two triangles have 4 certices, we need to split the vertices
+</span></span></span><span style="display:flex;"><span>      <span style="color:#75715e">// so that they can have different normals
+</span></span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">const</span> <span style="color:#75af00">vertices</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">(</span> <span style="color:#111">[</span>
+</span></span><span style="display:flex;"><span>         <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span>     <span style="color:#75715e">// 1A note that we need to keep this ccw
+</span></span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span>       <span style="color:#75715e">// 1B
+</span></span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span>       <span style="color:#75715e">// 1C   
+</span></span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span>      <span style="color:#75715e">// second triangle
+</span></span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span>       <span style="color:#75715e">// 2B
+</span></span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span>        <span style="color:#75715e">// 2C
+</span></span></span><span style="display:flex;"><span>      <span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#39;position&#39;</span><span style="color:#111">,</span><span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">vertices</span><span style="color:#111">,</span><span style="color:#ae81ff">3</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// in the previous example, we computed them explicitly - here we let three
+</span></span></span><span style="display:flex;"><span>      <span style="color:#75715e">// do it for us
+</span></span></span><span style="display:flex;"><span>      <span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">computeVertexNormals</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// the colors
+</span></span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">const</span> <span style="color:#75af00">colors</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">(</span> <span style="color:#111">[</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>    <span style="color:#75715e">// yellow (3 vertices)
+</span></span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,.</span><span style="color:#ae81ff">65</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>  <span style="color:#75715e">// orange (#FFA500)
+</span></span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,.</span><span style="color:#ae81ff">65</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">1</span><span style="color:#111">,.</span><span style="color:#ae81ff">65</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span> 
+</span></span><span style="display:flex;"><span>      <span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#34;color&#34;</span><span style="color:#111">,</span><span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">colors</span><span style="color:#111">,</span><span style="color:#ae81ff">3</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">MeshStandardMaterial</span><span style="color:#111">({</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75af00">roughness</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0.75</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75af00">vertexColors</span><span style="color:#f92672">:</span> <span style="color:#00a8c8">true</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">mesh</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">Mesh</span><span style="color:#111">(</span><span style="color:#75af00">geometry</span><span style="color:#111">,</span> <span style="color:#75af00">material</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">super</span><span style="color:#111">(</span><span style="color:#d88200">&#34;TwoTrianglesBuff&#34;</span><span style="color:#111">,</span> <span style="color:#75af00">mesh</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Notice that we had to split the vertices (so we have 6 of them) - for example (0,0,0) is repeated, once for each triangle. And note that we need to specify the colors for each of the 6 vertices.</p>
+<p>You can also see how we have to put the data for the vertices in special &ldquo;typed&rdquo; arrays (the <code>Float32Array</code>) on 88 and 102, and then tell THREE to use these as <code>BufferAttributes</code>. Note how for the positions and the colors, each vertex has 3 numbers (x,y,z or r,b,g), so we need to tell this to THREE when we create the <code>BufferAttribute</code> (lines 96 and 110).</p>
+<p>In this case, each triangle is made up of 3 distinct vertices. Triangle 1 is vertices 0,1 and 2; Triangle 2 is 3,4,5. If we don&rsquo;t tell THREE otherwise, it will assume this and will figure out the indices for us.</p>
+<p>THREE has materials specifically designed to work with meshes. If you want materials such as <code>MeshStandardMaterial</code> to use vertex colors, you need to tell it to do so (see <code>vertexColors: true</code> on line 114). Otherwise, it makes the whole mesh one color.</p>
+<h2 id="example-mesh-normals">Example: Mesh Normals</h2>
+<p>This example uses the same two triangles. However, this time, the normals are done differently for each of the 3 versions. On the left, we use the actual normals of the triangles (which requires vertex splitting). The other two have the center vertices &ldquo;shared&rdquo; between the triangles. These vertices have their normals set to be the average of the two faces they touch. This gives the same normals as if it were a smooth, curved piece (rather than two triangles with a crease). Because the lights are on the sides, the middle of this object is dark. But, as you move it, notice the lighting behaves as if this were a curved object. The object in the middle manually specified the normals; on the right, the normals are computed by THREE.</p>
+<p>
+
+<div id="box-05-05-06" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-06</span>&nbsp;
+    <input type="checkbox" id="check-05-05-06">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-06.html class="boxtitlelink">05-05-06.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-06.js" class="boxtitlelink">05-05-06.js</a>
+    <iframe
+        title="eg-different-normals"
+        src="../../for_students/05-05-06.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-06"
+    ></iframe>
+</div></p>
+<p>Be sure to read the code in 
+<a href="../../for_students/05-05-06.js" class="box-html" data-tag="eg-different-normals">05-05-06.js</a>
+ and understand how the meshes are put together.</p>
+<p>In the &ldquo;curved&rdquo; examples, we use the same normal (and color) for the vertex on each of its triangles, so we can re-use the vertex for both triangles. Notice how these examples only have 4 points. In the third example, THREE computes the normals: when it computes them for the vertices in the middle, it averages the normals of all the triangles the vertex touches.</p>
+<p>When we use 4 vertices to make three triangles, we need to tell THREE which vertices to use for each triangle. If you look at the code, you&rsquo;ll see we use <code>setIndex</code> to tell it which vertices to use for each triangle.</p>
+<h2 id="a-note-on-buffergeometry">A Note on BufferGeometry</h2>
+<p>While <code>BufferGeometry</code> is the preferred way to do things in THREE, it can be less convenient if we want to see our triangles (use their &ldquo;real&rdquo; normals and/or have triangle colors). In practice, we don&rsquo;t usually want to see individual triangles, so this isn&rsquo;t a big problem.</p>
+<p>One trick: the documentation doesn&rsquo;t have a good list of what attributes we can make. If you noticed, so far we&rsquo;ve made buffers for position, normal, and color. There are other choices (we&rsquo;ll see &ldquo;uv&rdquo; later in this workbook). The answers to this get a little tricky, and depend on how the graphics hardware works. Basically, the names of the buffers are variables that get used in the programs that run on the graphics hardware to transform vertices and color pixels.</p>
+<h2 id="backfacing-triangles">Backfacing Triangles</h2>
+<p>If you remember from the beginning&hellip; if you rotate the triangles too much so you see their &ldquo;backside,&rdquo; they disappear!</p>
+<p>By default, THREE uses an optimization called <strong>backface culling.</strong> Basically, if a triangle points away from the camera, it doesn&rsquo;t get drawn. With backface culling, we only see the &ldquo;fronts&rdquo; of triangles.</p>
+<p>The idea of backface culling is that most of the time, we make solid objects that are surrounded by surfaces. Triangles are on the surface of the object, and their normals should only face outwards. Most objects have fronts and backs - different triangles, which would face different directions. Since you can&rsquo;t see the back side, which is facing away from the camera, there is (usually) no reason to draw it.</p>
+<p>The problem here is that we made an object that is only 1 triangle &ldquo;thick&rdquo; - it is infinitely thin, so the same triangle is both the front and the back. If we turn the object around, we see the back of a triangle (which THREE doesn&rsquo;t draw by default).</p>
+<p>There are two ways to deal with this:</p>
+<ol>
+<li>We tell THREE that we want it to draw both sides of the object. We do this by adding an option to the material.</li>
+<li>We make our objects have some thickness, so they have fronts and backs. This is more &ldquo;realistic&rdquo; but also more work.</li>
+</ol>
+<p>Here is an example - this time, the object is 8 triangles. Some of the triangles face forward, some face backwards. As you spin the object around, note how when you look at the &ldquo;back&rdquo; you see different triangles. The object on the right is set to draw front and back facing triangles.</p>
+<p>
+
+
+
+
+
+<div id="box-05-05-07" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-05-07</span>&nbsp;
+    <input type="checkbox" id="check-05-05-07">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-05-07.html class="boxtitlelink">05-05-07.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-05-07.js" class="boxtitlelink">05-05-07.js</a>
+    <iframe
+        title="ex-backface"
+        src="../../for_students/05-05-07.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-05-07"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-05-07-0"></td>
+                <td>standard</td>
+                <td>triangles correctly oriented (no holes in grid)</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div></p>
+<p>If you look at the code, you&rsquo;ll notice something unexpected: when I specify the normals, I specify the normals all going the same way! (on line 41, all the normals face the Z direction).</p>
+<p>For backface culling, the graphics hardware doesn&rsquo;t use the normals to determine which direction the triangle is facing. It uses the orientation of the triangle. It effectively uses the right-hand rule to determine which direction the normal is facing - it has to do this because not all triangles have their normals specified.</p>
+<p>Specifically, it uses the winding direction of the triangle. After projection, the hardware determines if the vertices are clockwise or counter-clockwise. (counter-clockwise is facing towards the camera). If you look at the code, you&rsquo;ll see that some triangles are clockwise, others are counter-clockwise. This is a good exercise. Note that the vertices form a grid, and the triangles (specified by the index) are in different orders.</p>
+<p>So, to practice&hellip; (this is a rubric item!) fix the orientations of the triangles. You&rsquo;ll need to re-order the vertices in 
+<a href="../../for_students/05-05-07.js" class="box-html" data-tag="ex-backface">05-05-07.js</a>
+ to be consistently all clockwise or counter-clockwise. (if you make them all clockwise, you&rsquo;ll have to rotate the object to see it on the left). A hint: the positions of the vertices are:</p>
+<pre><code>6 7 8
+3 4 5
+0 1 2
+</code></pre>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">More Hints (if you&#39;re stuck)</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>Use the positions of the vertices to decide how the triangles should be ordered. Then create the index array accordingly.</p>
+
+    </div>
+</details>
+</div>
+<p>You might also wonder: why in the unfixed version with two-sided triangles are some triangles bright yellow and other triangles dark yellow? We would expect THREE to use the specified normal - so the triangle orientation doesn&rsquo;t matter. But, THREE does care about triangle orientation - if the triangle is going the wrong way, THREE flips the normal. So, the short lesson: when you make a mesh, orient the triangles correctly!</p>
+<h2 id="summary-meshes">Summary: Meshes</h2>
+<p>This is a reminder of what we learned about meshes, and an example of how to make a very simple one (with two triangles).</p>
+<a href="../../docs/06/" class="Next__Page">Next: Page &nbsp;6&nbsp;-&nbsp;Fake Normals</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Selected"> 5: Meshes in Three.js </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p05",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

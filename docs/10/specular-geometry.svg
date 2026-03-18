@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Specular Shading Geometry
+  Shows: surface normal n, light direction l, reflection r, eye direction e
+  Angle of incidence (theta) equals angle of reflection; phi is the
+  deviation between the eye direction e and the perfect mirror direction r.
+  CS559 Computer Graphics - Workbook 05
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 580 380"
+     width="580" height="380">
+
+  <title>Specular Shading Geometry: n, l, r, e vectors and angles</title>
+  <desc>The surface normal n, light direction l, reflection r, and eye direction e.
+  The reflection r is computed from l and n. Specular brightness depends on
+  how well e aligns with r (angle phi).</desc>
+
+  <defs>
+    <!-- Arrowhead: normal n (blue) -->
+    <marker id="arr-n" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="9" markerHeight="7" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#1E40AF"/>
+    </marker>
+    <!-- Arrowhead: light direction l (amber) -->
+    <marker id="arr-l" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="9" markerHeight="7" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#92400E"/>
+    </marker>
+    <!-- Arrowhead: reflection r (green) -->
+    <marker id="arr-r" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="9" markerHeight="7" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#166534"/>
+    </marker>
+    <!-- Arrowhead: eye direction e (purple) -->
+    <marker id="arr-e" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="9" markerHeight="7" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#6D28D9"/>
+    </marker>
+    <!-- Clip path for surface hatching -->
+    <clipPath id="clip-surf">
+      <rect x="40" y="295" width="500" height="55"/>
+    </clipPath>
+  </defs>
+
+
+  <!-- ═══════════════════════════════════════════════
+       SURFACE
+       ═══════════════════════════════════════════════ -->
+  <g id="g-surface">
+    <rect x="40" y="295" width="500" height="55" fill="#D1D5DB"/>
+    <g clip-path="url(#clip-surf)" stroke="#9CA3AF" stroke-width="0.9" stroke-linecap="butt">
+      <line x1="-15" y1="295" x2="40"  y2="350"/>
+      <line x1="5"   y1="295" x2="60"  y2="350"/>
+      <line x1="25"  y1="295" x2="80"  y2="350"/>
+      <line x1="45"  y1="295" x2="100" y2="350"/>
+      <line x1="65"  y1="295" x2="120" y2="350"/>
+      <line x1="85"  y1="295" x2="140" y2="350"/>
+      <line x1="105" y1="295" x2="160" y2="350"/>
+      <line x1="125" y1="295" x2="180" y2="350"/>
+      <line x1="145" y1="295" x2="200" y2="350"/>
+      <line x1="165" y1="295" x2="220" y2="350"/>
+      <line x1="185" y1="295" x2="240" y2="350"/>
+      <line x1="205" y1="295" x2="260" y2="350"/>
+      <line x1="225" y1="295" x2="280" y2="350"/>
+      <line x1="245" y1="295" x2="300" y2="350"/>
+      <line x1="265" y1="295" x2="320" y2="350"/>
+      <line x1="285" y1="295" x2="340" y2="350"/>
+      <line x1="305" y1="295" x2="360" y2="350"/>
+      <line x1="325" y1="295" x2="380" y2="350"/>
+      <line x1="345" y1="295" x2="400" y2="350"/>
+      <line x1="365" y1="295" x2="420" y2="350"/>
+      <line x1="385" y1="295" x2="440" y2="350"/>
+      <line x1="405" y1="295" x2="460" y2="350"/>
+      <line x1="425" y1="295" x2="480" y2="350"/>
+      <line x1="445" y1="295" x2="500" y2="350"/>
+      <line x1="465" y1="295" x2="520" y2="350"/>
+      <line x1="485" y1="295" x2="540" y2="350"/>
+      <line x1="505" y1="295" x2="560" y2="350"/>
+      <line x1="525" y1="295" x2="580" y2="350"/>
+    </g>
+    <line x1="40" y1="295" x2="540" y2="295" stroke="#1F2937" stroke-width="2.5"/>
+    <text x="455" y="321" font-family="Arial, Helvetica, sans-serif"
+          font-size="13" fill="#6B7280">surface</text>
+  </g>
+
+
+  <!-- ═══════════════════════════════════════════════
+       ORIGIN POINT
+       ═══════════════════════════════════════════════ -->
+  <circle cx="290" cy="295" r="4.5" fill="#1F2937"/>
+
+
+  <!-- ═══════════════════════════════════════════════
+       NORMAL VECTOR  n  (blue, straight up)
+       ═══════════════════════════════════════════════ -->
+  <line x1="290" y1="295" x2="290" y2="85"
+        stroke="#1E40AF" stroke-width="2.5" marker-end="url(#arr-n)"/>
+  <text x="300" y="76" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="bold" font-size="24" fill="#1E40AF">n</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       LIGHT DIRECTION  l  (amber, 45° upper-left)
+       Direction from surface point toward the light.
+       dx = -sin(45°)*150 ≈ -106,  dy = -cos(45°)*150 ≈ -106
+       Tip: (184, 189)
+       ═══════════════════════════════════════════════ -->
+  <line x1="290" y1="295" x2="184" y2="189"
+        stroke="#92400E" stroke-width="2.5" marker-end="url(#arr-l)"/>
+  <text x="160" y="182" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="bold" font-size="24" fill="#92400E">l</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       REFLECTION VECTOR  r  (green, 45° upper-right)
+       r = 2(n·l)n − l  (mirror image of l about n)
+       dx = +sin(45°)*150 ≈ +106,  dy = -cos(45°)*150 ≈ -106
+       Tip: (396, 189)
+       ═══════════════════════════════════════════════ -->
+  <line x1="290" y1="295" x2="396" y2="189"
+        stroke="#166534" stroke-width="2.5" marker-end="url(#arr-r)"/>
+  <text x="402" y="182" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="bold" font-size="24" fill="#166534">r</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       EYE DIRECTION  e  (purple, ~22° upper-right)
+       Direction from surface point toward the viewer.
+       dx = +sin(22°)*158 ≈ +59,  dy = -cos(22°)*158 ≈ -147
+       Tip: (349, 148)
+       ═══════════════════════════════════════════════ -->
+  <line x1="290" y1="295" x2="349" y2="148"
+        stroke="#6D28D9" stroke-width="2.5" marker-end="url(#arr-e)"/>
+  <text x="354" y="140" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="bold" font-size="24" fill="#6D28D9">e</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       ANGLE ARCS
+       n is at SVG angle 270° (straight up)
+       l is at SVG angle 225° (upper-left, 45° from n)
+       r is at SVG angle 315° (upper-right, 45° from n)
+       e is at SVG angle 292° (22° right of n)
+
+       Arc for θ (l side): from L-direction to N-direction
+         r=70: L-side=(290+70·cos225, 295+70·sin225)=(240.5,245.5)
+                N-side=(290,          295-70)         =(290,225)
+       Arc for θ (r side): from N-direction to R-direction
+         r=70: N-side=(290,225)
+               R-side=(290+70·cos315, 295+70·sin315)=(339.5,245.5)
+       Arc for φ: from E-direction to R-direction
+         r=95: E-side=(290+95·cos292, 295+95·sin292)=(290+35.6,295-88.2)=(325.6,206.8)
+               R-side=(290+95·cos315, 295+95·sin315)=(290+67.2,295-67.2)=(357.2,227.8)
+       ═══════════════════════════════════════════════ -->
+
+  <!-- θ arc: l to n (sweep clockwise = flag 1) -->
+  <path d="M 241 246 A 70 70 0 0 1 290 225"
+        fill="none" stroke="#374151" stroke-width="1.8"/>
+
+  <!-- θ arc: n to r (sweep clockwise = flag 1) -->
+  <path d="M 290 225 A 70 70 0 0 1 340 246"
+        fill="none" stroke="#374151" stroke-width="1.8"/>
+
+  <!-- Tick marks on both θ arcs to show equal angles -->
+  <!-- Left arc midpoint at angle 247.5°, r=70: (290+70·cos247.5, 295+70·sin247.5)
+       = (290-26.8, 295-64.7) = (263.2, 230.3)
+       Tangent direction at 247.5°+90°=337.5°: (cos337.5=0.924, sin337.5=-0.383)
+       Tick: ±6px along tangent -->
+  <line x1="257.6" y1="232.6" x2="268.8" y2="228.0"
+        stroke="#374151" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Right arc midpoint at angle 292.5°, r=70: (290+26.8, 295-64.7) = (316.8, 230.3)
+       Tangent direction at 292.5°+90°=22.5°: (cos22.5=0.924, sin22.5=0.383)
+       Tick: ±6px along tangent -->
+  <line x1="311.2" y1="228.0" x2="322.4" y2="232.6"
+        stroke="#374151" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- φ arc: e to r (sweep clockwise = flag 1) -->
+  <path d="M 326 207 A 95 95 0 0 1 357 228"
+        fill="none" stroke="#374151" stroke-width="1.8" stroke-dasharray="5,3"/>
+
+  <!-- Angle labels -->
+  <!-- θ labels: midangle 247.5° and 292.5°, radius 50 -->
+  <text x="268" y="248" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="19" fill="#374151">θ</text>
+  <text x="313" y="248" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="19" fill="#374151">θ</text>
+
+  <!-- φ label: midangle ~304°, radius 113 -->
+  <!-- (290+113·cos304, 295+113·sin304) = (290+63.2, 295-93.5) = (353.2, 201.5) -->
+  <text x="360" y="204" font-family="Georgia, 'Times New Roman', serif"
+        font-style="italic" font-size="19" fill="#374151">φ</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       LIGHT SOURCE SYMBOL (sun)
+       Placed beyond the tip of l, in the same direction
+       l direction unit vector: (-0.707, -0.707)
+       Sun center: tip + 38*(−0.707,−0.707) ≈ (184−27, 189−27) = (157, 162)
+       ═══════════════════════════════════════════════ -->
+  <g id="g-sun">
+    <circle cx="157" cy="162" r="27" fill="#FEF9C3" opacity="0.55"/>
+    <circle cx="157" cy="162" r="17" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.8"/>
+    <g stroke="#F59E0B" stroke-width="1.6" stroke-linecap="round">
+      <line x1="157" y1="140" x2="157" y2="133"/>
+      <line x1="157" y1="184" x2="157" y2="191"/>
+      <line x1="135" y1="162" x2="128" y2="162"/>
+      <line x1="179" y1="162" x2="186" y2="162"/>
+      <line x1="141" y1="146" x2="136" y2="141"/>
+      <line x1="173" y1="178" x2="178" y2="183"/>
+      <line x1="173" y1="146" x2="178" y2="141"/>
+      <line x1="141" y1="178" x2="136" y2="183"/>
+    </g>
+  </g>
+
+
+  <!-- ═══════════════════════════════════════════════
+       EYE SYMBOL
+       Placed beyond the tip of e, in the same direction
+       e direction unit vector: (sin22°, -cos22°) ≈ (0.375, -0.927)
+       Eye center: tip + 30*(0.375,-0.927) ≈ (349+11, 148-28) = (360, 120)
+       ═══════════════════════════════════════════════ -->
+  <g id="g-eye">
+    <ellipse cx="362" cy="118" rx="21" ry="13"
+             fill="white" stroke="#6D28D9" stroke-width="1.8"/>
+    <circle cx="362" cy="118" r="6" fill="#6D28D9"/>
+    <!-- eyelid arc hint -->
+    <path d="M 341 118 Q 362 104 383 118"
+          fill="none" stroke="#6D28D9" stroke-width="1.4"/>
+  </g>
+
+
+  <!-- ═══════════════════════════════════════════════
+       FORMULA ANNOTATION
+       Upper-left corner area
+       ═══════════════════════════════════════════════ -->
+  <g id="g-formula">
+    <rect x="14" y="90" width="130" height="42" rx="5"
+          fill="#F9FAFB" stroke="#D1D5DB" stroke-width="1.2"/>
+    <text x="22" y="116"
+          font-family="Georgia, 'Times New Roman', serif"
+          font-size="16" fill="#1F2937">
+      <tspan font-weight="bold" font-style="italic" fill="#166534">r</tspan>
+      <tspan> = 2(</tspan>
+      <tspan font-weight="bold" font-style="italic" fill="#1E40AF">n</tspan>
+      <tspan>·</tspan>
+      <tspan font-weight="bold" font-style="italic" fill="#92400E">l</tspan>
+      <tspan>)</tspan>
+      <tspan font-weight="bold" font-style="italic" fill="#1E40AF">n</tspan>
+      <tspan> − </tspan>
+      <tspan font-weight="bold" font-style="italic" fill="#92400E">l</tspan>
+    </text>
+  </g>
+
+</svg>

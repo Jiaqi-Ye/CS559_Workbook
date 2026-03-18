@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 6: Fake Normals</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On the previous pages, we discussed places where we choose the normals for triangles to be different from what the actual geometry of the triangle would suggest.</p>
+<p>Here, we&rsquo;ll show some applications of this. These will become even more important when we add lighting and reflection that depend on the normals.</p>
+<h2 id="smooth-looking-objects">Smooth-looking objects</h2>
+<p>Here is a scene with a bunch of cylinders. In the front row, the circular shape is approximated with six sides, but this is shown with both &ldquo;real normals&rdquo; (so you can see the faces) and &ldquo;fake normals&rdquo; (vertex normals computed so they match the real cylinder). The vertex normals are interpolated.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../texturedemos/normals/n1-cylindernormal.html" class="boxtitlelink">texturedemos/normals/n1-cylindernormal.html</a>
+    <iframe
+        title="texturedemos/normals/n1-cylindernormal.html"
+        src="../../texturedemos/normals/n1-cylindernormal.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>If you don&rsquo;t look at the ends of the cylinder (where the shape is obvious), even the six-sided one looks smooth - although maybe a little lumpy (the linear interpolation is an approximation to the real shape).</p>
+<p>In the back row are cylinders with 12 faces. The face version clearly shows the sharp edges between the faces. The smooth-shaded one looks like a cylinder. This is true unless you look at it from the top, where the shape is clear.</p>
+<h2 id="creating-uneven-surfaces">Creating uneven surfaces</h2>
+<p>Here&rsquo;s an example where we will control normals to create a stronger effect. It requires some explanation&hellip;</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../texturedemos/normals/n2-wavy.html" class="boxtitlelink">texturedemos/normals/n2-wavy.html</a>
+    <iframe
+        title="texturedemos/normals/n2-wavy.html"
+        src="../../texturedemos/normals/n2-wavy.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Start with the &ldquo;wavy&rdquo; object on the right. It is actually a white material; however, the lighting is set such that a strong red light comes from the right, and a strong blue light comes from the left. Because each surface points towards one light or the other, we see each face as one color or the other.</p>
+<p>With the object in the middle, we used the normals from the wavy object (so it reacts to the light as if it were wavy). But it is flat.</p>
+<p>On the left is the same flat object with the wavy normals. However, here I&rsquo;ve used the &ldquo;VertexNormalHelper&rdquo; object to show what is happening.</p>
+<p>The lesson here: The way that an object reacts with light is based on its normal directions. If we change the normal direction, we can fake the shape. We&rsquo;ll come back to this idea later.</p>
+<a href="../../docs/07/" class="Next__Page">Next: Page &nbsp;7&nbsp;-&nbsp;Mesh Exercise</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Selected"> 6: Fake Normals </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p06",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

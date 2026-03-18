@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 8: Shading Overview</h1>
+		</header>
+		<div class="content post__content clearfix"><p>In 2D, we generally specified the color we wanted objects to appear.</p>
+<p>In 3D, the color that something appears on screen depends on how the object responds to the lights in the scene, which involves the color of the object, the lights, and the geometry between them.</p>
+<p>The process of figuring out what color something actually appears is called <strong>shading</strong>. The shading computations involve figuring out what color an object is and how it responds to light. In this workbook, we&rsquo;ll learn some of the basics.</p>
+<p>We will learn a &ldquo;historic&rdquo; approach to the lighting computations. These simplified models of lighting were used in early computer graphics because they were the first things researchers figured out how to do. Even as more sophisticated models were developed, these classic models continued to be used because they were efficient to implement (especially in hardware). The classic models are still implemented in three.js, although fancier lighting models are also provided.</p>
+<p>In this workbook, we will be considering <strong>local</strong> shading (and therefore local lighting). This means that we consider each location separately; objects do not affect other objects. We assume that all light that comes to a point comes from a light source. This means that we will not have inter-object effects such as mirror reflections (of other objects), shadows, or spill. The local shading model is important for efficiency: each object can be processed independently of the others. We will learn various tricks to fake the kinds of effects that we lose because of the local lighting assumption. The local lighting model is still the standard for interactive computer graphics (and the tricks for getting the effects are very well-developed).</p>
+<p>The discussion of these models in the videos is:
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/t/1_vqv9687w?st=2419">2023 Video Clip: Diffuse and Specular Materials</a> [40:19 - 68:40 (28.4 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/t/1_vqv9687w">Lecture 17</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/17-Meshes-Texture-before.pdf">Slides</a>
+</div></p>
+<p>I strongly recommend (I may say &ldquo;require&rdquo;) watching the two &ldquo;Graphics in 5 Minutes&rdquo; videos. Note that he describes this in reverse order than I do in the workbook. But he also connects the concepts to the underlying physics.</p>
+<p><div class="resourcelink">Graphics in 5 Minutes <a href="https://www.youtube.com/watch?v=e-CDkxNll9w&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=10">Specular reflection in 5 minutes</a></div>
+<div class="resourcelink">Graphics in 5 Minutes <a href="https://www.youtube.com/watch?v=xyPDPutHA2A&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=11">Diffuse reflection in 5 minutes</a></div></p>
+<h2 id="lighting-models">Lighting Models</h2>
+<p>Here is a demo of the three main lighting models in three.js.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/08/materials.html" class="boxtitlelink">materials.html</a>
+    <iframe
+        title="materials.html"
+        src="../../docs/08/materials.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The Phong model is the classic computer graphics lighting model that we will discuss over the next few pages. It is flexible enough to capture a wide range of surfaces and is efficient. The standard model is derived from physical principles, while the physical model adds even more special effects.</p>
+<h2 id="a-basic-lighting-model">A Basic Lighting Model</h2>
+<p>We will consider what color a specific point on an object appears. The point has a surface normal that describes how the surface of the object is oriented.</p>
+<p>To make the pictures easier, we will draw the point as being on a flat surface, but the same things apply to an infinitesimally small piece of surface at the point - we can think of the flat surface tangent at that point.</p>
+<p>We consider one light source at a time. The contributions of different light sources can be added together.</p>
+<p>For basic lights, there is a single direction that the light comes from when it hits a point. For a point light, it is the vector from the light source to the target point; for a directional light source, all points get light from the same direction.</p>
+<p>Simple shading models are based on considering two different types of surfaces. At one extreme are shiny surfaces, such as mirrors. These objects bounce light back according to the direction it came from. High school physics says &ldquo;angle of incidence equals angle of reflection&rdquo;. In a perfect mirror, light comes in from one direction and goes out in one direction.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/08/incidence.svg">
+        <img src="../../docs/08/incidence.svg" alt="incidence.svg" />
+    </a>
+</figure>
+
+<p>In this perfect world, the light comes in from one direction, it goes out in one direction - so that unless the viewpoint happens to be exactly along that direction, you won&rsquo;t receive the light (from this source reflected at this point). In practice, shiny objects are not perfectly smooth, so that they send light in a range of directions, but the closer you are to the line of reflection, the more light goes in that direction.</p>
+<p>In contrast, there are very rough surfaces. These surfaces have their microscopic geometry that is not flat at all. If we look closely enough, the surface normals are going in all directions. If light comes in from one direction, it is equally likely to go out in any direction. Matte surfaces like chalk or unpolished wood have this property.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/08/scatter.svg">
+        <img src="../../docs/08/scatter.svg" alt="scatter.svg" />
+    </a>
+</figure>
+
+<p>Each of these surface types, shiny (or specular) and matte (or diffuse), can be modeled with a simple model. The standard computer graphics model creates lighting by saying that real objects are a blend of these two different extreme cases.</p>
+<div style="display: flex; gap: 16px; align-items: flex-start;">
+    <figure class="" style="width: 300px; ">
+        <a href="../../docs/08/l1-diffuse.png">
+            <img src="../../docs/08/l1-diffuse.png" alt="l1-diffuse.png" />
+        </a><figcaption><p>Diffuse (matte)&nbsp;</p></figcaption>
+    </figure>
+
+    <figure class="" style="width: 300px; ">
+        <a href="../../docs/08/l1-specular.png">
+            <img src="../../docs/08/l1-specular.png" alt="l1-specular.png" />
+        </a><figcaption><p>Specular (shiny)&nbsp;</p></figcaption>
+    </figure>
+
+</div>
+<p>These pictures are a sphere lit from above.
+With a diffuse surface, the parts of the object that face the light appear brighter, so the top of the sphere is bright and evenly lit. With a specular surface, the direct bounce point is brightest. There is a bright spot where the bounce path is direct. As we get farther from the spot, the brightness falls off. If the object were very shiny (closer to a perfect mirror) the spot would be smaller and sharper.</p>
+<p>There is a third piece to the classic computer graphics lighting model: the ambient component. In both specular and diffuse models, parts of the object that do not receive light directly (they face away from the light source) are completely dark. In the real world, enough light bounces around (off of other objects), that even the dark sides of objects get some light. We model this using a hack: ambient light. We add in a little bit of light that is everywhere from all directions; it effectively makes the objects glow.</p>
+<p>This &ldquo;classic&rdquo; computer graphics lighting model is sometimes referred to as the <strong>Phong</strong> lighting model. Its inventor, Bui Tuong Phong, was the first person to put the three components together. He also is credited with the specific model of specular highlights we will show on the next page. This model is the <strong>Phong Reflectance Model</strong>. In a moment, we&rsquo;ll learn about something else that is named for Phong.</p>
+<h2 id="beyond-the-classic-model">Beyond the classic model</h2>
+<p>The Phong model can produce a range of appearances and is simple enough to be efficient. However, it is very empirical. Someone made it up, and decided it looks good. It doesn&rsquo;t actually work like the physics of real materials.</p>
+<p>More modern lighting models are derived from the physical equations of how light acts with materials. They are generally more complicated and computationally expensive. However, they also look more realistic. And, because they are based on real-world effects, their parameters tend to be sensible physical properties, not random constants.</p>
+<p>Three.js provides the Phong lighting model, but it also provides two &ldquo;better&rdquo; models: <code>MeshStandardMaterial</code> and <code>MeshPhysicalMaterial</code>. The standard material is a physically-based model, however the &ldquo;physical&rdquo; material adds even more real-world effects.</p>
+<p>It is important to understand the classic Phong model because it provides the intuition for how surface lighting works. It is still important in practice because it is easy to implement, and very efficient.</p>
+<h2 id="when-do-lighting-computations-happen">When do lighting computations happen?</h2>
+<p>Local lighting computations, no matter which model we use, happen at specific points. When we have a triangle, there are a few choices for which points we do the computations at:</p>
+<ul>
+<li>Once per triangle: we compute a single lighting calculation for the whole triangle, so the whole triangle is a solid color. This is sometimes known as <strong>flat</strong> shading, since it emphasizes that each triangle is flat (even if it is trying to approximate a smooth surface).</li>
+<li>Once per vertex: we compute the lighting calculation for each vertex. This means that the <em>colors</em> are interpolated across the triangle (usually using barycentric interpolation). This is commonly called <strong>Gouraud</strong> shading, or sometimes <em>smooth</em> shading (although, other shading might appear smooth as well).</li>
+<li>Once per &ldquo;pixel&rdquo;: we compute the lighting for each pixel independently. When we learn about the hardware, we&rsquo;ll see that it may not be exactly the pixels, but the idea is that each point on the triangle has its lighting and color computed separately. If the normals are specified per-vertex, then the normals must be interpolated. This is commonly called <strong>Phong shading</strong>. Phong shading implies that we interpolate the normals across a triangle, and compute the shading calculations many times over the triangle.</li>
+</ul>
+<p>Historically, performing per-pixel lighting calculations was too slow. Gouraud shading was a trick to make things look smooth, but only do the complex lighting calculations at the vertices. With modern graphics hardware, computing the lighting per pixel is feasible.</p>
+<p>With modern graphics hardware, we tend to do lighting computations per-pixel.</p>
+<a href="../../docs/09/" class="Next__Page">Next: Page &nbsp;9&nbsp;-&nbsp;Diffuse Shading</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Selected"> 8: Shading Overview </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p08",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

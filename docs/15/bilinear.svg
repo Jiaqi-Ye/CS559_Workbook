@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 481.5 324">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0, .st1, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9 {
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+      }
+
+      .st0, .st10, .st6 {
+        fill: none;
+      }
+
+      .st1 {
+        fill: #f3d2bc;
+      }
+
+      .st2 {
+        fill: #d6e0ea;
+      }
+
+      .st3 {
+        fill: #c1e2c8;
+      }
+
+      .st11 {
+        fill: #231f20;
+        font-family: ArialMT, Arial;
+        font-size: 12px;
+      }
+
+      .st10 {
+        stroke: #000;
+        stroke-dasharray: 4;
+      }
+
+      .st4 {
+        fill: #3a75bb;
+      }
+
+      .st5 {
+        fill: #fcf1c5;
+      }
+
+      .st6 {
+        stroke-width: .75px;
+      }
+
+      .st7 {
+        fill: #57b947;
+      }
+
+      .st8 {
+        fill: #f26222;
+      }
+
+      .st9 {
+        fill: #fcca0c;
+      }
+    </style>
+  </defs>
+  <rect class="st5" x="36" y="27" width="144" height="144"/>
+  <rect class="st1" x="180" y="27" width="144" height="144"/>
+  <rect class="st2" x="36" y="171" width="144" height="144"/>
+  <rect class="st3" x="180" y="171" width="144" height="144"/>
+  <text class="st11" transform="translate(97.82 18)"><tspan x="0" y="0">u=0</tspan></text>
+  <text class="st11" transform="translate(7.32 102.79)"><tspan x="0" y="0">v=0</tspan></text>
+  <text class="st11" transform="translate(5.61 247.5) scale(1.15 1)"><tspan x="0" y="0">v=1</tspan></text>
+  <text class="st11" transform="translate(241.82 18)"><tspan x="0" y="0">u=1</tspan></text>
+  <line class="st10" x1="36" y1="99" x2="324" y2="99"/>
+  <line class="st10" x1="36" y1="243" x2="324" y2="243"/>
+  <path class="st9" d="M162,108c-4.97,0-9-4.03-9-9s4.03-9,9-9"/>
+  <path class="st8" d="M162,90c4.97,0,9,4.03,9,9s-4.03,9-9,9"/>
+  <path class="st4" d="M162,252c-4.97,0-9-4.03-9-9s4.03-9,9-9"/>
+  <path class="st7" d="M162,234c4.97,0,9,4.03,9,9s-4.03,9-9,9"/>
+  <text class="st11" transform="translate(96.99 121.5)"><tspan x="0" y="0">C00</tspan></text>
+  <text class="st11" transform="translate(149 85.5)"><tspan x="0" y="0">A</tspan></text>
+  <text class="st11" transform="translate(149 265.5)"><tspan x="0" y="0">B</tspan></text>
+  <text class="st11" transform="translate(153 139.5)"><tspan x="0" y="0">C</tspan></text>
+  <text class="st11" transform="translate(240.99 121.5)"><tspan x="0" y="0">C01</tspan></text>
+  <text class="st11" transform="translate(96.99 229.5)"><tspan x="0" y="0">C10</tspan></text>
+  <text class="st11" transform="translate(240.99 229.5)"><tspan x="0" y="0">C11</tspan></text>
+  <text class="st11" transform="translate(159 18)"><tspan x="0" y="0">s</tspan></text>
+  <line class="st0" x1="36" y1="153" x2="324" y2="153"/>
+  <line class="st6" x1="162" y1="27" x2="162" y2="315"/>
+  <line class="st10" x1="252" y1="27" x2="252" y2="315"/>
+  <line class="st10" x1="108" y1="27" x2="108" y2="315"/>
+  <text class="st11" transform="translate(25.33 157.5)"><tspan x="0" y="0">t</tspan></text>
+  <g>
+    <path class="st9" d="M153,153c0-4.97,4.03-9,9-9v9h-9Z"/>
+    <path class="st4" d="M162,153v9c-4.97,0-9-4.03-9-9h9Z"/>
+    <path class="st8" d="M162,153v-9c4.97,0,9,4.03,9,9h-9Z"/>
+    <path class="st7" d="M171,153c0,4.97-4.03,9-9,9v-9h9Z"/>
+  </g>
+  <text class="st11" transform="translate(355.5 76.5)"><tspan x="0" y="0">s = u - floor(u)</tspan><tspan x="0" y="17">t = v - floor(v)</tspan><tspan x="0" y="51">A = (1-s) C00 + s C01</tspan><tspan x="0" y="68">B = (1-s) C10 + s C11</tspan><tspan x="0" y="102">C = (1-t) A + t B</tspan></text>
+  <circle class="st9" cx="108" cy="99" r="9"/>
+  <circle class="st8" cx="252" cy="99" r="9"/>
+  <circle class="st7" cx="252" cy="243" r="9"/>
+  <circle class="st4" cx="108" cy="243" r="9"/>
+</svg>

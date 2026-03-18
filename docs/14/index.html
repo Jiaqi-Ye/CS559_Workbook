@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 14: Texture UVs</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The most common way for textures to be assigned is by UV mapping. Each vertex is assigned a texture coordinate (a position in the 2D image space).</p>
+<h2 id="triangles">Triangles</h2>
+<p>With triangles, we can attach texture coordinates to each vertex. We can think of each vertex as having an independent coordinate in different spaces, a 3D coordinate and a texture coordinate. This lets us place the triangle to pick up its colors from any part of the texture image that we need to.</p>
+<p>Here is a demonstration to let you place a triangle in texture space. Notice how you can make the triangle have any shape in texture space. Its contents are stretched to cover the triangle in world space. The world space shape is an equilateral triangle.
+</p>
+<div id="gadget-here"></div>
+<script type="module" src="../../docs/14/m1-triuv.js"></script>
+<h2 id="points-inside-triangles">Points inside triangles</h2>
+<p>We specify the vertices. The coordinate for any point inside the triangle can be determined by barycentric interpolation: we determine the barycentric coordinates of the point, and use those values to take a weighted combination of the uv values.</p>
+<p>Recall that with barycentric coordinates we write the position of a point in the triangle as a linear combination of the positions of the vertices:</p>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7305em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>
+<p>where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7305em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> is the position of the point, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> are the positions of the vertices, and the barycentric coordinates (or weights) <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span> are values that sum to one (so <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>). We can then use these weights to determine how the texture coordinates are blended:</p>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7305em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathbf">u</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1611em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mord"><span class="mord mathbf">u</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mord"><span class="mord mathbf">u</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord"><span class="mord mathbf">u</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>This assumes that we know the x, y, and z of the points on the triangle in 3D.
+In practice, when we draw the triangles, we draw them after they have been converted to screen space. The perspective projection loses the z value.</p>
+<p>Fortunately, the process of drawing triangles can provide barycentric coordinates as it generates the pixels. However, these coordinates are in screen space. Unfortunately, this doesn&rsquo;t account for perspective. A way to think about it: with linear interpolation, halfway is halfway; however, if part of the triangle is farther away, the back half will appear smaller than the front half.</p>
+<p>There is a simple fix: rather than using barycentric coordinates on the u,v values themselves, graphics systems use barycentric coordinates to interpolate on <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6954em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6954em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>. This is handled by the graphics hardware.</p>
+<h2 id="texture-wrapping">Texture Wrapping</h2>
+<p>Our texture coordinates usually stay inside of the range 0-1. However, sometimes it is convenient to let the coordinates go outside. There are three choices for how this is handled:</p>
+<ol>
+<li><strong>Clamp to Edge Wrapping</strong> - the value at the edge is used.</li>
+<li><strong>Repeat Wrapping</strong> - the texture is repeated, causing it to wrap around.</li>
+<li><strong>Mirror Wrapping</strong> - the texture is repeated, but it is flipped.</li>
+</ol>
+<p>You can use a different wrapping mode in each dimension. Wrapping is very useful for repeating textures.</p>
+<p>Here is a demo with a 3x3 grid of planes. Each plane has UV coordinates that run from -1 to 2 in both dimensions and uses <code>checkerboard_rg_gradient_256</code>. The column picks the U wrapping mode and the row picks the V wrapping mode.</p>
+<p>The texture is the square:
+<figure class="" style="width: 300px; ">
+    <a href="../../textures/simple/checkerboard_rg_gradient_256.png">
+        <img src="../../textures/simple/checkerboard_rg_gradient_256.png" alt="/textures/simple/checkerboard_rg_gradient_256.png" />
+    </a>
+</figure>
+</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 700px;">
+    <a href="../../docs/14/wrapping-grid.html" class="boxtitlelink">wrapping-grid.html</a>
+    <iframe
+        title="wrapping-grid.html"
+        src="../../docs/14/wrapping-grid.html"
+        class="includebox includebox-standard"
+        width="700"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<h2 id="texture-use-and-re-use">Texture Use and Re-Use</h2>
+<p>Loading and storing lots of textures is expensive. They can quickly use lots of memory, which can be limited in a graphics system.</p>
+<p>A key to effective texture use is to re-use textures as appropriate. If you have multiple objects using the same texture, load the texture once and use the same texture object for each graphics object.</p>
+<p>A common practice is to put many different textures into a single large texture called an <strong>atlas</strong>. The idea of an atlas is that multiple objects can just use the pieces of it that they want.</p>
+<p>Texture maps need to be rectangular. In fact, there are advantages for having texture maps be square. If the shapes of the textures are not square, this can lead to wasted space. Atlases are a solution: different shapes can be fit together into a single texture.</p>
+<h2 id="textures-on-more-complicated-shapes">Textures on more complicated shapes</h2>
+<p>Creating texture coordinates for a mesh can be complicated because each vertex needs to be placed into the texture space in a way that makes each triangle cover the right area.</p>
+<p>For some objects, there is a natural way to assign texture coordinates. For a plane (square), the shape maps naturally to the u,v square. For a cylinder, one coordinate goes around the circle, while the other goes along the length of the cylinder.</p>
+<p>This demo shows the default texture coordinates on several Three.js primitive geometries. It gives you a sense of how the parameterizations work.
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 700px;">
+    <a href="../../docs/14/primitive-uvs.html" class="boxtitlelink">primitive-uvs.html</a>
+    <iframe
+        title="primitive-uvs.html"
+        src="../../docs/14/primitive-uvs.html"
+        class="includebox includebox-standard"
+        width="700"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<h2 id="texture-coordinate-strategies">Texture coordinate strategies</h2>
+<p>There are two different approaches to getting useful texture coordinates:</p>
+<ol>
+<li>Start with an image. Then place the vertices at appropriate places in the texture space.</li>
+<li>Start with a &ldquo;good&rdquo; texture coverage of the object (such as the natural or default parameterization). Then paint the colors into appropriate places.</li>
+</ol>
+<p>One concern is that textures work best when the texture coordinates are not stretched too much on the object. The closer the spaces are in terms of their shape, the better that texture mapping will work. This means at any point, the u and v directions map to orthogonal directions in the 3D space of the object, and that the distances along the two axes are similar: the amount a step in the u direction moves along the 3D object is similar to how far a step in the v direction moves.</p>
+<p>Unfortunately, texture distortion is unavoidable. For a simple case, notice how on the sphere, the texture coordinates are more stretched out around the equator than at the poles.</p>
+<a href="../../docs/15/" class="Next__Page">Next: Page &nbsp;15&nbsp;-&nbsp;Texture Filtering</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Selected"> 14: Texture UVs </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p14",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

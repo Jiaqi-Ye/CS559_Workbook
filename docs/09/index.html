@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 9: Diffuse Shading</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The shading overview covered what shading is and set up the three-component
+model. Here we dig into the first and most fundamental component: <strong>diffuse</strong>
+(or <strong>Lambertian</strong>) shading — the model for matte, non-shiny surfaces.
+Understanding diffuse shading gives you the core intuition that everything else
+builds on.</p>
+<p>If you didn&rsquo;t watch it when I mentioned it on the previous page, the Graphics in 5 Minutes video about diffuse reflection is very good, although he discusses specular reflections first.
+<div class="resourcelink">Graphics in 5 Minutes <a href="https://www.youtube.com/watch?v=xyPDPutHA2A&amp;list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&amp;index=11">Diffuse reflection in 5 minutes</a></div></p>
+<h2 id="the-key-property-eye-position-doesnt-matter">The Key Property: Eye Position Doesn&rsquo;t Matter</h2>
+<p>Think about a piece of chalk, a painted wall, or a piece of unfinished wood.
+When you shine a light on it, the surface looks brighter facing the light and
+darker facing away. But here&rsquo;s the thing: if <em>you</em> move — step left, step
+right, crouch down — the brightness you see doesn&rsquo;t change. This is the
+defining property of a <strong>diffuse</strong> surface: it scatters incoming light equally
+in all directions.</p>
+<p>Contrast this with a mirror, where the bright spot jumps around completely as
+you move. We&rsquo;ll see that case when we get to specular shading.</p>
+<p>With diffuse shading, the brightness depends only
+on the surface orientation and the light direction. The camera position
+does not matter.</p>
+<h2 id="lamberts-cosine-law">Lambert&rsquo;s Cosine Law</h2>
+<p>The intuition for diffuse shading is that when the surface points towards the light source, it catches more light (which it then reflects in all directions equally). Here, the math works for a differentially small patch, but this diagram (with a finite area) makes the point:</p>
+<figure class="" style="width: 90%; ">
+    <a href="../../docs/09/cosines.svg">
+        <img src="../../docs/09/cosines.svg" alt="cosines.svg" />
+    </a><figcaption><p>The amount of surface area that is exposed to the light reduces as the surface tilts away from the light source.&nbsp;</p></figcaption>
+</figure>
+
+<p>When the normal vector is parallel to the light direction, the surface receives the most light. If it is perpendicular to the light direction, it receives no light. In between, it receives some light.</p>
+<p>Therefore, the brightness of a diffuse surface point depends on the angle between two vectors. We define the vectors as being from the point.</p>
+<ul>
+<li><strong>n</strong> — the outward surface normal</li>
+<li><strong>l</strong> — the direction <em>toward</em> the light source</li>
+</ul>
+<figure class="" style="width: 500px; ">
+    <a href="../../docs/09/diffuse-geometry.svg">
+        <img src="../../docs/09/diffuse-geometry.svg" alt="diffuse-geometry.svg" />
+    </a><figcaption><p>The surface normal <strong>n</strong> and the direction to the light <strong>l</strong> form angle θ. Diffuse brightness is proportional to cos θ.&nbsp;</p></figcaption>
+</figure>
+
+<p>When the light hits the surface directly (θ = 0°, <strong>n</strong> and <strong>l</strong> aligned),
+the surface is at maximum brightness. As the angle increases, brightness falls
+off. At θ = 90° (light grazing the surface), the contribution reaches zero.
+For surfaces facing away from the light (θ &gt; 90°), we clamp to zero — a
+surface pointing away from a light source receives no direct illumination
+from it.</p>
+<p>The relationship is the <strong>cosine of the angle</strong>. Since <strong>n</strong> and <strong>l</strong> are
+unit vectors, this is simply their dot product:</p>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mop">cos</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4445em;"></span><span class="mord mathbf">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathbf">l</span></span></span></span>
+<p>The full diffuse shading formula is:</p>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">max</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="mopen"><span class="delimsizing size1">(</span></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathbf">l</span><span class="mclose"><span class="delimsizing size1">)</span></span></span></span></span>
+<p>where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is the <strong>diffuse material color</strong> — the color
+you&rsquo;d see under perfectly even white light. (It can be an RGB triple, in which
+case each channel is multiplied separately.)</p>
+<p>One consequence worth pausing on: <strong>points facing away from the light are completely black</strong>. Any
+surface point with θ &gt; 90° receives no direct diffuse contribution — the
+max(0, &hellip;) clamps it to zero. Real environments have indirect light bouncing
+around, and we approximate this with an <strong>ambient</strong> term.</p>
+<h2 id="diffuse-shading-in-threejs">Diffuse Shading in THREE.js</h2>
+<p>THREE provides a material that implements pure diffuse shading:</p>
+<p><code>MeshLambertMaterial</code> implements Lambertian diffuse shading directly. It
+is efficient, but computes shading per-vertex and interpolates the result across
+the triangle (Gouraud shading).</p>
+<p>The diffuse model is part of the Phong model. So it is possible to get diffuse shading by using the Phong model (implemented in the <code>MeshPhongMaterial</code>) and turning off the other components. This uses Phong shading to get per-pixel lighting calculations.</p>
+<h2 id="summary-diffuse-shading">Summary: Diffuse Shading</h2>
+<p>Diffuse shading models matte surfaces with the formula
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">max</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf">l</span><span class="mclose">)</span></span></span></span>: the
+material color scaled by the cosine of the angle between the surface normal
+and the light direction. The critical insight: <strong>eye position is irrelevant</strong>.
+Only the light direction and the surface normal determine diffuse brightness —
+that is what distinguishes diffuse from specular reflection, which we look at
+next.</p>
+<a href="../../docs/10/" class="Next__Page">Next: Page &nbsp;10&nbsp;-&nbsp;Specular Shading</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Selected"> 9: Diffuse Shading </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p09",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

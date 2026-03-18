@@ -1,0 +1,164 @@
+<!--
+  Regular 10-gon, r=105, vertex k at angle (−90° + k·36°)
+  Left  centre: (162, 150)
+  Right centre: (488, 150)
+
+  Vertex coords  (cx + r·cos θ,  cy + r·sin θ),  θ_k = −π/2 + k·2π/10
+
+  k=0:  angle=−90°   → (cx,      cy−105)
+  k=1:  angle=−54°   → (cx+61.8, cy−85.2)   [cos−54=0.588, sin−54=−0.809] ×105 → (61.74,−84.95)
+  k=2:  angle=−18°   → (cx+99.9, cy−32.5)   [cos−18=0.951, sin−18=−0.309] ×105 → (99.86,−32.45)
+  k=3:  angle= 18°   → (cx+99.9, cy+32.5)
+  k=4:  angle= 54°   → (cx+61.8, cy+84.95)
+  k=5:  angle= 90°   → (cx,      cy+105)
+  k=6:  angle=126°   → (cx−61.8, cy+84.95)
+  k=7:  angle=162°   → (cx−99.9, cy+32.5)
+  k=8:  angle=198°   → (cx−99.9, cy−32.5)
+  k=9:  angle=234°   → (cx−61.8, cy−84.95)
+
+  Offset from centre:
+    dx0=0,      dy0=−105
+    dx1=61.74,  dy1=−84.95
+    dx2=99.86,  dy2=−32.45
+    dx3=99.86,  dy3=32.45
+    dx4=61.74,  dy4=84.95
+    dx5=0,      dy5=105
+    dx6=−61.74, dy6=84.95
+    dx7=−99.86, dy7=32.45
+    dx8=−99.86, dy8=−32.45
+    dx9=−61.74, dy9=−84.95
+
+  LEFT cx=162, cy=150:
+    v0=(162,45)   v1=(223.74,65.05)  v2=(261.86,117.55) v3=(261.86,182.45)
+    v4=(223.74,234.95) v5=(162,255)  v6=(100.26,234.95)  v7=(62.14,182.45)
+    v8=(62.14,117.55)  v9=(100.26,65.05)
+
+  RIGHT cx=488, cy=150:
+    v0=(488,45)   v1=(549.74,65.05)  v2=(587.86,117.55) v3=(587.86,182.45)
+    v4=(549.74,234.95) v5=(488,255)  v6=(426.26,234.95)  v7=(388.14,182.45)
+    v8=(388.14,117.55) v9=(426.26,65.05)
+
+  Fan triangulation (left): apex = v0=(162,45), 8 triangles:
+    T1: v0,v1,v2   T2: v0,v2,v3   T3: v0,v3,v4   T4: v0,v4,v5
+    T5: v0,v5,v6   T6: v0,v6,v7   T7: v0,v7,v8   T8: v0,v8,v9
+
+  Star triangulation (right): interior pt = centre (488,150), 10 triangles:
+    T1: C,v0,v1   T2: C,v1,v2   T3: C,v2,v3   T4: C,v3,v4   T5: C,v4,v5
+    T6: C,v5,v6   T7: C,v6,v7   T8: C,v7,v8   T9: C,v8,v9   T10: C,v9,v0
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 650 310" width="650" height="310">
+
+  <defs>
+    <style>
+      .bg         { fill: #EBF2FD; }
+      .chord      { fill: none; stroke: #2A5AAF; stroke-width: 1.1;
+                    stroke-linejoin: round; }
+      .boundary   { fill: none; stroke: #1C1C2E; stroke-width: 2;
+                    stroke-linejoin: round; stroke-linecap: round; }
+      .apex-dot   { fill: #C0392B; }
+      .lbl        { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    font-size: 13px; fill: #1C1C2E; text-anchor: middle; }
+      .sub        { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    font-size: 10.5px; fill: #555; text-anchor: middle; }
+      .divider    { stroke: #C8C8D8; stroke-width: 1; stroke-dasharray: 4 4; }
+    </style>
+  </defs>
+
+  <!-- vertical divider -->
+  <line class="divider" x1="325" y1="20" x2="325" y2="280"/>
+
+  <!-- ══════════════════════════════════════
+       LEFT — Fan triangulation from v0
+  ══════════════════════════════════════ -->
+
+  <!-- Fan triangles (chord lines only; boundary drawn on top) -->
+  <!-- T1: v0,v1,v2 -->
+  <polygon class="chord"
+    points="162,45 223.74,65.05 261.86,117.55"/>
+  <!-- T2: v0,v2,v3 -->
+  <polygon class="chord"
+    points="162,45 261.86,117.55 261.86,182.45"/>
+  <!-- T3: v0,v3,v4 -->
+  <polygon class="chord"
+    points="162,45 261.86,182.45 223.74,234.95"/>
+  <!-- T4: v0,v4,v5 -->
+  <polygon class="chord"
+    points="162,45 223.74,234.95 162,255"/>
+  <!-- T5: v0,v5,v6 -->
+  <polygon class="chord"
+    points="162,45 162,255 100.26,234.95"/>
+  <!-- T6: v0,v6,v7 -->
+  <polygon class="chord"
+    points="162,45 100.26,234.95 62.14,182.45"/>
+  <!-- T7: v0,v7,v8 -->
+  <polygon class="chord"
+    points="162,45 62.14,182.45 62.14,117.55"/>
+  <!-- T8: v0,v8,v9 -->
+  <polygon class="chord"
+    points="162,45 62.14,117.55 100.26,65.05"/>
+
+  <!-- Outer boundary -->
+  <polygon class="boundary"
+    points="162,45 223.74,65.05 261.86,117.55 261.86,182.45
+            223.74,234.95 162,255 100.26,234.95 62.14,182.45
+            62.14,117.55 100.26,65.05"/>
+
+  <!-- Apex dot (v0) -->
+  <circle class="apex-dot" cx="162" cy="45" r="5"/>
+
+  <!-- Labels -->
+  <text class="lbl" x="162" y="277">Fan triangulation</text>
+  <text class="sub" x="162" y="292">apex: top vertex</text>
+
+
+  <!-- ══════════════════════════════════════
+       RIGHT — Star triangulation from centre
+  ══════════════════════════════════════ -->
+
+  <!-- 10 triangles from centre (488,150) to each edge -->
+  <!-- T1: C,v0,v1 -->
+  <polygon class="chord"
+    points="488,150 488,45 549.74,65.05"/>
+  <!-- T2: C,v1,v2 -->
+  <polygon class="chord"
+    points="488,150 549.74,65.05 587.86,117.55"/>
+  <!-- T3: C,v2,v3 -->
+  <polygon class="chord"
+    points="488,150 587.86,117.55 587.86,182.45"/>
+  <!-- T4: C,v3,v4 -->
+  <polygon class="chord"
+    points="488,150 587.86,182.45 549.74,234.95"/>
+  <!-- T5: C,v4,v5 -->
+  <polygon class="chord"
+    points="488,150 549.74,234.95 488,255"/>
+  <!-- T6: C,v5,v6 -->
+  <polygon class="chord"
+    points="488,150 488,255 426.26,234.95"/>
+  <!-- T7: C,v6,v7 -->
+  <polygon class="chord"
+    points="488,150 426.26,234.95 388.14,182.45"/>
+  <!-- T8: C,v7,v8 -->
+  <polygon class="chord"
+    points="488,150 388.14,182.45 388.14,117.55"/>
+  <!-- T9: C,v8,v9 -->
+  <polygon class="chord"
+    points="488,150 388.14,117.55 426.26,65.05"/>
+  <!-- T10: C,v9,v0 -->
+  <polygon class="chord"
+    points="488,150 426.26,65.05 488,45"/>
+
+  <!-- Outer boundary -->
+  <polygon class="boundary"
+    points="488,45 549.74,65.05 587.86,117.55 587.86,182.45
+            549.74,234.95 488,255 426.26,234.95 388.14,182.45
+            388.14,117.55 426.26,65.05"/>
+
+  <!-- Centre dot -->
+  <circle class="apex-dot" cx="488" cy="150" r="5"/>
+
+  <!-- Labels -->
+  <text class="lbl" x="488" y="277">Star triangulation</text>
+  <text class="sub" x="488" y="292">apex: interior centre point</text>
+
+</svg>

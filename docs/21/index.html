@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 21: Bump, Normal, and Displacement Maps</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Here, we consider different ways to add detail to the shape of the object. As with colors, if we want to add small details, describing them in an image can be convenient, and also better for implementation (since we don&rsquo;t have tons of little triangles).</p>
+<p>Small changes to a surface can do two things: they change the shape (where things are), but they also change how light interacts with the object. If we don&rsquo;t look too closely, we can do one without the other: we can change how light interacts with the object by faking it.</p>
+<p>There are two standard categories of methods for adding surface details: displacement maps (which actually change the shape) and normal maps (which only change the normal vectors, faking lighting). Bump maps are a type of normal map.</p>
+<h2 id="fake-normals">Fake Normals</h2>
+<p>Here is the demo from earlier in the workbook, with a few more options. In this scene we are creating a wavy object (it&rsquo;s now on the left). The object is white; however, there is a strong red light coming from one side and a strong blue light coming from the other, so the object looks like it is red and blue striped.</p>
+<p>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../texturedemos/normals/n2-wavy-map.html" class="boxtitlelink">texturedemos/normals/n2-wavy-map.html</a>
+    <iframe
+        title="texturedemos/normals/n2-wavy-map.html"
+        src="../../texturedemos/normals/n2-wavy-map.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Making the wavy object required us to use triangles to model the shape of all of the surface details. If the pattern was complicated and had lots of detail, this could become complicated and require lots of tiny triangles.</p>
+<p>If we flatten the object&rsquo;s shape, but keep the normals from the wavy surface, we get the same lighting effects, but not the shape effects. If we look at it from the right direction, it is very similar, although if we look at it from the wrong direction, the fake is obvious.</p>
+<div style="display: flex; gap: 1em; justify-content: center;">
+    <figure class="" style="width: 300px; ">
+        <a href="../../docs/21/fake-wavy-1.png">
+            <img src="../../docs/21/fake-wavy-1.png" alt="fake-wavy-1.png" />
+        </a>
+    </figure>
+
+    <figure class="" style="width: 300px; ">
+        <a href="../../docs/21/fake-wavy-2.png">
+            <img src="../../docs/21/fake-wavy-2.png" alt="fake-wavy-2.png" />
+        </a>
+    </figure>
+
+</div>
+<p>Of course, this requires all the work of making the triangles, but it hopefully explains the concepts: we want to take the flat surface and change its normal vectors to change how it reacts with light. We&rsquo;ll get the changes to the normal vectors by reading them from a map that is just like a color map.</p>
+<p>In the demo, I show a flat plane. Notice that it is gray since the red and blue lights don&rsquo;t hit it (they come from the sides).</p>
+<p>To the right of that is something labeled &ldquo;Normal Map&rdquo; that should look very similar to the &ldquo;using normals&rdquo; case. It&rsquo;s not exactly the same (I didn&rsquo;t match the stripe width, and I have the angles off slightly so that it may appear a little brighter). In this image, I&rsquo;ve created a <strong>normal map</strong> which is a picture whose colors are used to change the normals during drawing. The texturing process does a texture lookup for every pixel and gets the color, but uses the color to change the normal direction. The texture that I applied as the normal map is:
+<figure class="" style="width: 300px; ">
+    <a href="../../texturedemos/normals/nmap-stripes.png">
+        <img src="../../texturedemos/normals/nmap-stripes.png" alt="/texturedemos/normals/nmap-stripes.png" />
+    </a>
+</figure>
+
+Coincidentally, the colors are red and green. Red here is the u direction, so the places we want the normals to point left are high in u.</p>
+<p>The nice part of this is we can paint arbitrary details in the map, but still only use the large triangles. We don&rsquo;t get the actual shape change, but often changing the light is good enough.</p>
+<p>Having to figure out the colors corresponding to directions can be tricky. An easier thing to do is create a grayscale height map that describes the desired geometry to fake. This is known as a <strong>bump map</strong>, where the texture values correspond to the height of the surface from the original. The normal directions are computed by estimating this surface and changing the original object normals accordingly.
+<figure class="" style="width: 300px; ">
+    <a href="../../texturedemos/normals/grad-stripes.png">
+        <img src="../../texturedemos/normals/grad-stripes.png" alt="/texturedemos/normals/grad-stripes.png" />
+    </a>
+</figure>
+</p>
+<p>Because of some details of how normal maps work, this demo didn&rsquo;t reproduce the effects well (it is hard to make sharp edges with normal maps).</p>
+<h2 id="normal-maps">Normal Maps</h2>
+<p>Normal maps use textures to change the <em>apparent</em> shape of the object by using the texture to modulate the normals on the surface so it interacts with light differently than it otherwise would.</p>
+<p>The basic idea is that the R,G,B channels of the texture map will give us the X,Y,Z direction of the normal vector. However, there is a catch: what X,Y,Z do we use?</p>
+<p>The most common way to do normal maps is to define a local coordinate system so that Z is the direction of the &ldquo;real&rdquo; normal (so 0,0,1 would be keeping the original normals). This is convenient because it means that blue colors in the normal map mean &ldquo;keep the normals the same&rdquo;, and everything else represents a change from the object&rsquo;s true shape. The other two directions are the directions of U and V along the surface. This is called <em>tangent space normal maps</em>.</p>
+<p>THREE supports tangent space normal maps. It also supports &ldquo;object space normal maps&rdquo; that just use the XYZ of the object&rsquo;s local coordinate system.</p>
+<p>There is one other issue: we want to have normals with negative directions, but we don&rsquo;t have negative colors. Our normal vectors are unit vectors, with each component ranging from -1 to 1. To pack these into the 0-255 values in an RGB image, we put zero at the center of the range (128, or x80). The &ldquo;no change&rdquo; normal vector (pointing in the Z direction), would be the vector (0,0,1), which maps to (128,128,255) or (0x8080FF). We see a lot of this pale blue color in normal maps.</p>
+<p>Because we want to store <em>unit</em> vectors in the normal map, and change in one component requires a coordinated change in the other component. For example, the vector in the direction (1,1,1) would need to be divided by its length (to make it a normal vector), and be stored as (201,201,201) or 0xC9C9C9. The need to have the changes in values be coordinated makes normal vectors difficult to create correctly by hand. Fortunately, most programs that use normal maps (including the standard shaders in three.js) normalize the vectors before using them.</p>
+<p>There is an excellent tutorial on normal maps in the <a href="https://docs.unity3d.com/Manual/StandardShaderMaterialParameterNormalMap.html" target="_blank">Unity documentation</a>. They like to call normal maps a kind of bump map (so height maps, which are a kind of displacement map discussed below, are also bump maps for them).</p>
+<p>Here is a simple example of a normal map:
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../texturedemos/normals/n4-normalMapTest.html" class="boxtitlelink">texturedemos/normals/n4-normalMapTest.html</a>
+    <iframe
+        title="texturedemos/normals/n4-normalMapTest.html"
+        src="../../texturedemos/normals/n4-normalMapTest.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<figure class="" style="width: 300px; ">
+    <a href="../../textures/pixl_r_normal.png">
+        <img src="../../textures/pixl_r_normal.png" alt="/textures/pixl_r_normal.png" />
+    </a>
+</figure>
+
+<p>Making a good normal map is hard, since you need to think about how the normals would be changed in order to achieve the effect and convert these to appropriate vectors. This motivates what comes next.</p>
+<h2 id="bump-maps-and-normal-maps">Bump Maps and Normal Maps</h2>
+<p>The term <em>bump map</em> is often used interchangeably with <em>normal map</em>, but it really refers to a special kind of normal map that was actually invented first. Historically, bump maps refer to this specific kind of normal map, although some people use bump map as a general term (see the Unity documentation as an example).</p>
+<p>Making normal maps is a bit of a pain since you have to create 3-vectors (for the normal direction). It&rsquo;s hard to understand what the colors mean.</p>
+<p>Bump maps simplify this. They use only 1 color channel (so the textures have 1 number). The number is interpreted as a height. You could think of the bump map as a height map that alters the surface by pushing it upwards (in the normal direction) at each point. However, it doesn&rsquo;t really change the shape - it just adjusts the normal vectors as if it had this altered shape. The normals (as we would have from a normal map) are computed from the height differences.</p>
+<p>Here is a visual explanation of the difference that I like (taken from normalmap.net):
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/21/normalmap-net-normal.png">
+        <img src="../../docs/21/normalmap-net-normal.png" alt="normalmap-net-normal.png" />
+    </a><figcaption><p>A visual explanation of normal vs. bump maps.
+            <a href="https://normalmap.net/#how-it-works">&nbsp;From normalmap.net</a></p></figcaption>
+</figure>
+
+With a bump map, the brightness is height. With a normal map, the different color channels are the vector components.</p>
+<p>Bump maps are very easy to make, since you just paint some bumpiness.</p>
+<p>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../texturedemos/normals/n3-bumpTest.html" class="boxtitlelink">texturedemos/normals/n3-bumpTest.html</a>
+    <iframe
+        title="texturedemos/normals/n3-bumpTest.html"
+        src="../../texturedemos/normals/n3-bumpTest.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Here are the maps used in this demo (use the &ldquo;Bumps&rdquo; button to switch maps):</p>
+<div style="display: flex; gap: 1em; justify-content: center;">
+<figure class="" style="width: 300px; ">
+    <a href="../../texturedemos/normals/paintBump.png">
+        <img src="../../texturedemos/normals/paintBump.png" alt="/texturedemos/normals/paintBump.png" />
+    </a>
+</figure>
+
+<figure class="" style="width: 300px; ">
+    <a href="../../texturedemos/normals/dots-bump.png">
+        <img src="../../texturedemos/normals/dots-bump.png" alt="/texturedemos/normals/dots-bump.png" />
+    </a>
+</figure>
+
+</div>
+<h2 id="normal-maps-and-displacement-maps">Normal Maps and Displacement Maps</h2>
+<p>Remember, normal maps (and bump maps) don&rsquo;t change the actual shape, they only change the <em>apparent</em> shape by changing the normals, which affect how light interacts with the surface (including reflections).</p>
+<p>This has some limitations, including:</p>
+<ol>
+<li>If you look at things from the side, you&rsquo;ll see the object is not bumpy.</li>
+<li>There are no self-occlusions.</li>
+<li>Things like shadows that depend on shape don&rsquo;t see the bumps (since they aren&rsquo;t really there).</li>
+</ol>
+<p>There is yet another kind of mapping called <strong>displacement mapping</strong> that is like normal mapping, except that rather than changing the normal, it actually changes the positions/shape (which also affects the normals). Displacement mapping is different from all the other mappings we talk about because it causes things to move: if you compute it for a pixel, that pixel might move to a different place (in which case, it will be a different pixel). With displacement mapping, you need to worry about making holes in things.</p>
+<p>From an implementation perspective, displacement mapping is implemented very differently. There is displacement mapping in three.js, but it works by moving the vertices of triangles, rather than changing pixel colors. Therefore, you can&rsquo;t use three.js displacement mapping if you have big triangles. Displacement maps require dividing the object up into small triangles.</p>
+<h2 id="the-normal-map-and-bump-map-exercise">The Normal Map and Bump Map Exercise</h2>
+<p>Your turn. In the scene below, add two objects. On one of them, put a bump map. On the other one, put a normal map. Try to think of some kind of bumpiness that you&rsquo;d want to add, and figure out how to make it. It is OK to find textures for this on the web (but be sure to give proper attribution where the textures come from!).</p>
+<p>In order to see the effects of the bump and normal maps, you will probably either want your objects or the lights to move, which will make it more obvious that there is bumpiness.</p>
+<p>In this exercise, have the object material be a solid color, so all of the variation comes from the lighting (which is affected by the bump/normal maps). You can experiment with changing the lights to create more drastic effects (this is built in to the code framework, but you can try it yourself). You might also want to experiment with other material properties (such as roughness and metalness) to make the lighting effects more dramatic.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Put the code in 
+<a href="../../for_students/05-21-01.js" class="box-html" data-tag="ex-bump-normal">05-21-01.js</a>
+, and don&rsquo;t forget to add any texture files. You should be able to explain how we can see the bump/normal map effect.</p>
+<p>For a challenge, try to make the same effect with both a normal map and a bump map - this will help you understand why we prefer one over the other for different situations.</p>
+
+<div id="box-05-21-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-21-01</span>&nbsp;
+    <input type="checkbox" id="check-05-21-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-21-01.html class="boxtitlelink">05-21-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-21-01.js" class="boxtitlelink">05-21-01.js</a>
+    <iframe
+        title="ex-bump-normal"
+        src="../../for_students/05-21-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-21-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-21-01-0"></td>
+                <td>standard</td>
+                <td>appropriate scene (objects and lighting)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-21-01-1"></td>
+                <td>standard</td>
+                <td>bump mapped object (with map)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-21-01-2"></td>
+                <td>standard</td>
+                <td>normal mapped object (with map)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-21-01-3"></td>
+                <td>standard</td>
+                <td>explanation of how we can see the effects</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-21-01-4"></td>
+                <td>advanced</td>
+                <td>combine  with color map, with explanation</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Of course, if you get an image from the web, be sure to give proper attribution.</p>
+<p>Advanced: create a third object that uses a color map and a bump or normal map together to achieve some effect. The two must be coordinated in some way (so that they work together to create some effect). Explain what you did in the text box (why do the two work together, and how can we see it).</p>
+<div class="input-group">
+    <label for="describe-your-normal-and-bump-map-usage" style="vertical-align: top;">Describe your normal and bump map usage</label>
+    <textarea id="describe-your-normal-and-bump-map-usage" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<h2 id="summary">Summary</h2>
+<p>Normal, Bump and Displacement maps give us different ways to add apparent shape details to surfaces.</p>
+<a href="../../docs/22/" class="Next__Page">Next: Page &nbsp;22&nbsp;-&nbsp;Environment Maps</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Selected"> 21: Bump, Normal, and Displacement Maps </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p21",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

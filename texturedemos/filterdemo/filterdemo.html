@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Texture Filtering Demo</title>
+  <link rel="stylesheet" href="/libs/CS559/style559.css" />
+  <style>
+    :root {
+      --panel-size: 256px;
+      --surface: #f4f4ef;
+      --ink: #1a1f24;
+      --accent: #155b96;
+      --line: #bfc6cc;
+    }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, #fff6d8 0%, #f8f6ed 45%, #ece9df 100%);
+    }
+
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .meta {
+      margin: 0 0 0.9rem 0;
+      font-size: 0.9rem;
+      color: #3f4951;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(280px, 1fr));
+      gap: 0.8rem;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem;
+      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.06);
+    }
+
+    .panel h2 {
+      margin: 0 0 0.45rem 0;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    canvas,
+    #view3d-host canvas:not(#view3d-overlay) {
+      width: var(--panel-size);
+      height: var(--panel-size);
+      border: 1px solid #2f3b45;
+      display: block;
+      image-rendering: pixelated;
+      background: #111;
+    }
+
+    #view3d-host {
+      position: relative;
+      width: var(--panel-size);
+      height: var(--panel-size);
+    }
+
+    #view3d-host #view3d-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: var(--panel-size);
+      height: var(--panel-size);
+      pointer-events: none;
+      background: transparent;
+      z-index: 2;
+    }
+
+    .controls {
+      margin-top: 0.55rem;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 9rem 1fr auto;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .row select,
+    .row input[type="range"] {
+      width: 100%;
+    }
+
+    .row output {
+      min-width: 3.2rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .checkrow {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hint {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: #5a646c;
+    }
+
+    .legend {
+      margin-top: 0.5rem;
+      display: block;
+      column-count: 2;
+      column-gap: 0.65rem;
+      font-size: 0.78rem;
+      color: #3e4850;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      break-inside: avoid;
+      margin-bottom: 0.28rem;
+      line-height: 1.2;
+    }
+
+    .swatch {
+      width: 0.85rem;
+      height: 0.85rem;
+      border: 1px solid #111;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 1080px) {
+      .legend {
+        column-count: 1;
+      }
+    }
+
+    .swatch-outline {
+      background: #ffe152;
+    }
+
+    .swatch-centers {
+      background: #ff3838;
+    }
+
+    .swatch-cells {
+      background: #00b4ff;
+    }
+
+    .swatch-hover {
+      background: #ff8200;
+    }
+
+    .swatch-mip {
+      background: #aa26ff;
+    }
+
+    @media (max-width: 840px) {
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+        "three/": "https://unpkg.com/three@0.180.0/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Texture Filtering Demonstration</h1>
+  <p class="meta">Implemented by GitHub Copilot using GPT-5.3-Codex. Directed by Gleicher.</p>
+
+  <div class="demo-grid">
+    <section class="panel">
+      <h2>Texture Space (UV)</h2>
+      <canvas id="uv-canvas" width="256" height="256" aria-label="Texture coordinate panel"></canvas>
+      <div class="controls" id="uv-controls"></div>
+      <p class="hint">UV sliders control where geometry samples the texture.</p>
+    </section>
+
+    <section class="panel">
+      <h2>3D View</h2>
+      <div id="view3d-host">
+        <canvas id="view3d-overlay" width="256" height="256" aria-label="3D zoom sampling overlay"></canvas>
+      </div>
+      <div class="controls" id="view-controls"></div>
+      <p class="hint">Camera looks down the negative Z axis. Move square-width/tilt to provoke filtering artifacts.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Center Pixel Zoom</h2>
+      <canvas id="zoom-canvas" width="256" height="256" aria-label="Zoom panel"></canvas>
+      <div class="controls" id="overlay-controls"></div>
+      <div class="legend" aria-label="Overlay color legend">
+        <div class="legend-item"><span class="swatch swatch-outline"></span>UV outline</div>
+        <div class="legend-item"><span class="swatch swatch-centers"></span>Pixel centers</div>
+        <div class="legend-item"><span class="swatch swatch-cells"></span>Pixel-cell quads</div>
+        <div class="legend-item"><span class="swatch swatch-hover"></span>Hover quad</div>
+        <div class="legend-item"><span class="swatch swatch-mip"></span>Mip estimate (circle + level squares)</div>
+      </div>
+      <p class="hint">Hover a zoomed pixel to inspect its mapped UV region and mip estimate.</p>
+    </section>
+  </div>
+
+  <script type="module" src="./filterdemo.js"></script>
+</body>
+</html>

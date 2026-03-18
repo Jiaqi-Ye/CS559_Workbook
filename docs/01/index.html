@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 1: The CS559 Framework Code</h1>
+		</header>
+		<div class="content post__content clearfix"><p>For the assignments in this workbook and in the future, we will use a software framework we have built for class over the years.</p>
+<p>Learning to work with the Framework code is important practically (you will use it on most of the assignments from here on), but also pedagogically. In the real world, you often have to work with code that someone else wrote.</p>
+<p>The framework code allows you to focus on creating graphics objects and defining their behavior (for animation). You don&rsquo;t need to worry about setting up a user interface, or the basic stuff of the world. It will give you &ldquo;good enough&rdquo; defaults so that you can focus on the parts of the assignment you care about. It will give you lights and cameras and a basic animation loop, etc.</p>
+<p>The framework provides a &ldquo;thin wrapper&rdquo; around THREE.JS - you still program using THREE.JS, but you put your objects inside of wrapper objects, and define their behaviors as methods of these objects.</p>
+<p>You will use the framework code for the rest of the assignments in class, so it is worth learning about it.</p>
+<p>The best documentation for the framework is the code itself, and the examples that we give you. There is documentation at [the CS559 3D Framework 26 page](<a href="https://cs559.github.io/CS559-Framework26/">CS559 3D Framework</a>), but this documentation is taken directly from the comments and markdown files in the framework directory. The code is designed to be (reasonably) self-documenting. The code is structured such that the comments automatically produce a documentation web (using <a href="https://jsdoc.app/" target="_blank">jsdoc</a>), but that only gets some of the information.</p>
+<p>The framework is really helpful for small exercises where we simply want you to make an object. It will let you put the object on the screen with simple lighting and a simple UI with very little code. In the future, the framework will allow you to make a world with lots of objects that are all defined independently. This will let you make much more complex worlds. It also lets you add objects that we give you (or even to share objects with other students).</p>
+<p>The framework will allow us to build &ldquo;Graphics Town&rdquo; - where you will create a world with lots of &ldquo;living&rdquo; stuff in it. The last assignment of the semester will ask you to do this. Several of the assignments before that will ask you to make specific objects within the framework. The objects you create can be re-used in later assignments.</p>
+<h2 id="modern-javascript">Modern JavaScript</h2>
+<p>Learning about features of &ldquo;modern&rdquo; JavaScript is a learning goal of this assignment.</p>
+<p>The framework code uses &ldquo;modern&rdquo; JavaScript. That includes modules and classes. We&rsquo;ve actually had some of that in prior assignments, but this time you will see more of it. You will not be able to avoid writing a <code>class</code> or figuring out how to <code>export</code> from a module. Fortunately, the workbooks are full of examples, so you can always do things by modifying something we&rsquo;ve given you to start with. However, we do recommend that you take some time to actually understand what is going on with the code.</p>
+<p>If you want to learn about JavaScript classes, we have a basic tutorial for class <a href="https://cs559.github.io/559Tutorials/javascript/oop-in-js-1/" target="_blank">Traditional Object Oriented Programming in JavaScript</a>.  To learn more about them (and other nice JavaScript features), most up-to-date books have discussions. See the <a href="https://cs559.github.io/559Tutorials/javascript/javascript559/" target="_blank">Javascript in CS559</a> for suggestions. One specific recommendation: <a href="http://exploringjs.com/es6/ch_classes.html" target="_blank">Exploring JS Ch15</a> has a nice introduction before it starts a deep-dive into some gory details and tricks to do fancy stuff.</p>
+<h2 id="object3d-and-grobject">Object3D and GrObject</h2>
+<p>
+Here&rsquo;s a simple example, with the code in 
+<a href="../../for_students/05-01-01.js" class="box-html" data-tag="eg-framework-simple">05-01-01.js</a>
+.</p>
+
+<div id="box-05-01-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-01-01</span>&nbsp;
+    <input type="checkbox" id="check-05-01-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-01-01.html class="boxtitlelink">05-01-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-01-01.js" class="boxtitlelink">05-01-01.js</a>
+    <iframe
+        title="eg-framework-simple"
+        src="../../for_students/05-01-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="400"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-01-01"
+    ></iframe>
+</div>
+<p>Notice that this example has a ground object (the big flat gray box), it has lights, it has a camera in a reasonable location, it has orbit controls. You know how to do all that in THREE. So now, we can use the framework to do it for us.</p>
+<p>The code is a bit simpler than if you had to write it yourself in THREE (this is an excerpt from 
+<a href="../../for_students/05-01-01.js" class="box-html" data-tag="eg-framework-simple">05-01-01.js</a>
+):</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">world</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrWorld</span><span style="color:#111">({</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">groundplanecolor</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;gray&#34;</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">where</span><span style="color:#f92672">:</span> <span style="color:#111">document</span><span style="color:#111">.</span><span style="color:#75af00">getElementById</span><span style="color:#111">(</span><span style="color:#d88200">&#34;div1&#34;</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// make a THREE cube
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">geometry</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BoxGeometry</span><span style="color:#111">(</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">mat</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">MeshStandardMaterial</span><span style="color:#111">({</span> <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;green&#34;</span> <span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cubeObj3D</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">Mesh</span><span style="color:#111">(</span><span style="color:#75af00">geometry</span><span style="color:#111">,</span> <span style="color:#75af00">mat</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// make this cubeObj3D (an Object3D) into a framework object
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cube1</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrObject</span><span style="color:#111">(</span><span style="color:#d88200">&#34;cube-0&#34;</span><span style="color:#111">,</span><span style="color:#75af00">cubeObj3D</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// put it into the world
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cube1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// move it above the ground plane
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">cubeObj3D</span><span style="color:#111">.</span><span style="color:#75af00">position</span><span style="color:#111">.</span><span style="color:#75af00">y</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// make a Framework object that has a cube inside of it
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cube2</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrCube</span><span style="color:#111">({</span><span style="color:#75af00">x</span><span style="color:#f92672">:</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#75af00">y</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0.5</span><span style="color:#111">,</span><span style="color:#75af00">color</span><span style="color:#f92672">:</span><span style="color:#d88200">&#34;yellow&#34;</span><span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cube2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// run the animation/interaction loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">go</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>On line 11, we create a <code>GrWorld</code> object. This object takes the place of the scene and renderer in THREE (or, to be more precise, it creates a scene and a renderer and stores them inside). In fact, the &ldquo;world&rdquo; sets up many things for us:</p>
+<ol>
+<li>it creates a <code>Scene</code></li>
+<li>it creates a <code>Renderer</code> for us - since the Renderer will create a canvas (DOM element) for us, we need to say where we want it to go. If we say nothing, it sticks it at the end of the DOM. Here, we find a <code>&lt;div&gt;</code> and put it in there.</li>
+<li>it creates some lights - if we don&rsquo;t like those lights, we can tell it not to</li>
+<li>it creates a camera and places it in a reasonable location</li>
+<li>it creates a &ldquo;groundplane&rdquo; - here, we change its color to gray (by default, it&rsquo;s green).</li>
+<li>it does some other stuff too - you can read the code to see what happens. Some of the things are more useful when they get to future assignments</li>
+</ol>
+<p>Normally, we don&rsquo;t need to worry about the THREE objects inside of the world, we just use the <code>GrWorld</code>.</p>
+<p>By now, you should be familiar with THREE&rsquo;s <code>Object3D</code> - the base class of objects you can put in the world. These objects can be meshes (and have geometry), they have transformations, you put them into the THREE.js <code>scene</code>, etc.</p>
+<p>The Framework defines <code>GrObject</code> - which contains a list of THREE <code>Object3D</code> (these are stored in the <code>objects</code> member variable). We add <code>GrObject</code>s to the <code>GrWorld</code>.</p>
+<p>For example, on lines 17-19 we make a THREE.js cube (a mesh with a box geometry and a material). Then on line 22, we make a <code>GrObject</code> that holds this cube. On 25, we add the cube to the <code>GrWorld</code> (Note: this takes care of adding the internal cube to the THREE Scene).</p>
+<p>We can define subclasses of <code>GrObject</code> that create different kinds of objects (by creating the appropriate THREE.js objects). Some of these are built in. For example, there is a <code>GrCube</code> that, well, you can guess. See the example on line 30.</p>
+<p>The THREE objects are inside of the <code>GrObject</code>. If we looked at <code>cube1.objects[0]</code> we&rsquo;d find the Mesh we made on line 19. If we looked at <code>cube2.objects[0]</code> we&rsquo;d find a similar Mesh created insider the <code>GrCube</code> constructor.</p>
+<p>On line 33, we call <code>go()</code> - a method of <code>GrWorld</code> that starts an infinite loop with a render loop (using <code>window.requestAnimationFrame</code>).</p>
+<p>Read the code or documentation to see all of the options for these objects.</p>
+<h2 id="box-2-getting-started-with-a-simple-example">Box 2: Getting Started with a simple example</h2>
+<p>
+Let&rsquo;s revisit the spinning green cube, this time in the framework. The code is in 
+<a href="../../for_students/05-01-02.js" class="box-html" data-tag="eg-framework-rotate">05-01-02.js</a>
+.</p>
+
+<div id="box-05-01-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-01-02</span>&nbsp;
+    <input type="checkbox" id="check-05-01-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-01-02.html class="boxtitlelink">05-01-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-01-02.js" class="boxtitlelink">05-01-02.js</a>
+    <iframe
+        title="eg-framework-rotate"
+        src="../../for_students/05-01-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-01-02"
+    ></iframe>
+</div>
+<p>Everything is pretty much the default - except that we made the groundplane gray, not its usual green, since the cube is green. We got some lighting, a camera, orbit controls, an animation loop, and some other stuff &ldquo;for free&rdquo;. It may not be exactly what we want, but we get a reasonable default and can always change things.</p>
+<p>The key parts are:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// define a special kind of cube that spins
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">class</span> <span style="color:#75af00">SpinCube</span> <span style="color:#00a8c8">extends</span> <span style="color:#75af00">GrCube</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">constructor</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">super</span><span style="color:#111">({</span> <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;green&#34;</span> <span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">stepWorld</span><span style="color:#111">(</span><span style="color:#75af00">ms</span><span style="color:#111">,</span> <span style="color:#75af00">daytime</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// this used to be .01 per step
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// however, we want to advance things based on the frame rate
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// if we get 60fps, that&#39;s 16 miliseconds
+</span></span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">x</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">world</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrWorld</span><span style="color:#111">({</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">groundplanecolor</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;gray&#34;</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">where</span><span style="color:#f92672">:</span> <span style="color:#111">document</span><span style="color:#111">.</span><span style="color:#75af00">getElementById</span><span style="color:#111">(</span><span style="color:#d88200">&#34;div1&#34;</span><span style="color:#111">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cube</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">SpinCube</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cube</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// we need to place the cube above the ground
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">cube</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">position</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">go</span><span style="color:#111">();</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Walking through this:</p>
+<ol>
+<li>The main thing we do is define a new object type, a spinning cube. We create a class <code>SpinCube</code> that subclasses the built-in Cube type. The <code>super</code> call in the constructor runs the constructor of the base class (giving it an option that tells us the color).</li>
+<li>The main thing we do in the new object is to define its behavior by overriding the <code>stepWorld</code> method. The method gets called every frame and tells the object to update itself. The first parameter (<code>ms</code>) gives an estimate of how long it has been since the last redraw. This way we can adapt the speed in case our frame rate drops, rather than assuming our computer keeps up with 60 frames per second (16 milliseconds per frame).</li>
+<li>Inside the <code>stepWorld</code> method we do the same angle increments we did in the original program. Two things to note:
+<ul>
+<li>First, since we need access to the THREE <code>Object3D</code>, we have to look inside the list of objects that are &ldquo;owned&rdquo; by the <code>SpinCube</code> GrObject. We took advantage of the fact that we know that a <code>GrCube</code> has only one <code>Object3D</code>.</li>
+<li>Second, notice how we scale the spin rate by the time.</li>
+</ul>
+</li>
+<li>In the main program (the function <code>go</code> that is called on window load), all we need to do is:
+<ul>
+<li>create the world (making the <code>new GrWorld</code>)</li>
+<li>make objects and add them to the world</li>
+<li>start the animation loop</li>
+<li>We could do more (add more objects, adjust things), but we don&rsquo;t have to. We get reasonable defaults.</li>
+</ul>
+</li>
+<li>Since there is a ground, we needed to raise the cube above the ground. Again, this means accessing the internal <code>Object3D</code>.</li>
+</ol>
+<p>For a simple example like this one, the framework isn&rsquo;t that much easier than just writing the code from scratch using THREE.js directly. It does save us from having to remember to turn the lights on and point the camera the right way. In terms of code organization, we have put the animation of the object together with the object - which can simplify things if we have lots of objects with different animations.</p>
+<p>We call the code that generates motion for an object its &ldquo;Behavior&rdquo; - although, behavior is not an explicit class or object in the code.</p>
+<p>In the example, we created a new sub-class of cube. Here is a different example where we create a &ldquo;regular&rdquo; cube and patch its stepWorld method:</p>
+<p>
+
+<div id="box-05-01-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-01-03</span>&nbsp;
+    <input type="checkbox" id="check-05-01-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-01-03.html class="boxtitlelink">05-01-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-01-03.js" class="boxtitlelink">05-01-03.js</a>
+    <iframe
+        title="eg-framework-rotate2"
+        src="../../for_students/05-01-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-01-03"
+    ></iframe>
+</div></p>
+<p>The result is the same, but the code is different:
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// make a regular cube
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cube</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrCube</span><span style="color:#111">({</span><span style="color:#75af00">color</span><span style="color:#f92672">:</span><span style="color:#d88200">&#34;green&#34;</span><span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// replace its step function
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">cube</span><span style="color:#111">.</span><span style="color:#75af00">stepWorld</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">function</span><span style="color:#111">(</span><span style="color:#75af00">ms</span><span style="color:#111">,</span> <span style="color:#75af00">daytime</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">x</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cube</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div></p>
+<p>One advantage to this style of programming is that we can define a function that applies the behavior to objects. For example&hellip;</p>
+<p>
+
+<div id="box-05-01-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-01-04</span>&nbsp;
+    <input type="checkbox" id="check-05-01-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-01-04.html class="boxtitlelink">05-01-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-01-04.js" class="boxtitlelink">05-01-04.js</a>
+    <iframe
+        title="eg-framework-rotate3"
+        src="../../for_students/05-01-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-01-04"
+    ></iframe>
+</div></p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// make a regular cube
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// define a function that replaces the object&#39;s step function
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">function</span> <span style="color:#75af00">spin</span><span style="color:#111">(</span><span style="color:#75af00">object</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">object</span><span style="color:#111">.</span><span style="color:#75af00">stepWorld</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">function</span><span style="color:#111">(</span><span style="color:#75af00">ms</span><span style="color:#111">,</span> <span style="color:#75af00">daytime</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">x</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">+=</span> <span style="color:#111">(</span><span style="color:#ae81ff">0.01</span> <span style="color:#f92672">*</span> <span style="color:#75af00">ms</span><span style="color:#111">)</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">16</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cube</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrCube</span><span style="color:#111">({</span><span style="color:#75af00">color</span><span style="color:#f92672">:</span><span style="color:#d88200">&#34;green&#34;</span><span style="color:#111">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">spin</span><span style="color:#111">(</span><span style="color:#75af00">cube</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cube</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">cube</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">position</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">cone</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">GrCone</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">spin</span><span style="color:#111">(</span><span style="color:#75af00">cone</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">world</span><span style="color:#111">.</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">cone</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">cone</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">position</span><span style="color:#111">.</span><span style="color:#75af00">set</span><span style="color:#111">(</span><span style="color:#ae81ff">2</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Notice how we define a function at lines 15-20 that changes the behavior of any object (with some assumptions that there is at least one object inside of it). We can then apply this to multiple objects.</p>
+<p>In the simple example, we re-used a basic object (a cube). Just as when we use THREE directly, usually we will make more interesting objects. You&rsquo;ll see that on the next pages.</p>
+<h2 id="another-simple-example">Another Simple Example</h2>
+<p>
+The first example showed how to make a simple animation. In this second example, we look at the ability of the framework to create simple user interfaces by making sliders for parameters. In 
+<a href="../../for_students/05-01-05.js" class="box-html" data-tag="eg-framework-constructor">05-01-05.js</a>
+, we control the rotation with sliders, rather than animating. The framework will make the sliders for us!</p>
+
+<div id="box-05-01-05" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-01-05</span>&nbsp;
+    <input type="checkbox" id="check-05-01-05">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-01-05.html class="boxtitlelink">05-01-05.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-01-05.js" class="boxtitlelink">05-01-05.js</a>
+    <iframe
+        title="eg-framework-constructor"
+        src="../../for_students/05-01-05.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-01-05"
+    ></iframe>
+</div>
+<p>This defines a different subclass of cube:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">class</span> <span style="color:#75af00">RotCube</span> <span style="color:#00a8c8">extends</span> <span style="color:#75af00">GrCube</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">constructor</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">super</span><span style="color:#111">({</span> <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;green&#34;</span> <span style="color:#111">},</span> <span style="color:#111">[</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">[</span><span style="color:#d88200">&#34;X&#34;</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">],</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">[</span><span style="color:#d88200">&#34;Y&#34;</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">],</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">[</span><span style="color:#d88200">&#34;Z&#34;</span><span style="color:#111">,</span> <span style="color:#f92672">-</span><span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#111">Math</span><span style="color:#111">.</span><span style="color:#75af00">PI</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">update</span><span style="color:#111">(</span><span style="color:#75af00">vec</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">x</span> <span style="color:#f92672">=</span> <span style="color:#75af00">vec</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">y</span> <span style="color:#f92672">=</span> <span style="color:#75af00">vec</span><span style="color:#111">[</span><span style="color:#ae81ff">1</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">this</span><span style="color:#111">.</span><span style="color:#75af00">objects</span><span style="color:#111">[</span><span style="color:#ae81ff">0</span><span style="color:#111">].</span><span style="color:#75af00">rotation</span><span style="color:#111">.</span><span style="color:#75af00">z</span> <span style="color:#f92672">=</span> <span style="color:#75af00">vec</span><span style="color:#111">[</span><span style="color:#ae81ff">2</span><span style="color:#111">];</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>The big difference here is that when we created the cube subclass, we defined a set of &ldquo;parameters&rdquo; (the X, Y, Z) for rotation. They each range from <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0404em;vertical-align:-0.345em;"></span><span class="mord">−</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6954em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">π</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span> to <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0404em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6954em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">π</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>. Since these are defined (with a name, range, and default value), the AutoUI code can make a control panel for it. Also notice how rather than defining a <code>stepWorld</code> method, we provided an <code>update</code> method that takes the slider values as its argument.</p>
+<p>The main body of the code created the UI - but all this required was telling <code>AutoUI</code> to do its job.</p>
+<p>Again, this is a really simple case where we extend the cube. Under normal circumstances, we would extend the base class <code>GrObject</code> and populate it with THREE objects ourselves.</p>
+<h2 id="the-framework-and-hierarchy">The Framework and Hierarchy</h2>
+<p>The Framework doesn&rsquo;t really handle hierarchy. A <code>GrObject</code> stores a list of THREE <code>Object3D</code> - not other <code>GrObject</code>s.</p>
+<p>That doesn&rsquo;t stop you from making hierarchical objects using THREE objects, and then putting this hierarchical object inside of a <code>GrObject</code>. There is an example of this in the framework example file <a href="
+../../libs/CS559-Framework/TestObjects.js">TestObjects.js</a> called <code>HingeCube</code>. When we had the hierarchy demo (previous workbook) there was an example where a cube was made inside of a <code>GrObject</code> and then put inside of another cube.</p>
+<p>One thing to note: you only put the top level <code>GrObject</code> into the <code>GrWorld</code>, and only the top level <code>Object3D</code> into the <code>GrObject</code>. This is very similar to using THREE by itself: you only place the top level parent <code>Object3D</code> into the <code>Scene</code>.</p>
+<h2 id="the-framework-code-ground-rules">The Framework Code Ground Rules</h2>
+<p>Some ground rules about the Framework Code:</p>
+<ol>
+<li>You are strongly recommended to read the framework code. The code is meant to be somewhat self-documenting (with comments and type declarations). Part of the &ldquo;learning goal&rdquo; is to be able to figure things out by reading someone else&rsquo;s code.</li>
+<li>Please avoid changing the framework code. Do not edit the files in the framework directory unless we give you explicit instructions to do so. If you feel like you want to make your own version of something, copy the code into your own directory (<code>for_students</code>) and make changes (be sure to give the code proper attribution).</li>
+<li>If you find a bug in the framework code, please notify the instructors by Piazza.</li>
+<li>We appreciate suggestions on how to make it better - this includes things we could document better, or functionality that we might want to add. The framework code will most likely be used by many classes, so suggestions may help many future students.</li>
+<li>You are strongly encouraged to use the framework code. Learning to work within someone else&rsquo;s (imperfect) code is part of the learning goals of the assignments. However, if you choose to implement things yourself, you will be responsible for providing all of the functionality that the framework provides.</li>
+<li>Future assignments will use the Framework code, but they may use newer versions.</li>
+</ol>
+<h2 id="summary-the-graphics-town-framework-code">Summary: The Graphics Town Framework Code</h2>
+<p>The main way to learn about the Framework code is to read the code and its documentation. But the most important thing to do is to try it out and do things with it. You&rsquo;ll get to do that in the next two exercises.</p>
+<a href="../../docs/02/" class="Next__Page">Next: Page &nbsp;2&nbsp;-&nbsp;Graphics Park</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Selected"> 1: The CS559 Framework Code </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p01",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

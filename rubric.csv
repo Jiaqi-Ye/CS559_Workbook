@@ -1,0 +1,51 @@
+Box,Link,CheckId,Kind,Description,HTML,JS
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-0,standard,"take out bouncing cube",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-1,standard,"place at least 1 more swing",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-2,standard,"place carousel",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-3,standard,"carousel has poles and ''horses''",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-4,advanced,"carousel has correct motion (spins, horses go up and down)",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-5,advanced,"more theme park rides 1 (with hierarchical motion)",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-6,creative,"more theme park rides 2 (with hierarchical motion)",05-02-01.html,05-02-01.js
+05-02-01,/docs/02/#box-05-02-01,wbsp26_05_check-05-02-01-7,creative,"creative or exceptional theme park ride",05-02-01.html,05-02-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-0,standard,"equipment 1 is identifiable and articulated",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-1,standard,"equipment 2 is identifiable and articulated",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-2,standard,"UI works",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-3,standard,"good use of colors/materials for all equipment (not just one color)",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-4,advanced,"third machine identifiable and articulated",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-5,advanced,"at least one object has 4+ d.o.f. (beyond position/orientation)",05-03-01.html,05-03-01.js
+05-03-01,/docs/03/#box-05-03-01,wbsp26_05_check-05-03-01-6,creative,"exceptional machines",05-03-01.html,05-03-01.js
+05-05-07,/docs/05/#box-05-05-07,wbsp26_05_check-05-05-07-0,standard,"triangles correctly oriented (no holes in grid)",05-05-07.html,05-05-07.js
+05-07-01,/docs/07/#box-05-07-01,wbsp26_05_check-05-07-01-0,standard,"Two objects with 3 triangles each",05-07-01.html,05-07-01.js
+05-07-01,/docs/07/#box-05-07-01,wbsp26_05_check-05-07-01-1,standard,"Face Colors",05-07-01.html,05-07-01.js
+05-07-01,/docs/07/#box-05-07-01,wbsp26_05_check-05-07-01-2,standard,"Vertex Colors",05-07-01.html,05-07-01.js
+05-07-01,/docs/07/#box-05-07-01,wbsp26_05_check-05-07-01-3,standard,"Smooth normals",05-07-01.html,05-07-01.js
+05-07-01,/docs/07/#box-05-07-01,wbsp26_05_check-05-07-01-4,standard,"Code Check: objects built “manually”",05-07-01.html,05-07-01.js
+05-17-01,/docs/17/#box-05-17-01,wbsp26_05_check-05-17-01-0,standard,"There are 2 dice",05-17-01.html,05-17-01.js
+05-17-01,/docs/17/#box-05-17-01,wbsp26_05_check-05-17-01-1,standard,"Dice have (correct) numbers on their sides",05-17-01.html,05-17-01.js
+05-17-01,/docs/17/#box-05-17-01,wbsp26_05_check-05-17-01-2,creative,"Rounded edges (Dice)",05-17-01.html,05-17-01.js
+05-17-02,/docs/17/#box-05-17-02,wbsp26_05_check-05-17-02-0,standard,"At least one domino",05-17-02.html,05-17-02.js
+05-17-02,/docs/17/#box-05-17-02,wbsp26_05_check-05-17-02-1,standard,"At least one double 6",05-17-02.html,05-17-02.js
+05-17-02,/docs/17/#box-05-17-02,wbsp26_05_check-05-17-02-2,advanced,"More dominos (different numbers, legal configuration)",05-17-02.html,05-17-02.js
+05-17-02,/docs/17/#box-05-17-02,wbsp26_05_check-05-17-02-3,creative,"Rounded edges (Domino)",05-17-02.html,05-17-02.js
+05-18-02,/docs/18/#box-05-18-02,wbsp26_05_check-05-18-02-0,standard,"identifiable as a real object",05-18-02.html,05-18-02.js
+05-18-02,/docs/18/#box-05-18-02,wbsp26_05_check-05-18-02-1,standard,"texture makes it look like a real object",05-18-02.html,05-18-02.js
+05-20-01,/docs/20/#box-05-20-01,wbsp26_05_check-05-20-01-0,standard,"clear use of mat prop map",05-20-01.html,05-20-01.js
+05-20-01,/docs/20/#box-05-20-01,wbsp26_05_check-05-20-01-1,standard,"material map use explained",05-20-01.html,05-20-01.js
+05-21-01,/docs/21/#box-05-21-01,wbsp26_05_check-05-21-01-0,standard,"appropriate scene (objects and lighting)",05-21-01.html,05-21-01.js
+05-21-01,/docs/21/#box-05-21-01,wbsp26_05_check-05-21-01-1,standard,"bump mapped object (with map)",05-21-01.html,05-21-01.js
+05-21-01,/docs/21/#box-05-21-01,wbsp26_05_check-05-21-01-2,standard,"normal mapped object (with map)",05-21-01.html,05-21-01.js
+05-21-01,/docs/21/#box-05-21-01,wbsp26_05_check-05-21-01-3,standard,"explanation of how we can see the effects",05-21-01.html,05-21-01.js
+05-21-01,/docs/21/#box-05-21-01,wbsp26_05_check-05-21-01-4,advanced,"combine  with color map, with explanation",05-21-01.html,05-21-01.js
+05-23-01,/docs/23/#box-05-23-01,wbsp26_05_check-05-23-01-0,standard,"correct skybox",05-23-01.html,05-23-01.js
+05-24-01,/docs/24/#box-05-24-01,wbsp26_05_check-05-24-01-0,standard,"there is a reflective object in the scene that shows the environment map",05-24-01.html,05-24-01.js
+05-24-01,/docs/24/#box-05-24-01,wbsp26_05_check-05-24-01-1,advanced,"explanation of why env map is appropriate",05-24-01.html,05-24-01.js
+05-24-01,/docs/24/#box-05-24-01,wbsp26_05_check-05-24-01-2,advanced,"combine env map with other map types and explain",05-24-01.html,05-24-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-0,standard,"Building 1 with texture",05-27-01.html,05-27-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-1,standard,"Building 2 with texture",05-27-01.html,05-27-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-2,standard,"Tree or plant",05-27-01.html,05-27-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-3,advanced,"Building Type 3 (fancy)",05-27-01.html,05-27-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-4,advanced,"Advanced Buildings",05-27-01.html,05-27-01.js
+05-27-01,/docs/27/#box-05-27-01,wbsp26_05_check-05-27-01-5,creative,"Creative Buildings",05-27-01.html,05-27-01.js
+<no value>,/#box-<no value>,wbsp26_05_check-%!s(<nil>)-0,standard,"(at least one) texture you made by painting",,
+<no value>,/#box-<no value>,wbsp26_05_check-%!s(<nil>)-1,standard,"(at least one) texture you found on the web",,
+<no value>,/#box-<no value>,wbsp26_05_check-%!s(<nil>)-2,standard,"(at least one) texture you made by taking a picture",,

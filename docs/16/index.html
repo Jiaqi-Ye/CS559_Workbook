@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 16: Textures in THREE</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Using textures is notoriously tricky because there are a lot of steps involved. Fortunately, THREE makes it remarkably easy - it takes care of all the little details, allowing you to focus on the big parts (setting coordinates, defining the texture image).</p>
+<p>If you want a sense of how much had to happen to get a textured cube, have a look at the <a href="https://cs559.github.io/S20-FrameworkDemos/WebGLTexture/texture.html" target="_blank">2015 example</a>! And this doesn&rsquo;t do any lighting!</p>
+<p>Fortunately, THREE takes care of all of this for us. And it gives us access to lots of fancier kinds of texture things as well.</p>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17C%20Lecture%2017C-TextureBasics-remake-of-18C/1_1s3e03bk" target="_blank" rel="noopener">2023 Video: Lecture 18C</a>
+        Textures in Three.JS&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17C-TextureInThree-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<h2 id="the-complete-example">The Complete Example</h2>
+<p>We&rsquo;re going to do this backwards. Here is a complete example program. The plane is included so you can see what the texture looks like when flat.</p>
+<p>
+
+<div id="box-05-16-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-16-01</span>&nbsp;
+    <input type="checkbox" id="check-05-16-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-16-01.html class="boxtitlelink">05-16-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-16-01.js" class="boxtitlelink">05-16-01.js</a>
+    <iframe
+        title="eg-texture"
+        src="../../for_students/05-16-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-16-01"
+    ></iframe>
+</div></p>
+<p>We&rsquo;ll explain how it works below, but you might want to have a look first (the program is 
+<a href="../../for_students/05-16-01.js" class="box-html" data-tag="eg-texture">05-16-01.js</a>
+).</p>
+<p>On the left, we have the triangles without texture, for reference. In the center, we put the texture on the triangles. On the right, we again put the texture on, but adjust the texture coordinates - the left triangle gets its colors from the lower-left part of the texture map (as it appears on the square), and the right triangle gets its colors from the upper-right corner.</p>
+<h2 id="texture-coordinates-in-three">Texture Coordinates in THREE</h2>
+<p>Most THREE primitives have reasonable texture coordinates defined. For example, the square (a THREE <code>PlaneGeometry</code>) in the demo 1 has its u,v going from 0 to 1 across the plane.</p>
+<p>For user-defined geometries (of class <code>BufferGeometry</code>), we have to provide texture coordinates ourselves. We need to split a vertex if it needs to have different coordinates for the different triangles it belongs to (as we did with color and normals before).</p>
+<p>Setting up the texture coordinates for the <code>BufferGeometry</code> is simple: we make a new <code>BufferAttribute</code> for the UVs. We give it an array of 2 * number of vertices (a uv pair for each vertex). Here&rsquo;s the code from 
+<a href="../../for_students/05-16-01.js" class="box-html" data-tag="eg-texture">05-16-01.js</a>
+ - it&rsquo;s actually only 2 statements (since I put each vertex&rsquo;s data on a separate line, it appears longer).</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>      <span style="color:#00a8c8">const</span> <span style="color:#75af00">uvs</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">(</span> <span style="color:#111">[</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#39;uv&#39;</span><span style="color:#111">,</span><span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">uvs</span><span style="color:#111">,</span><span style="color:#ae81ff">2</span><span style="color:#111">));</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Notice that I need to make a <strong>typed array</strong> of the values (that&rsquo;s what <code>Float32Array</code> does). It has 12 values (6 vertices, 2 values per vertex - u and v). I then use that array to make a <code>BufferAttribute</code> that gets assigned to &ldquo;uv&rdquo;.</p>
+<h2 id="using-the-texture">Using the Texture</h2>
+<p>Once we have UV values, we simply need to make sure our material knows to use those UV values and color the triangles using the correct map. In 
+<a href="../../for_students/05-16-01.js" class="box-html" data-tag="eg-texture">05-16-01.js</a>
+, it is done by:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">tl</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">TextureLoader</span><span style="color:#111">().</span><span style="color:#75af00">load</span><span style="color:#111">(</span><span style="color:#d88200">&#34;../textures/UV_Grid_Sm.jpg&#34;</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">MeshStandardMaterial</span><span style="color:#111">({</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;white&#34;</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75af00">roughness</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0.75</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75af00">map</span><span style="color:#f92672">:</span> <span style="color:#75af00">tl</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#111">});</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>There are two steps here: first, we load an image texture (more on that in a moment), and then we create the material. When we create the material, it can be as simple as setting the <code>map</code> attribute to the texture we want to use. Technically, we are using the texture as a <strong>color map</strong>. Note that we make the material white: the color will be blended with the texture color, so if you want to see the actual colors in the texture, you need to have the base color be white.</p>
+<p>We can specify other properties for the material. In the example, I specified <code>roughness</code>. You can even specify <code>color</code>, and this color will be combined with the colors from the texture. Of course, with a <code>MeshStandardMaterial</code>, the colors are affected by lighting as well. If you want to use textures but do not want the color affected by lighting, use a <code>MeshBasicMaterial</code>.</p>
+<p>THREE allows us to control many properties of how textures are used. These will make more sense once we learn about how texturing works in class. For now, the default parameters will probably be fine.</p>
+<h2 id="texture-image-loading-in-three">Texture Image Loading in THREE</h2>
+<p>In order to have a texture image, we need to get the image from somewhere. Usually, this is from some image file.</p>
+<p>Loading an image into a texture is tricky. We need to load the image. We need to wait until the image is loaded. We need to process the image and put it into a special format. We need to attach the image to its surface.</p>
+<p>Fortunately, THREE takes care of all this for you with a texture loader. You say &ldquo;load me a texture&rdquo;, and it loads the texture in and sets things up once it&rsquo;s loaded. A cool feature: before the texture is loaded, things still work (it just shows up as blank). Remember, this is JavaScript asynchronicity, so there really isn&rsquo;t any multi-threading. You need to make sure you return back to the main event loop for loading to happen (remember how <code>requestAnimationFrame</code> works?).</p>
+<p>The line of code is:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>      <span style="color:#00a8c8">let</span> <span style="color:#75af00">tl</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">TextureLoader</span><span style="color:#111">().</span><span style="color:#75af00">load</span><span style="color:#111">(</span><span style="color:#d88200">&#34;../textures/UV_Grid_Sm.jpg&#34;</span><span style="color:#111">);</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<h2 id="texture-re-use">Texture Re-Use</h2>
+<p>It&rsquo;s so easy to load and use textures with THREE that you might forget how many you&rsquo;ve loaded. In general, using lots of textures can be a problem: they take up a lot of memory.</p>
+<p>For example, in the example code 
+<a href="../../for_students/05-16-01.js" class="box-html" data-tag="eg-texture">05-16-01.js</a>
+, the texture file <code>/textures/UV_Grid_Sm.jpg</code> is loaded three times. A separate copy will be loaded for each instance of <code>TwoTrianglesTextured</code> and <code>TwoTrianglesTextured2</code> that we create. Right now, there is just one of each (so that&rsquo;s two copies of the texture - a third is used for the plane). If we made a lot of these objects, the memory usage would add up fast.</p>
+<p>Therefore, when we use textures, we need to be careful to reuse previously loaded assets and not load multiple copies. In fact, we might want to try to re-use the same texture over and over to save memory. Think about this when you make your own objects for future projects.</p>
+<p>The obvious way to fix this in 
+<a href="../../for_students/05-16-01.js" class="box-html" data-tag="eg-texture">05-16-01.js</a>
+ would be to move the line that loads the texture to near the top of the file (after the THREE library is loaded), outside of any function. That way <code>tl</code> would be a &ldquo;module&rdquo; variable (effectively a global), rather than a local variable. The texture would be loaded once, when the module is first loaded.</p>
+<h2 id="setting-texture-parameters">Setting Texture Parameters</h2>
+<p>Once you have loaded a texture, THREE allows you to control exactly how that image is sampled and mapped onto your geometry. <strong>It is important to note that these filtering and sampling options are properties of the <code>THREE.Texture</code> object itself, not the <code>Material</code>.</strong> While the material dictates how the surface reacts to light (using properties like <code>roughness</code> or <code>color</code>), the texture object controls how its own pixels are read and interpolated by the GPU. If you change a filtering property on a texture, every material that uses that specific texture object will inherit those rendering rules.</p>
+<h3 id="magnification-and-minification-filtering">Magnification and Minification (Filtering)</h3>
+<p>When a textured object is rendered, the pixels of your texture (texels) rarely line up perfectly 1:1 with the pixels on your screen. THREE uses filters to dictate how the graphics hardware should calculate the final colors:</p>
+<ul>
+<li>
+<p><strong>Magnification (<code>magFilter</code>):</strong> This applies when the camera is very close to the object, meaning a single texture pixel is stretched to cover multiple screen pixels.</p>
+</li>
+<li>
+<p><code>THREE.LinearFilter</code> (Default): Blends the closest texels together, resulting in a smooth, sometimes blurry appearance.</p>
+</li>
+<li>
+<p><code>THREE.NearestFilter</code>: Snaps to the exact color of the closest texel, resulting in a sharp, blocky, &ldquo;pixel art&rdquo; look.</p>
+</li>
+<li>
+<p><strong>Minification (<code>minFilter</code>):</strong> This applies when the object is far away, meaning a single screen pixel covers a large area of the texture. To handle minification efficiently without creating noisy visual artifacts (aliasing), THREE relies on <strong>mipmaps</strong>.</p>
+</li>
+</ul>
+<h3 id="mipmaps">Mipmaps</h3>
+<p>Mipmaps are a sequence of pre-calculated, progressively smaller versions of your original texture image (e.g., half size, quarter size, down to a single pixel).</p>
+<ul>
+<li><strong>How they are created:</strong> By default, THREE automatically generates these mipmaps for you in the background when the texture is successfully loaded (<code>texture.generateMipmaps = true</code>).</li>
+<li><strong>How they are used:</strong> During rendering, the hardware automatically selects the mipmap level that best matches the object&rsquo;s current size on the screen. This saves rendering performance and drastically reduces visual noise.</li>
+</ul>
+<p>You control how these mipmaps are sampled using the <code>minFilter</code> property. The default setting is <code>THREE.LinearMipmapLinearFilter</code> (often called Trilinear Filtering). This is generally the highest quality standard option, as it smoothly interpolates both across the texture <em>and</em> between the two closest mipmap sizes to prevent jarring visual pops as objects move away.</p>
+<h3 id="anisotropic-filtering">Anisotropic Filtering</h3>
+<p>Standard mipmapping works beautifully when you are looking straight at a surface, but it breaks down at steep, oblique angles. For example, if you are rendering a textured floor stretching out toward the horizon, the shape the screen pixel covers on the texture is a long, skinny rectangle. Standard mipmapping assumes a square shape, which causes the distant floor to look heavily blurred and smudged.</p>
+<p><strong>Anisotropic filtering</strong> solves this by taking multiple samples along that elongated shape, restoring crisp details at sharp angles.</p>
+<p>Because it requires more processing power, anisotropy is set to <code>1</code> (disabled) by default. You can turn it on by setting the <code>anisotropy</code> property on your texture. To get the best possible visual result without guessing what a user&rsquo;s device can handle, you can query the renderer for the maximum hardware-supported value:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Example: Loading a texture and setting parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">textureLoader</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">TextureLoader</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">myTexture</span> <span style="color:#f92672">=</span> <span style="color:#75af00">textureLoader</span><span style="color:#111">.</span><span style="color:#75af00">load</span><span style="color:#111">(</span><span style="color:#d88200">&#39;textures/my_image.jpg&#39;</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// These are the defaults, shown here for clarity
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">myTexture</span><span style="color:#111">.</span><span style="color:#75af00">magFilter</span> <span style="color:#f92672">=</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">LinearFilter</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">myTexture</span><span style="color:#111">.</span><span style="color:#75af00">minFilter</span> <span style="color:#f92672">=</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">LinearMipmapLinearFilter</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Enable the maximum anisotropic filtering supported by the device
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">myTexture</span><span style="color:#111">.</span><span style="color:#75af00">anisotropy</span> <span style="color:#f92672">=</span> <span style="color:#75af00">renderer</span><span style="color:#111">.</span><span style="color:#75af00">capabilities</span><span style="color:#111">.</span><span style="color:#75af00">getMaxAnisotropy</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Apply to material
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">MeshStandardMaterial</span><span style="color:#111">({</span> <span style="color:#75af00">map</span><span style="color:#f92672">:</span> <span style="color:#75af00">myTexture</span> <span style="color:#111">});</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="summary-textures-in-threejs">Summary: Textures in Three.js</h2>
+<p>While the underlying math of texture mapping is highly complex, THREE handles the heavy lifting for us. To successfully apply textures to your 3D objects, keep these key takeaways in mind:</p>
+<ul>
+<li><strong>Coordinates:</strong> Ensure your geometry has UV coordinates defined. Standard THREE geometries have them built-in, but for custom <code>BufferGeometry</code>, you must provide them manually via a <code>BufferAttribute</code>.</li>
+<li><strong>Loading:</strong> Use <code>THREE.TextureLoader</code> to asynchronously load your image files into texture objects. It automatically handles the tricky WebGL setup in the background.</li>
+<li><strong>Application:</strong> Assign the loaded texture to the <code>map</code> property of your material (e.g., <code>THREE.MeshStandardMaterial</code>). Remember that the base color of the material will blend with the texture, so you often want to set the material color to white.</li>
+<li><strong>Efficiency:</strong> Textures consume a lot of memory. Always try to load a texture only once and re-use that single <code>THREE.Texture</code> object across multiple materials or meshes.</li>
+<li><strong>Parameters:</strong> Configure sampling properties like <code>magFilter</code>, <code>minFilter</code> (for mipmaps), and <code>anisotropy</code> directly on the <code>Texture</code> object—not the material—to control how the image is filtered at different distances and viewing angles.</li>
+</ul>
+<a href="../../docs/17/" class="Next__Page">Next: Page &nbsp;17&nbsp;-&nbsp;Dice and Dominos</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Selected"> 16: Textures in THREE </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p16",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

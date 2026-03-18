@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 3-Column Material Gallery</title>
+    <style>
+        body { 
+            margin: 0; 
+            background: #0a0a0a; 
+            color: #eee; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            width: 650px; 
+            overflow-x: hidden;
+        }
+        #container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 across */
+            gap: 8px;
+            padding: 10px;
+        }
+        .material-slot {
+            background: #151515;
+            border: 1px solid #222;
+            text-align: center;
+            padding-bottom: 8px;
+            border-radius: 4px;
+        }
+        canvas {
+            width: 200px !important;
+            height: 200px !important;
+            display: block;
+            margin: 0 auto;
+        }
+        .label {
+            font-size: 10px;
+            margin-top: 6px;
+            color: #00ffcc;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.180.0/build/three.module.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="container"></div>
+    <script type="module" src="materials.js"></script>
+</body>
+</html>

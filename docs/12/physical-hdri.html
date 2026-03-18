@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Material Lab</title>
+    <style>
+        body { margin: 0; background: #111; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; width: 650px; }
+        #controls { width: 90%; background: #222; padding: 15px; border-radius: 8px; margin: 10px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
+        .slider-group { display: flex; flex-direction: column; gap: 5px; }
+        .val { color: #00ffcc; font-family: monospace; float: right; }
+        canvas { background: #000; border: 1px solid #333; border-radius: 4px; }
+        label { text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="controls">
+        <div class="slider-group">
+            <label>Metalness <span id="metalVal" class="val">0.0</span></label>
+            <input type="range" id="metalness" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="slider-group">
+            <label>Roughness <span id="roughVal" class="val">0.3</span></label>
+            <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.3">
+        </div>
+        <div class="slider-group">
+            <label>Clearcoat <span id="coatVal" class="val">0.0</span></label>
+            <input type="range" id="clearcoat" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="slider-group">
+            <label>Clearcoat Roughness <span id="coatRoughVal" class="val">0.0</span></label>
+            <input type="range" id="clearcoatRoughness" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="slider-group">
+            <label>Toggles</label>
+            <div style="display:flex; gap:5px;">
+                <button id="toggleEnv">Toggle Environment</button>
+                <button id="toggleLights">Toggle Lights</button>
+            </div>
+        </div>
+    </div>
+    <canvas id="mainCanvas"></canvas>
+
+    <script type="module" src="physical-hdri.js"></script>
+</body>
+</html>

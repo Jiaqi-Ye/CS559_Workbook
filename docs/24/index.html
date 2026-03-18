@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 24: Environment Mapping (Reflectance)</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On the previous page, we learned about texture maps that surround objects. On that page, we just looked at them. On this page, we&rsquo;ll use them to fake reflections on objects. This is called <strong>Environment Mapping.</strong> Since all lighting is basically reflections, environment mapping becomes an important method for faking complex lighting. Sometimes, environment mapping is referred to as <strong>reflection mapping</strong>.</p>
+<p>Environment mapping gives us a way to &ldquo;fake&rdquo; some global lighting effects. We still consider one point on one object at a time. However, we can get the color from the environment, which can represent distant objects. We still cannot see reflections of other objects in the scene: we can only see reflections of the environment map.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Environment Maps for Object Reflections</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>Looking ahead&hellip; if we want to see the objects in our scene in environment map reflections, we can draw the objects into the environment map. This requires us to update the environment map based on the scene, a technique known as <strong>dynamic environment mapping</strong>, which we will discuss later.</p>
+
+    </div>
+</details>
+</div>
+<p>The key idea of environment mapping is that we use the normal of the surface to figure out what direction the mirror reflection would be coming from, and then use that direction to look up the color in the environment map. Unlike all of the mapping strategies we&rsquo;ve discussed so far, in environment mapping we don&rsquo;t use the UV coordinates from the object; instead, we compute the texture coordinates based on the object&rsquo;s normal and the direction of the camera.</p>
+<p>Implementing environment maps is tricky because you have to do the computation of the texture coordinate (which depends on the camera, the object position, and the object normal). Then, you must look up the texture in the environment map. Fortunately, THREE implements this for us! All we have to do is use it.</p>
+<h2 id="environment-map-theory">Environment Map Theory</h2>
+<p>Remember that with an environment map, we assume the environment is far away. Small changes in position do not matter. Orientation (the direction that we look in) matters a lot. Think about looking at the moon or a distant mountain. If you take ten steps to the left, your perspective of the mountain doesn&rsquo;t visibly change. The parallax effect is practically zero. Because of this, when a 3D object reflects an environment map, we can completely ignore the object&rsquo;s physical X,Y,Z position in the world. If you turn your head, however, you see completely different things.</p>
+<p>With environment mapping, we make the same assumption: the object is small relative to the environment, so we can assume the entire object is at the center (focal point) of the environment map.</p>
+<p>The direction of the reflection is determined by the viewing direction (the vector from the point to the eye) and the normal vector. This is calculated using the same &ldquo;angle of incidence equals angle of reflection&rdquo; math we did for specular lighting. This provides a reflectance direction: if light bounced off the point to the eye, we know what direction it must have come from.</p>
+<p>The reflected vector can be determined from the <span class="tooltip-trigger">eye vector E
+    <span class="tooltip-box">
+        Sometimes this is written in terms of the incidence vector I, which is the vector from the eye to the point.
+    </span>
+</span>
+ (the vector from the point to the eye) and the normal vector, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span></span></span></span>. The vectors must be unit vectors.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/24/reflect.svg">
+        <img src="../../docs/24/reflect.svg" alt="reflect.svg" />
+    </a><figcaption><p>The reflection vector (R) is computed using the eye vector (E) and the normal vector (N). R is used to determine the texture coordinates in the environment map.&nbsp;</p></figcaption>
+</figure>
+
+<p>Given the reflectance direction and the assumption that the object is small relative to the environment (so that the ray starts at the center of the environment map), we can figure out where the ray intersects with the environment map geometry. This determines texture coordinates (u,v on the environment map) from the reflection vector. The actual equation for determining u,v from R depends on the type of environment map.</p>
+<p>So, the four key concepts of environment mapping:</p>
+<ol>
+<li>We assume the object is small relative to the environment.</li>
+<li>#1 allows us to ignore positions on the object and just use the direction of reflection.</li>
+<li>We compute the direction of reflection using the eye position, the point position, and the normal vector.</li>
+<li>We use the reflection vector to tell us where in the environment map to look up the color.</li>
+</ol>
+<p>Note that assumption #1 means that large objects, especially large flat objects, do not work well with environment map reflections. However, it does mean that small details, even if they are just fake normals, can create differences in directions that lead to interesting reflection patterns.</p>
+<p>Filtering (lookup) in an environment map is conceptually the same as filtering for color map lookup. When applying these lookups to real-world materials, we must account for the fact that most surfaces are not perfect mirrors. Microscopic surface roughness causes the reflection vectors to scatter, meaning a rough object doesn&rsquo;t just reflect a single distinct point; it reflects a blurry cone of light. To render this blurriness, the graphics hardware must filter the environment map by averaging together a much larger lookup area of the texture, similar to how standard minification works. However, applying standard filtering techniques to environment maps introduces significant mathematical challenges. Because these maps are 3D spaces flattened into 2D images, they contain inherent geometric distortions—such as pixels severely bunching up at the poles of a spherical map, or the disjointed boundaries between the six faces of a cubemap. Standard GPU filtering (like mipmapping) assumes a continuous, uniform 2D grid and does not naturally know how to average pixels correctly across these distorted poles or hard cubic seams. Without specialized pre-filtering techniques to handle this non-flat topology, relying on standard averaging causes highly visible pinching artifacts or seam lines to appear inside the object&rsquo;s blurry reflections.</p>
+<h2 id="using-an-environment-map-in-threejs">Using an Environment Map in Three.js</h2>
+<p>The basic use of an environment is to make a mirrored object. In THREE, this is as simple as using a material that supports Environment Mapping, and using an appropriate texture with it. All of the standard materials support environment mapping - even <code>MeshBasicMaterial.</code></p>
+<p>There are two steps for using an environment map:</p>
+<ol>
+<li>The material must be shiny (reflective). This requires setting the parameters to make it reflect. For <code>MeshBasicMaterial</code> and <code>MeshPhongMaterial</code>, we set their <code>reflectivity</code> (which controls the amount of reflectance to blend with the base color, <code>reflectivity=1.0;</code> means 100% reflection). For the physical materials, there is a richer set of properties, but these align with real-world materials. For example <code>roughness</code> can vary from 0 (smooth and therefore reflective like a mirror) to 1 (rough like a matte surface, no reflection).</li>
+<li>The surface needs an environment map. You can specify an <code>envMap</code> for each surface. However, you can also specify the environment map as a property of the scene by setting <code>scene.environment</code>. Note: <code>scene.environment</code> is independent of <code>scene.background</code>. It often works well to make them the same: you see the same environment that is reflected.</li>
+</ol>
+<p>It&rsquo;s easy, but try practicing by making some reflective objects.
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>In the example below in 
+<a href="../../for_students/05-24-01.js" class="box-html" data-tag="ex-environment">05-24-01.js</a>
+, put an environment-mapped object into the scene. Pick an object that is appropriate for environment mapping (a primitive like a sphere or torus is fine). Find an environment map, or paint one yourself. Be sure to put the images into the repo!</p>
+<p>Note: your object will &ldquo;reflect&rdquo; what is in the environment map, not what is in the scene (we&rsquo;ll deal with this later). That&rsquo;s OK for this exercise, but it may look silly to have the green ground plane not reflected in the object (so the bottom of the object won&rsquo;t be green). You can just remove the ground plane (<code>GrWorld</code> has that option). Even better, paint your textures so the bottom has the green in it, so objects look as if they are properly reflecting the ground plane.</p>
+<p>You will want to make the background (skybox) be the environment map - otherwise, it will look like the object is reflecting the wrong thing.</p>
+
+<div id="box-05-24-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-24-01</span>&nbsp;
+    <input type="checkbox" id="check-05-24-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-24-01.html class="boxtitlelink">05-24-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-24-01.js" class="boxtitlelink">05-24-01.js</a>
+    <iframe
+        title="ex-environment"
+        src="../../for_students/05-24-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-24-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-24-01-0"></td>
+                <td>standard</td>
+                <td>there is a reflective object in the scene that shows the environment map</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-24-01-1"></td>
+                <td>advanced</td>
+                <td>explanation of why env map is appropriate</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-24-01-2"></td>
+                <td>advanced</td>
+                <td>combine env map with other map types and explain</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>You should explain why the object you chose is appropriate for reflection mapping. And give attribution for any textures (like the environment map!).</p>
+<div class="input-group">
+    <label for="explain-why-environment-map-is-appropriate-for-the-object" style="vertical-align: top;">Explain why environment map is appropriate for the object</label>
+    <textarea id="explain-why-environment-map-is-appropriate-for-the-object" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<p>To get advanced credit, combine environment mapping with other types of maps to make more interesting effects.</p>
+<h2 id="summary-environment-maps">Summary: Environment Maps</h2>
+<p>Environment mapping is the way we use environment maps to fake reflections. It has some limitations: it only reflects objects in the map, and it assumes that the object is small relative to the environment.</p>
+<a href="../../docs/25/" class="Next__Page">Next: Page &nbsp;25&nbsp;-&nbsp;Lighting with HDRI</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Selected"> 24: Environment Mapping (Reflectance) </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p24",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

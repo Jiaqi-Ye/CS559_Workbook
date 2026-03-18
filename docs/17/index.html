@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 17: Dice and Dominos</h1>
+		</header>
+		<div class="content post__content clearfix"><p>We&rsquo;ve made lots of boxes in THREE. Now we&rsquo;ll turn a box into a die (one of a set of dice) and into a domino. All this means is we take a white box and put some dots on the side. For dice, we put a different number of dots on each side. For a domino, we put two sets of dots on the top.</p>
+<p>We&rsquo;ve provided you with a simple texture with all 6 patterns of dots (1-6) in the file <code>images/dice_texture.png</code>. You are welcome to make a nicer texture file (don&rsquo;t forget to include it in the repo when you hand it in!). If you make a texture, it should contain all 6 dot patterns.</p>
+<p><strong>Note:</strong> there should be <em>one texture</em> that has all the 6 patterns of dots. You make the faces of the objects be different by using different texture coordinates to get different parts of the texture onto each face.</p>
+<p>For both the dice and dominoes, it is OK if they are simply boxes - as long as they have the right texture on them.</p>
+<p><strong>Note:</strong> you do need to make shapes for the dice and dominos. It may be easier to make them manually (creating a <code>BufferGeometry</code> with the mesh details) than to adapt the THREE primitives (the primitives give you limited control over the texture coordinates for each face).</p>
+<p>In the text below, I refer to &ldquo;numbers&rdquo; of the side, but that means the number of dots you can see on the side.</p>
+<h2 id="dice-exercise">Dice Exercise</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>Make two dice. This means defining a single class for dice and then making two instances. You should use the CS559 framework for this (so the new class is a subclass of <code>GrObject</code>). We&rsquo;ve gotten things started with 
+<a href="../../for_students/05-17-01.js" class="box-html" data-tag="ex-dice">05-17-01.js</a>
+</p>
+<p>Place the dice on the groundplane. They should be oriented so the numbers on top are different. This should be as simple as rotating one of the dice. We should be able to see that the dice have different numbers on each side (we can&rsquo;t see the bottom).</p>
+
+<div id="box-05-17-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-17-01</span>&nbsp;
+    <input type="checkbox" id="check-05-17-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-17-01.html class="boxtitlelink">05-17-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-17-01.js" class="boxtitlelink">05-17-01.js</a>
+    <iframe
+        title="ex-dice"
+        src="../../for_students/05-17-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-17-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-01-0"></td>
+                <td>standard</td>
+                <td>There are 2 dice</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-01-1"></td>
+                <td>standard</td>
+                <td>Dice have (correct) numbers on their sides</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-01-2"></td>
+                <td>creative</td>
+                <td>Rounded edges (Dice)</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Note: it is possible to do this assignment by using a THREE Box geometry and assigning a different material to each side. Don&rsquo;t do this. The goal is to use texture coordinates to pull the right part of the texture (that contains all the numbers) to the right place. This means that you probably need to make your own <code>Geometry</code> that allows you to control the <code>uv</code> coordinates on each vertex for each face.</p>
+<p>It is OK to make your dice be cubes. Real dice (usually) have rounded edges. Making rounded edges is hard (we&rsquo;ll give you credit, but this is probably not worth it).</p>
+<p>We&rsquo;ve given you a texture file in the <code>images</code> directory.</p>
+<h2 id="dominos-exercise">Dominos Exercise</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>Make at least one domino. If you make only one domino, it should be a double 6.</p>
+<figure><img src="../../images/DBL6-Domino.jpg">
+</figure>
+
+<p>It&rsquo;s OK if your domino is just a box (twice as wide as it is deep, relatively thin). You need to have the dots on both sides of the top. The line between the sides is optional.</p>
+<p>You can use the texture you used for the dice for this exercise. This is the recommended/expected way to do the assignment, but it is not required.</p>
+<p>Note: you could try to do this by making a single texture for the entire top of the domino (with two sixes on one texture). Please don&rsquo;t do this. The point of the exercise is for you to make geometry that has the correct UV values to pull the correct part of the texture onto each part of the object.</p>
+<p>The requirement is to make one domino. A double six. If you&rsquo;re ambitious, you can make a set of dominos (up to 6-6). Here&rsquo;s what a set of dominos looks like <a href="https://www.123rf.com/photo_48347848_stock-vector-full-set-of-realistic-white-domino-pieces-vector-illustration-.html" target="_blank">in a drawing</a>. You could even arrange the dominos on the table in a legal way (numbers have to match - if you don&rsquo;t know the rules for dominos, don&rsquo;t worry).</p>
+<p>It is OK if your domino is a white box except for the black dots. As with the dice, real dominos usually have rounded edges. Don&rsquo;t worry about it (there are more interesting advanced points on the next pages).</p>
+<p>There is a set of files <a href="../../for_students/05-17-02.html" class="box-html" data-tag="ex-dominos">05-17-02.html</a> and 
+<a href="../../for_students/05-17-02.js" class="box-html" data-tag="ex-dominos">05-17-02.js</a>
+ for you to put your work into. You should use the CS559 Framework, and define a new class for dominos. If you really wanted to do it right, the constructor could take 2 numbers (one for the number of dots to appear on each side). The preferred way to implement this is to define your own <code>BufferGeometry</code>, where the top of the box is made of at least 4 triangles, with texture coordinates that put the right numbers where they should go.</p>
+
+<div id="box-05-17-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-17-02</span>&nbsp;
+    <input type="checkbox" id="check-05-17-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-17-02.html class="boxtitlelink">05-17-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-17-02.js" class="boxtitlelink">05-17-02.js</a>
+    <iframe
+        title="ex-dominos"
+        src="../../for_students/05-17-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-17-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-02-0"></td>
+                <td>standard</td>
+                <td>At least one domino</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-02-1"></td>
+                <td>standard</td>
+                <td>At least one double 6</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-02-2"></td>
+                <td>advanced</td>
+                <td>More dominos (different numbers, legal configuration)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-17-02-3"></td>
+                <td>creative</td>
+                <td>Rounded edges (Domino)</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>You can make rounded edges on your dominos and place more than 4 dominos on the table in a legal arrangement (obey the rules of dominos).</p>
+<a href="../../docs/18/" class="Next__Page">Next: Page &nbsp;18&nbsp;-&nbsp;Real Texturing</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Selected"> 17: Dice and Dominos </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p17",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

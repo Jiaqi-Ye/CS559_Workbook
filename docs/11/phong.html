@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phong Parameter Lab</title>
+    <style>
+        body { margin: 0; background: #111; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; width: 650px; }
+        #controls { width: 90%; background: #222; padding: 15px; border-radius: 8px; margin: 10px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
+        .slider-group { display: flex; flex-direction: column; gap: 5px; }
+        .val { color: #00ffcc; font-family: monospace; float: right; }
+        canvas { background: #000; border: 1px solid #333; border-radius: 4px; }
+        label { text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.180.0/build/three.module.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="controls">
+        <div class="slider-group">
+            <label>Diffuse Intensity <span id="diffVal" class="val">1.0</span></label>
+            <input type="range" id="diffuse" min="0" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-group">
+            <label>Shininess (n) <span id="shinVal" class="val">30</span></label>
+            <input type="range" id="shininess" min="1" max="250" step="1" value="30">
+        </div>
+        <div class="slider-group">
+            <label>Specular Color (Metal->Plastic) <span id="specVal" class="val">50%</span></label>
+            <input type="range" id="specMix" min="0" max="100" step="1" value="50">
+        </div>
+        <div class="slider-group">
+            <label>Light Intensity <span id="lightVal" class="val">15</span></label>
+            <input type="range" id="lightInt" min="0" max="50" step="1" value="15">
+        </div>
+    </div>
+    <canvas id="mainCanvas"></canvas>
+
+    <script type="module" src="phong.js"></script>
+</body>
+</html>

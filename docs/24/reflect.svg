@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 427.5 103.5">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke-dasharray: 4 4;
+      }
+
+      .st0, .st1, .st2, .st3, .st4 {
+        stroke-miterlimit: 10;
+      }
+
+      .st0, .st1, .st2, .st4 {
+        fill: none;
+      }
+
+      .st0, .st3 {
+        stroke: #231f20;
+      }
+
+      .st5, .st6 {
+        fill: #be1e2d;
+      }
+
+      .st5, .st7, .st8, .st9 {
+        font-family: ArialMT, Arial;
+        font-size: 10px;
+      }
+
+      .st1 {
+        stroke: #2b3990;
+      }
+
+      .st1, .st2, .st4 {
+        stroke-width: 2px;
+      }
+
+      .st10, .st7 {
+        fill: #231f20;
+      }
+
+      .st2 {
+        stroke: #006838;
+      }
+
+      .st11, .st9 {
+        fill: #2b3990;
+      }
+
+      .st3 {
+        stroke-width: 3px;
+      }
+
+      .st3, .st12 {
+        fill: #fff;
+      }
+
+      .st8, .st13 {
+        fill: #006838;
+      }
+
+      .st4 {
+        stroke: #be1e2d;
+      }
+    </style>
+  </defs>
+  <line class="st3" x1="36" y1="99" x2="180" y2="99"/>
+  <g>
+    <line class="st12" x1="108" y1="13.5" x2="108" y2="99"/>
+    <g>
+      <line class="st2" x1="108" y1="27.62" x2="108" y2="99"/>
+      <polygon class="st13" points="108 13.5 99.87 33.4 108 28.68 116.13 33.4 108 13.5"/>
+    </g>
+  </g>
+  <text class="st8" transform="translate(66.6 9)"><tspan x="0" y="0">N (surface normal)</tspan></text>
+  <text class="st5" transform="translate(127.38 90)"><tspan x="0" y="0">R (reflection vector)</tspan></text>
+  <text class="st5" transform="translate(306 58.5)"><tspan x="0" y="0">R</tspan></text>
+  <text class="st9" transform="translate(4.88 22.5)"><tspan x="0" y="0">E (eye vector)</tspan></text>
+  <g>
+    <line class="st1" x1="45.99" y1="36.99" x2="108" y2="99"/>
+    <polygon class="st11" points="36 27 44.32 46.82 46.73 37.73 55.82 35.32 36 27"/>
+  </g>
+  <g>
+    <line class="st4" x1="108" y1="99" x2="170.01" y2="36.99"/>
+    <polygon class="st6" points="180 27 171.68 46.82 169.27 37.73 160.18 35.32 180 27"/>
+  </g>
+  <g>
+    <line class="st4" x1="297" y1="54" x2="320.76" y2="30.24"/>
+    <polygon class="st6" points="330.75 20.25 322.43 40.07 320.02 30.98 310.93 28.57 330.75 20.25"/>
+  </g>
+  <g>
+    <path class="st0" d="M112.23,58.72c8.8.91,16.76,4.64,22.97,10.28"/>
+    <polygon class="st10" points="108 58.5 113.81 61.3 112.54 58.78 114.11 56.43 108 58.5"/>
+    <polygon class="st10" points="138.19 72 132.22 69.55 134.94 68.81 135.64 66.07 138.19 72"/>
+  </g>
+  <g>
+    <path class="st0" d="M80.8,69c6.21-5.63,14.17-9.36,22.96-10.28"/>
+    <polygon class="st10" points="77.81 72 83.78 69.55 81.06 68.81 80.36 66.07 77.81 72"/>
+    <polygon class="st10" points="108 58.5 102.19 61.3 103.46 58.78 101.89 56.43 108 58.5"/>
+  </g>
+  <text class="st7" transform="translate(82.72 58.5)"><tspan x="0" y="0">θ</tspan></text>
+  <text class="st7" transform="translate(123.22 58.5)"><tspan x="0" y="0">θ</tspan></text>
+  <circle class="st1" cx="297" cy="54" r="45"/>
+  <text class="st7" transform="translate(325.32 99)"><tspan x="0" y="0">Environment map</tspan></text>
+  <text class="st7" transform="translate(337.5 18)"><tspan x="0" y="0">u,v (in env map)</tspan></text>
+</svg>

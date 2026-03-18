@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 13: Texture Basics</h1>
+		</header>
+		<div class="content post__content clearfix"><p>In the past, texture concepts were covered in the lectures. The workbook page was a list of things &ldquo;you should have learned in class.&rdquo; I am hoping that interactive demonstrations of the tricky parts will help students understand the concepts better.</p>
+<p>Like many things, the high-level APIs make texturing easy to use, without understanding how it actually works. I think it is important to understand the key concepts in order to use the various forms of texturing.</p>
+<p>The rough outline of this &ldquo;section&rdquo; of the workbook/class:</p>
+<ul>
+<li>We&rsquo;ll start with the core concepts of texturing: how we define coordinate systems and look up information. We will focus on a specific kind of texture (surface colors).</li>
+<li>We will dig into some of the details of how texturing works. We&rsquo;ll look at it in regular texturing, but the concepts will apply in more advanced texturing.</li>
+<li>We will practice texturing using regular color-based textures.</li>
+<li>We will learn about some more advanced uses of texturing to achieve different kinds of effects. With these, we will focus on trying to use them (since they are implemented well in three.js).</li>
+<li>We will have a few exercises at the end to let you practice using textures.</li>
+</ul>
+<p>A lot of the concepts of texturing connect to both the theory of image formation (very foundational graphics stuff) and the practical details of how the graphics hardware works. We will use texturing as a way to motivate these topics, but we will explore them in depth later.</p>
+<p>The videos on texturing were created as a series of &ldquo;mini lectures&rdquo; (4 shorter parts, rather than one longer lecture). For various reasons, I had been re-using them repeatedly.</p>
+<p>The first video (18A, Texturing Overview) was actually made to be a final review, but we found it works really well as an introductory overview. It is practical - showing you how to do it in three.js, to motivate what you will learn about the concepts. One caveat: it refers to the old three.js <code>Geometry</code> data structures. You can skip that. This is one case where the new <code>BufferGeometry</code> is easier.</p>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17A%20Lecture%2017A-Textures-Review-was-19-1/1_7eq4nl5l" target="_blank" rel="noopener">2023 Video: Lecture 18A</a>
+        Texturing Overview&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17A-Texture-was19-1-textures-review-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17C%20Lecture%2017C-TextureBasics-remake-of-18C/1_1s3e03bk" target="_blank" rel="noopener">2023 Video: Lecture 18C</a>
+        Texture in Three.JS&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17C-TextureInThree-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17D%20Lecture%2017D-%20How%20Textures%20Work%20-was-18D/1_2uqemy5i" target="_blank" rel="noopener">2023 Video: Lecture 18D</a>
+        How Texture Mapping Works&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17D-Texture-was18d-texture-details-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18B%20Lecture%2018B-%20Advanced%20Textures%20Normals%20and%20Bump%20Mapping%20-was-19-2/1_ix3bfovw" target="_blank" rel="noopener">2023 Video: Lecture 19A</a>
+        Advanced Texturing: Normal and Bump Mapping&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18B-Texture-was19-2-texures-normals-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18C%20Lecture%2018C-%20Advanced%20Textures%20Other%20Texturing%20Tricks%20-was-19-3/1_jza5ciwj" target="_blank" rel="noopener">2023 Video: Lecture 19B</a>
+        Advanced Texturing: Layers, Lightmaps, Procedural, and Solid Textures&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18C-Texture-was19-3-texture-other-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18D%20Lecture%2018D-%20Advanced%20Textures%20Sky%20Boxes%20and%20Environment%20Maps%20-was-19-4/1_powqj3fs" target="_blank" rel="noopener">2023 Video: Lecture 19C</a>
+        Advanced Texturing: Skybox and Environment Maps&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18D-Texture-was19-4-texture-environ-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<h2 id="the-big-picture">The Big Picture</h2>
+<p>This video gives the basic ideas of textures very well:
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17B%20Lecture%2017B-TextureBasics-was-18B/1_xsfuj4m7" target="_blank" rel="noopener">2023 Video: Lecture 18B</a>
+        Texturing Basics&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17B-Texture-was18b-texture-basics-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<p>Texturing is a way to add details to a scene without making the geometry more complex. Effectively, it provides a way to make a decision about appearance for every pixel on the screen - without having to make triangles that are pixel-sized.</p>
+<p>For now, we&rsquo;ll talk about using the texture to control colors. We&rsquo;ll also focus on determining the colors based on an image. This is the most common form of texture mapping.</p>
+<p>The obvious catch is that we can&rsquo;t know the pixels ahead of time: a triangle may be big or small on the screen. We need to define the textures in a way that is independent of the actual pixels, and then compute the texture for each pixel.</p>
+<p>The idea is that when the triangle is drawn, each <span class="tooltip-trigger">pixel
+    <span class="tooltip-box">
+        Pixel is a slight oversimplification. We will explore the subtleties later.
+    </span>
+</span>
+ looks up its color in an image. This requires a mapping from the position of the pixel on the triangle to a position in the image. We call these positions in the image <strong>texture coordinates</strong>.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/13/texture-concept.svg">
+        <img src="../../docs/13/texture-concept.svg" alt="texture-concept.svg" />
+    </a>
+</figure>
+
+<p>As the graphics hardware colors each pixel, it knows the position on the triangle and uses this to compute the texture coordinate so it can perform the color lookup. As programmers, we don&rsquo;t know the pixel positions ahead of time. We define the mapping for the whole triangle by specifying the texture coordinates for each of the vertices of the triangle.</p>
+<p>There are two parts of the process we need to understand: (1) how we assign texture coordinates to triangles to control where in the images they get their colors from; and (2) how the graphics hardware will look up the colors, so we can prepare things for it.</p>
+<h2 id="why-not-just-use-more-triangles">Why Not Just Use More Triangles?</h2>
+<p>The alternative to texturing would be to break our triangles into smaller triangles, so that each one could have a different color.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/13/lots-triangles.svg">
+        <img src="../../docs/13/lots-triangles.svg" alt="lots-triangles.svg" />
+    </a>
+</figure>
+
+<p>This has some obvious, and some non-obvious, downsides:</p>
+<ol>
+<li>When designing the object, we need to design it as a collection of triangles. We can&rsquo;t just paint (or photograph) pictures.</li>
+<li>We might need a lot of very small triangles. This means a lot of triangles to maintain, keep attached together, transform and draw, etc.</li>
+<li>As we move the triangle around, we need to make sure that all of the triangles that make it up are adjusted accordingly.</li>
+<li>We may want to capture small details that will end up being smaller than a pixel. In such a case, we will need to figure out what happens when a lot of triangles end up in one pixel.</li>
+<li>When we have large numbers of small triangles, small numerical problems can cause them to not fit together perfectly.</li>
+</ol>
+<p>Texturing addresses all of these problems.</p>
+<ol>
+<li>It allows us to use pictures to define the colors on the surfaces of objects.</li>
+<li>We can define the details of the picture independent of the geometry of the object; we can put a highly detailed picture on a simple object (made of large triangles).</li>
+<li>Because the colors are attached to the triangles, they move correctly as the triangles move.</li>
+<li>We can use well-defined image processing techniques (filtering) to make sure that merging details together into a small space works out correctly. This isn&rsquo;t trivial, but it is a lot easier than trying to have a large number of triangles fighting with each other.</li>
+<li>We don&rsquo;t need to make tiny triangles. We can perform coloring per pixel (or at whatever rate we want), and have this attached to the right place on a bigger triangle.</li>
+</ol>
+<h2 id="how-do-we-do-this">How do we do this?</h2>
+<p>Here&rsquo;s a simple example, using the class software framework.</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 670px;">
+    <a href="../../docs/13/tri-warning-texture.html" class="boxtitlelink">tri-warning-texture.html</a>
+    <iframe
+        title="tri-warning-texture.html"
+        src="../../docs/13/tri-warning-texture.html"
+        class="includebox includebox-standard"
+        width="670"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>The main idea here is you can see a triangle floating in space (you can move the camera), and this triangle has colors mapped to it. The colors come from an image file (shown on the right). The portion of the image used is defined by giving each vertex of the triangle a position in the image. The &ldquo;texture-space&rdquo; triangle is shown as a yellow line in the texture image.</p>
+<p>Here we can see the three.js code that implements the texturing. It matches very directly with the concepts.</p>
+<p>First, we need to assign texture coordinates.
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>    <span style="color:#00a8c8">const</span> <span style="color:#75af00">uvs</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">Float32Array</span><span style="color:#111">([</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">0.5</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">]);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75af00">geometry</span><span style="color:#111">.</span><span style="color:#75af00">setAttribute</span><span style="color:#111">(</span><span style="color:#d88200">&#34;uv&#34;</span><span style="color:#111">,</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">BufferAttribute</span><span style="color:#111">(</span><span style="color:#75af00">uvs</span><span style="color:#111">,</span> <span style="color:#ae81ff">2</span><span style="color:#111">));</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+Here, we create a buffer (just as we did for positions, colors, and normals in the past), but this time we provide a u,v coordinate pair for each vertex. Notice that when we create the buffer, we specify that there are two numbers per vertex.</p>
+<p>Next, we need to define a material that uses the texture for its colors:
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>    <span style="color:#00a8c8">const</span> <span style="color:#75af00">texture</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">TextureLoader</span><span style="color:#111">().</span><span style="color:#75af00">load</span><span style="color:#111">(</span><span style="color:#75af00">texturePath</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">const</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">MeshStandardMaterial</span><span style="color:#111">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#d88200">&#34;white&#34;</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">map</span><span style="color:#f92672">:</span> <span style="color:#75af00">texture</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">transparent</span><span style="color:#f92672">:</span> <span style="color:#00a8c8">true</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">side</span><span style="color:#f92672">:</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">DoubleSide</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75af00">roughness</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0.7</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">});</span></span></span></code></pre></td></tr></table>
+</div>
+</div></p>
+<p>The key things here are:</p>
+<ol>
+<li>We need to load in the image file and tell three.js to process it as a texture. This is done on line 39. It creates a texture object (with deferred loading).</li>
+<li>We define the color to be white (41), since this &ldquo;base color&rdquo; gets combined with the colors from the texture.</li>
+<li>We attach the texture to the object (42).</li>
+<li>We need to give the other properties of a <code>MeshStandardMaterial</code> - the colors of the surface come from the texture, but the lighting calculations still happen. They just use this color as the diffuse color.</li>
+</ol>
+<p>Three.js takes care of everything else for us in terms of setup. The graphics hardware takes care of performing the texturing computation for every pixel on the triangle.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">About the textures</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>This texture comes from <a href="https://www.plaintextures.com/">plaintextures.com</a>, specifically, the <a href="https://www.plaintextures.com/textures/texture/3363">warnings</a> category.</p>
+<p>When we use textures, we should be careful to (1) only use textures that we are allowed to use; and (2) give credit to the author, even if they don&rsquo;t require it.</p>
+<p>In this case, while there is no explicit license on their page that I can find, there is a <a href="https://www.plaintextures.com/terms">terms of use</a> that gives a very broad license.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="image-based-triangle-interpolated-textures-for-color-maps">Image-Based, Triangle-Interpolated Textures, for Color Maps</h2>
+<p>The specific kinds of textures we&rsquo;re doing are:</p>
+<ol>
+<li>Triangle coordinate interpolation (for texture coordinates): We&rsquo;ll put UV values on each vertex of the triangle. The system will interpolate these values for each pixel.</li>
+<li>Image-Based Texture Lookup: Given the u,v coordinate for a pixel, we&rsquo;ll look up its value in an image.</li>
+<li>Color Maps: we&rsquo;ll use the value we looked up in the image as the color for the pixel. We may use this as the material color (so it is affected by lighting), or we might just use the color directly (so it won&rsquo;t be affected by lighting).</li>
+</ol>
+<h2 id="coming-attractions">Coming Attractions</h2>
+<p>For each of the previous choices, there are lots of other choices, and lots of details to consider. With THREE, we don&rsquo;t need to worry about the details: it will make reasonable choices for us. In the future, we will want more control over these choices, and we&rsquo;ll want to try different kinds of texturing.</p>
+<ol>
+<li><strong>Coordinates:</strong> we&rsquo;ll see different ways to determine texture coordinates in order to make solid materials (like wood and stone) or to achieve fancy effects like reflection.</li>
+<li><strong>Texture Lookup:</strong> we&rsquo;ll see how the image lookup process can cause problems, and how we can control the process to get better quality. We&rsquo;ll also look at alternatives to using pre-defined images (procedural textures).</li>
+<li><strong>Texture Use:</strong> rather than controlling the color, we can control other aspects of the appearance. We&rsquo;ll look at adjusting material properties, apparent shape, lighting, etc.</li>
+</ol>
+<h2 id="summary-texturing">Summary: Texturing</h2>
+<p>Key concepts we need:</p>
+<ul>
+<li>The idea of texture coordinates</li>
+<li>Why we need triangle coordinates, and the idea of UV coordinates on triangles</li>
+<li>The idea of image-based texture lookup</li>
+<li>Why we need filtering for texture lookups</li>
+</ul>
+<p>(optional) If you want to look this up in the books (see the <a href="../../">index page</a> for a discussion of the books):
+FCG4 Chapter 11 covers texturing, describing it in a very general way. Section 11.1 gives the main ideas, and 11.2 gives many different types of textures - we&rsquo;ll focus on what&rsquo;s described in 11.2.2. Real-Time Rendering discusses texturing in great detail.</p>
+<p>On the next pages, we&rsquo;ll look at some details in how textures work.</p>
+<a href="../../docs/14/" class="Next__Page">Next: Page &nbsp;14&nbsp;-&nbsp;Texture UVs</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Selected"> 13: Texture Basics </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p13",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

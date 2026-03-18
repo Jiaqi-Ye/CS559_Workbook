@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+	<meta name="generator" content="Hugo 0.157.0">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="./css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="./js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+
+
+<main class="main list" role="main">
+	<header class="main__header">
+		<h1 class="main__title">Workbook 5: Meshes, Texture and Appearance</h1>
+	</header>
+	<div class="content main__content clearfix"><p>This week, we&rsquo;ll move on to making the objects that we see in 3D worlds. We&rsquo;ll learn about how we group triangles into <em>meshes</em> and use <em>texturing</em> to give them more interesting colors. Along the way, we&rsquo;ll see how <em>shading</em> is computed to make lighting effects, and examine different kinds of effects we can use to make things look more interesting.</p>
+<h2 id="workbook-operations">Workbook Operations</h2>
+<p>The workbook uses both type-in forms that rely on browser local storage and &ldquo;page boxes&rdquo; that are files that must be checked in to GitHub.</p>
+<p>Right now, please put your name on the workbook and press the &ldquo;checkpoint&rdquo; button so that we know that you have at least seen this workbook.</p>
+<p><div class="netid">
+<label for="netid">NetID:</label>
+<input 
+  type="text" 
+  id="netid" 
+  class="netid-input sitekey" 
+  placeholder="e.g. bbadger123" 
+  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
+  title="NetID must start with a letter and contain only letters and numbers."
+  required
+  oninput="validateNetID(this)"
+> <span id="netid-error" class="netid-error"></span>
+<script>
+  function validateNetID(input) {
+    const errorSpan = document.getElementById("netid-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "NetID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "NetID can only contain letters and numbers.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div class="netid">
+<label for="github">GithubID (user name):</label>
+<input 
+  type="text" 
+  id="github" 
+  class="netid-input sitekey" 
+  placeholder="e.g. octocat" 
+  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
+  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
+  required
+  oninput="validateGithubID(this)"
+> <span id="github-error" class="netid-error"></span>
+<script>
+  function validateGithubID(input) {
+    const errorSpan = document.getElementById("github-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "Github ID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div id="sheets-status-div" class="status-box">
+<strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-check-span">waiting for check</span>
+<br>
+<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
+<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+</div></p>
+<p>This workbook contains type-ins that are part of the assignment. Some of these have specific rubric checkboxes at the end of the page.</p>
+<p>The checkboxes for boxes and rubric elements are to help students keep track of their work. The <a href="./docs/28/">Last Page (rubric)</a> page has a list of all boxes and rubric items.</p>
+<p>Remember to save your local storage to the JSON file periodically in case something goes wrong. You should also make a checkpoint periodically.</p>
+<p>Remember to commit your work as you edit files in <code>for_students</code> (you should not need to edit files outside of that directory). Remember to push your work to GitHub - at least at the end, or periodically after you commit, to make a backup. And, when you have completed the workbook, remember to use the submit button on the last page to signal us that your workbook is ready for grading.</p>
+<p>We only grade the <code>main</code> branch. It must be pushed to GitHub. And you must use the &ldquo;submit&rdquo; button.</p>
+<p>You will probably add files to the workbook (especially textures). Remember to <code>add</code> them to the repository, so they will be committed and pushed.</p>
+<h2 id="module-goals">Module Goals</h2>
+<p>In this workbook, we dig deeper into 3D graphics by exploring the techniques that we use to make shapes and appearance.</p>
+<p>We will continue to explore using these methods in the context of a high-level API (three.js). Three implements all of the methods that we will learn about, and makes them easy to use. So this workbook is a mix of learning about the concepts, trying them out in simple cases, and learning a little bit about how they work &ldquo;under-the-hood.&rdquo; Understanding the concepts and a little about how they work is critical because these intuitions will help you know when to apply the methods.</p>
+<ol>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<li>Understand meshes and use mesh data structures for describing objects.</li>
+    
+<li>Practice the basic concepts of textures, especially texture coordinates.</li>
+    
+<li>Understand how lighting and texturing are used to create appearance in interactice graphics systems.</li>
+    
+<li>Practice using shape, material, and texture to create appearance.</li>
+    
+<li>Understand how local lighting is computed and used in a practical system.</li>
+    
+<li>Understand and apply advanced texturing types.</li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</ol>
+<h2 id="the-old-lectures">The Old Lectures</h2>
+<p>Lectures 18 and 19 are divided into parts: these were a sequence of shorter videos that covered focused topics. They were good enough that I used them repeatedly.</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_vqv9687w" target="_blank" rel="noopener">2023 Video: Lecture 17</a>
+        Meshes and Lighting&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/17-Meshes-Texture-before.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17A%20Lecture%2017A-Textures-Review-was-19-1/1_7eq4nl5l" target="_blank" rel="noopener">2023 Video: Lecture 18A</a>
+        Texturing Overview&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17A-Texture-was19-1-textures-review-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17B%20Lecture%2017B-TextureBasics-was-18B/1_xsfuj4m7" target="_blank" rel="noopener">2023 Video: Lecture 18B</a>
+        Texturing Basics&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17B-Texture-was18b-texture-basics-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17C%20Lecture%2017C-TextureBasics-remake-of-18C/1_1s3e03bk" target="_blank" rel="noopener">2023 Video: Lecture 18C</a>
+        Texture in Three.JS&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17C-TextureInThree-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17D%20Lecture%2017D-%20How%20Textures%20Work%20-was-18D/1_2uqemy5i" target="_blank" rel="noopener">2023 Video: Lecture 18D</a>
+        How Texture Mapping Works&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17D-Texture-was18d-texture-details-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18B%20Lecture%2018B-%20Advanced%20Textures%20Normals%20and%20Bump%20Mapping%20-was-19-2/1_ix3bfovw" target="_blank" rel="noopener">2023 Video: Lecture 19A</a>
+        Advanced Texturing: Normal and Bump Mapping&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18B-Texture-was19-2-texures-normals-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18C%20Lecture%2018C-%20Advanced%20Textures%20Other%20Texturing%20Tricks%20-was-19-3/1_jza5ciwj" target="_blank" rel="noopener">2023 Video: Lecture 19B</a>
+        Advanced Texturing: Layers, Lightmaps, Procedural, and Solid Textures&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18C-Texture-was19-3-texture-other-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18D%20Lecture%2018D-%20Advanced%20Textures%20Sky%20Boxes%20and%20Environment%20Maps%20-was-19-4/1_powqj3fs" target="_blank" rel="noopener">2023 Video: Lecture 19C</a>
+        Advanced Texturing: Sky Box and Environment Maps&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18D-Texture-was19-4-texture-environ-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18E%20Lecture%2018E-%20Advanced%20Textures%20Shadow%20Maps%20-was-19-5/1_38m6irmn" target="_blank" rel="noopener">2023 Video: Lecture 19D</a>
+        Advanced Texturing: Shadow Maps&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18E-Texture-was19-5-texture-shadows-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<p>Note: we won&rsquo;t cover shadow maps in this workbook; I include them for completeness.</p>
+<h2 id="exercises">Exercises</h2>
+<p>There are a few &ldquo;bigger&rdquo; programming assignments scattered throughout the workbook:</p>
+<ul>
+<li><strong>Graphics Park</strong> - explore animation in the class software framework by making amusement park rides.</li>
+<li><strong>Construction Equipment</strong> - explore articulated figures and automatic user interfaces in the class software framework by making construction equipment.</li>
+<li><strong>Real Object</strong> - create an object that you see in the world by photographing textures.</li>
+<li><strong>Buildings</strong> - practice using textures by making a building.</li>
+<li><del>Vehicles - practice using shape and appearance models by making a vehicle.</del> (moved to another workbook)</li>
+</ul>
+<p>There are several smaller exercises to expose you to using the ideas in three.js. These are still important requirements. This list is not exhaustive. Look at the rubric on <a href="./docs/28/">Page &nbsp;28&nbsp; (Last Page (rubric))</a> for the complete list.</p>
+<ul>
+<li><strong>Mesh Exercises</strong> - orient triangles correctly, and make something else simple.</li>
+<li><strong>Dice and Dominos</strong> - apply textures to an object.</li>
+<li><strong>Material Property Map</strong> - make something with a Material Property Map.</li>
+<li><strong>Bump and Normal Maps</strong> - make things with bump and normal maps.</li>
+<li><strong>SkyBox</strong> - make a real and a fake skybox.</li>
+<li><strong>Environment Map</strong> - make a reflective object that shows reflections.</li>
+</ul>
+<h2 id="readings">Readings</h2>
+<p>The workbook and videos should be self-contained. But, they don&rsquo;t get as deep into the concepts as the books do. The readings are optional.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Accessing the Textbook(s)</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>I refer you to two textbooks, for different purposes.</p>
+<p><strong>If you want to learn the concepts, approached differently:</strong>
+Historically we used: <a href="https://www.routledge.com/Fundamentals-of-Computer-Graphics/Marschner-Shirley/p/book/9780367505035">Fundamentals of Computer Graphics</a>. The book has a long author list (I contributed a chapter).</p>
+<p>You can access the book from the UW Library (so you don&rsquo;t need to buy it):
+<a href="https://search.library.wisc.edu/catalog/9913781252802121/online">Library Link</a>.</p>
+<p>I have also provided the book in Canvas.</p>
+<p><strong>If you want to dig deeper into the concepts and see the range of methods that get used in practice:</strong>
+I&rsquo;ve recommended <strong>Real-Time Rendering</strong> by Thomas Moller, Eric Haines, Naty Hoffman, and some others (each edition adds authors). This book is 1200 pages, and they left chapters out! (the <a href="https://www.realtimerendering.com/">webpage</a> gives PDFs for these chapters).</p>
+<p>The most recent 4th edition is already old (it&rsquo;s from 2018). They do continue to update the website.</p>
+<p>This book is an amazingly extensive reference book that surveys many approaches and details for a huge variety of topics. It’s an invaluable reference - if you’re going to be a real-time graphics programmer, you probably want to have this book. For a class, it’s overkill - it’s way too much depth. It&rsquo;s also not the best way to learn the concepts: once you understand the concepts, you can learn about a lot of details and different implementation tricks.</p>
+<p>The UW Library has an electronic copy of Real-Time Rendering, 4e (Real-Time Rendering 4e <a href="https://search.library.wisc.edu/catalog/9913039972302121">(library link)</a>. Because the services the library uses are unreliable (and inconvenient when they work), I have provided some chapters in <a href="https://canvas.wisc.edu/courses/498231/files/folder/Books/RTR">Canvas</a>. I don&rsquo;t have all of the chapters.</p>
+
+    </div>
+</details>
+</div>
+<p>These reading recommendations refer to Fundamentals of Computer Graphics (FCG) and Real-Time Rendering (RTR) - described in the aside above.</p>
+<p><strong>Shading:</strong> FCG Chapter 10 covers the basics. (10.3 covers stylized shading, which we will not cover in class). If you want to dig deeper into lighting, RTR Chapter 5 is &ldquo;Shading Basics&rdquo; (but goes way beyond the basics).</p>
+<p><strong>Texturing:</strong> FCG Chapter 11 is concise yet thorough. RTR Chapter 6 covers even more details and specifics.</p>
+<p><strong>Meshes:</strong> FCG Chapter 12 discusses many different aspects of data structures to represent graphics. Sections 12, 12.1 and 12.2 cover the material for class. Section 12.1.3 covers strips and fans (which we will touch on in class, but won&rsquo;t use much). Section 12.1.4 discusses the fancy data structures used for representing meshes when they need to be manipulated - this is beyond what we will do in class - read this section to get a taste of a more advanced topic.</p>
+<p><strong>Three.js:</strong> You will undoubtedly need to look at the <a href="https://threejs.org/docs" target="_blank">THREE documentation</a>. You may also want to look at the <a href="https://cs559.github.io/CS559-Framework23/" target="_blank">framework code documentation</a>. The documentation is generated from the comments in the code, so you can probably just get by with reading the code.</p>
+<h2 id="a-note-on-the-assignments">A note on the assignments</h2>
+<p>It is your responsibility to make sure that your scene shows off the texturing feature that it is supposed to. For example, if you are showing off the use of environment maps to simulate reflections, make sure that you have a shiny object that reflects things (and an environment map that gives something to be seen in the reflections). You may want to make your objects move in order to show off some of the lighting effects, or choose object views that make things clear (for example, in lecture I showed off when bump mapping becomes invisible). If you think that it&rsquo;s not clear that you are using the required effect, you may want to describe (in the text box below the exercise) what we should be seeing and why it shows off the feature.</p>
+<p>You will need to find/create your own texture maps. Over the course of the assignment, you will need a bunch of texture maps. Over the whole assignment you must use each of these creation methods at least once:</p>
+<ol>
+<li>A texture you made yourself by painting (digital painting, using a painting program/photo editor)</li>
+<li>A texture that you got from the web (document where you found it, and confirm that it is free to use)</li>
+<li>A texture that is a photograph (that you took) of a real object</li>
+</ol>
+<p>You need to explain how you used each of these creation methods on the last page of the workbook to get credit.</p>
+<p>Don&rsquo;t forget to include the textures you use in your repo and push them to GitHub!</p>
+<p>If you want to load in objects from model files, that is OK (but optional). Make sure to include the objects in your repo, and document where you got them from in the text areas on the workbook pages. You probably want to use the loader code built in the framework. Please choose objects that have appropriate licensing and be sure to give proper attribution.</p>
+<h2 id="a-note-on-textures">A Note on Textures</h2>
+<p>Please be reasonable with your textures. Because many students are uploading files for grading, it uses up a lot of space very quickly. You don&rsquo;t need massive texture files. When you find textures on the web (especially environment map textures) they tend to be huge. Please choose small-sized textures, or shrink them to reasonable size if need be. (It is very unlikely that you need a texture that is more than 1MB).</p>
+<p>And please use compressed file formats (e.g., <code>.png</code> or <code>.jpg</code>). Use HDR formats (such as <code>.exr</code>) only when necessary.</p>
+<p>You do need to add/commit textures to your repo, so they get pushed to GitHub.</p>
+<p>If you get a texture from someplace, you need to give proper attribution. Use the type-in box on <a href="./docs/28/">Page &nbsp;28&nbsp; (Last Page (rubric))</a>.</p>
+<h2 id="rubric-for-grading">Rubric for Grading</h2>
+<p>The requirements are pretty straightforward. You really only need to add a few lines on top of things you already know how to do.</p>
+<p>Assessing effort beyond the minimum is difficult for the graders: it&rsquo;s too subjective, and not necessarily a measure of your learning about graphics. For example, you might make a really cool scene just because you picked a nice environment map background from <a href="https://polyhaven.com/" target="_blank">Poly Haven</a>; in fact, that might look nicer than a simple one someone made themselves.</p>
+<p>The rubric is provided on <a href="./docs/28/">Page &nbsp;28&nbsp; (Last Page (rubric))</a>.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+</p>
+<h2 id="ai-usage">AI Usage</h2>
+<p>The class policy requires you to disclose your usage of AI tools in completing the assignment. There is a text box on <a href="./docs/28/">Page &nbsp;28&nbsp; (Last Page (rubric))</a>.</p>
+<p>I am disclosing <strong>my</strong> usage of AI tools: I used AI tools extensively in the preparation of this workbook. You need to give more detail than that.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">AI Tools Used</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The tools I used:</p>
+<ul>
+<li>GitHub Co-Pilot in Visual Studio Code, with various models.</li>
+<li>Gemini (both CLI and on the Web)</li>
+<li>Claude (from the App, including co-work)</li>
+<li>NotebookLM</li>
+</ul>
+<p>AI was used extensively to design and write the programs in this workbook. Most of the new programs were written by AI (in collaboration). Even most of the old programs were edited by AI (I did various cleanup and checking tasks with it).</p>
+<p>I used AI to help with writing and image creation. Generally it did not write large portions of text (although, I did try having it draft pages - usually, I needed to completely re-write these). Most of the text it wrote was edited a lot (for content and style). Most of the images it made were edited and adapted. Everything should have been checked.</p>
+<p>Impressively, the AI agentic programmers figured out how to write code using the class software framework. I take this as a sign that the design isn&rsquo;t that hard to figure out.</p>
+
+    </div>
+</details>
+</div>
+<p>Get Started on <a href="./docs/01/">Page &nbsp;1&nbsp; (The CS559 Framework Code)</a></p>
+</div>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Selected">Index (Meshes and Textures) </li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="./storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="./wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "np",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "\u003cnil\u003e",
+            solution: false
+        };
+</script><script src="./js/localstore.js"></script><script src="./js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Texture Filtering: Magnification vs Minification
+  Left panel: magnification — screen pixel maps to sub-texel region
+  Right panel: minification — screen pixel maps to many-texel region
+  CS559 Computer Graphics – Workbook 05
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 280" width="660" height="280">
+
+  <defs>
+    <!-- Arrow marker (dark gray) -->
+    <marker id="mm-arr" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#374151"/>
+    </marker>
+    <!-- Dashed arrow for footprint -->
+    <marker id="mm-arr-blue" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#1D4ED8"/>
+    </marker>
+    <marker id="mm-arr-red" viewBox="0 0 12 8" refX="11" refY="4"
+            markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0,0 12,4 0,8" fill="#B91C1C"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════
+       PANEL BACKGROUNDS AND DIVIDER
+       ═══════════════════════════════════════════════ -->
+  <rect x="0"   y="0" width="330" height="280" fill="#F8FAFC"/>
+  <rect x="330" y="0" width="330" height="280" fill="#F0F9FF"/>
+  <line x1="330" y1="0" x2="330" y2="280" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- Panel titles -->
+  <text x="165" y="26" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#1E3A5F">
+    Magnification
+  </text>
+  <text x="165" y="44" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="12" fill="#475569">
+    (zoomed in — pixel &lt; texel)
+  </text>
+
+  <text x="495" y="26" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#1E3A5F">
+    Minification
+  </text>
+  <text x="495" y="44" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="12" fill="#475569">
+    (zoomed out — pixel &gt; many texels)
+  </text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       LEFT PANEL: MAGNIFICATION
+       Screen: 3×3 coarse grid (large pixels, 52px each)
+       Texture: 6×6 fine grid (24px each)
+       One screen pixel maps to a sub-texel region
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Screen label -->
+  <text x="52" y="70" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">Screen</text>
+
+  <!-- Screen grid: 3×3, each cell 50px, origin at (10, 76) -->
+  <g id="mag-screen">
+    <!-- background -->
+    <rect x="10" y="76" width="150" height="150" fill="#E0E7FF" stroke="#6366F1" stroke-width="1.5"/>
+    <!-- grid lines -->
+    <line x1="10"  y1="126" x2="160" y2="126" stroke="#6366F1" stroke-width="1"/>
+    <line x1="10"  y1="176" x2="160" y2="176" stroke="#6366F1" stroke-width="1"/>
+    <line x1="60"  y1="76"  x2="60"  y2="226" stroke="#6366F1" stroke-width="1"/>
+    <line x1="110" y1="76"  x2="110" y2="226" stroke="#6366F1" stroke-width="1"/>
+    <!-- highlight center pixel -->
+    <rect x="60" y="126" width="50" height="50" fill="#818CF8" opacity="0.6"/>
+    <!-- center cross -->
+    <circle cx="85" cy="151" r="3" fill="#3730A3"/>
+    <!-- pixel label -->
+    <text x="85" y="168" text-anchor="middle"
+          font-family="Arial, sans-serif" font-size="10" fill="#312E81">pixel</text>
+  </g>
+
+  <!-- Arrow: screen → texture -->
+  <line x1="165" y1="151" x2="183" y2="151"
+        stroke="#374151" stroke-width="1.8" marker-end="url(#mm-arr)"/>
+
+  <!-- Texture label -->
+  <text x="258" y="70" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">Texture</text>
+
+  <!-- Texture grid: 5×5, each cell 26px, origin at (188, 76)
+       One screen pixel maps to ~1.3 texels wide (just under one texel),
+       so we highlight a 28×28 region inside a single texel cell -->
+  <g id="mag-texture">
+    <rect x="188" y="76" width="130" height="130" fill="#FEF9C3" stroke="#D97706" stroke-width="1.5"/>
+    <!-- grid lines (5 columns / 5 rows = 26px each) -->
+    <line x1="188" y1="102" x2="318" y2="102" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="188" y1="128" x2="318" y2="128" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="188" y1="154" x2="318" y2="154" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="188" y1="180" x2="318" y2="180" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="214" y1="76"  x2="214" y2="206" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="240" y1="76"  x2="240" y2="206" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="266" y1="76"  x2="266" y2="206" stroke="#D97706" stroke-width="0.8"/>
+    <line x1="292" y1="76"  x2="292" y2="206" stroke="#D97706" stroke-width="0.8"/>
+
+    <!-- Color a few texels for visual interest -->
+    <rect x="188" y="76"  width="26" height="26" fill="#FDE68A"/>
+    <rect x="240" y="102" width="26" height="26" fill="#FCD34D"/>
+    <rect x="266" y="128" width="26" height="26" fill="#FDE68A"/>
+    <rect x="214" y="154" width="26" height="26" fill="#FCD34D"/>
+    <rect x="292" y="76"  width="26" height="26" fill="#FEF3C7"/>
+
+    <!-- Pixel footprint in texture: small dashed rectangle inside one texel -->
+    <!-- Screen pixel of ~50px maps to ~(50/3)*(130/150)≈14px in texture -->
+    <!-- Center of screen pixel (85,151) → scale to texture center around (253, 141) -->
+    <!-- Footprint ~14px wide centered at (253,141) -->
+    <rect x="245" y="133" width="14" height="14"
+          fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-dasharray="3,2"/>
+    <!-- Center dot of footprint -->
+    <circle cx="252" cy="140" r="2.5" fill="#1D4ED8"/>
+    <!-- Label -->
+    <text x="265" y="205"
+          font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">pixel footprint</text>
+    <line x1="265" y1="202" x2="256" y2="154"
+          stroke="#1D4ED8" stroke-width="1" marker-end="url(#mm-arr-blue)"/>
+  </g>
+
+  <!-- Texel size annotation bracket -->
+  <line x1="214" y1="212" x2="240" y2="212" stroke="#D97706" stroke-width="1.2"/>
+  <line x1="214" y1="208" x2="214" y2="216" stroke="#D97706" stroke-width="1.2"/>
+  <line x1="240" y1="208" x2="240" y2="216" stroke="#D97706" stroke-width="1.2"/>
+  <text x="227" y="225" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="10" fill="#92400E">1 texel</text>
+
+  <!-- Problem note -->
+  <text x="165" y="247" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8">
+    ⚠ Sub-pixel: which texel value to use?
+  </text>
+  <text x="165" y="261" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8">
+    → Interpolate between neighbors
+  </text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       RIGHT PANEL: MINIFICATION
+       Screen: 6×6 fine grid (22px each)
+       Texture: 5×5 large texel grid (26px each, many texels)
+       One screen pixel maps to a large region in texture
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Screen label -->
+  <text x="382" y="70" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">Screen</text>
+
+  <!-- Screen grid: 5×5, 26px each, at (340, 76) -->
+  <g id="min-screen">
+    <rect x="340" y="76" width="80" height="80" fill="#E0E7FF" stroke="#6366F1" stroke-width="1.5"/>
+    <!-- grid lines - 4 cells -->
+    <line x1="340" y1="96"  x2="420" y2="96"  stroke="#6366F1" stroke-width="0.8"/>
+    <line x1="340" y1="116" x2="420" y2="116" stroke="#6366F1" stroke-width="0.8"/>
+    <line x1="340" y1="136" x2="420" y2="136" stroke="#6366F1" stroke-width="0.8"/>
+    <line x1="360" y1="76"  x2="360" y2="156" stroke="#6366F1" stroke-width="0.8"/>
+    <line x1="380" y1="76"  x2="380" y2="156" stroke="#6366F1" stroke-width="0.8"/>
+    <line x1="400" y1="76"  x2="400" y2="156" stroke="#6366F1" stroke-width="0.8"/>
+    <!-- highlight one pixel -->
+    <rect x="380" y="116" width="20" height="20" fill="#818CF8" opacity="0.7"/>
+    <circle cx="390" cy="126" r="2.5" fill="#3730A3"/>
+    <text x="390" y="167" text-anchor="middle"
+          font-family="Arial, sans-serif" font-size="10" fill="#312E81">pixel</text>
+  </g>
+
+  <!-- Arrow: screen → texture -->
+  <line x1="426" y1="126" x2="444" y2="126"
+        stroke="#374151" stroke-width="1.8" marker-end="url(#mm-arr)"/>
+
+  <!-- Texture label -->
+  <text x="560" y="70" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">Texture</text>
+
+  <!-- Texture grid: 8×8, 16px each, at (449, 62) — showing much finer detail -->
+  <g id="min-texture">
+    <!-- Checkerboard-ish pattern to show many distinct texels -->
+    <!-- 8 columns × 8 rows = 128px × 128px at (449, 76) -->
+    <rect x="449" y="76" width="128" height="128" fill="#FEF9C3" stroke="#D97706" stroke-width="1.5"/>
+
+    <!-- Alternating color cells to suggest texture detail -->
+    <!-- Row 0 -->
+    <rect x="449" y="76"  width="16" height="16" fill="#FDE68A"/>
+    <rect x="481" y="76"  width="16" height="16" fill="#FDE68A"/>
+    <rect x="513" y="76"  width="16" height="16" fill="#FDE68A"/>
+    <rect x="545" y="76"  width="16" height="16" fill="#FDE68A"/>
+    <!-- Row 1 -->
+    <rect x="465" y="92"  width="16" height="16" fill="#FCD34D"/>
+    <rect x="497" y="92"  width="16" height="16" fill="#FCD34D"/>
+    <rect x="529" y="92"  width="16" height="16" fill="#FCD34D"/>
+    <rect x="561" y="92"  width="16" height="16" fill="#FCD34D"/>
+    <!-- Row 2 -->
+    <rect x="449" y="108" width="16" height="16" fill="#FDE68A"/>
+    <rect x="481" y="108" width="16" height="16" fill="#FDE68A"/>
+    <rect x="513" y="108" width="16" height="16" fill="#FDE68A"/>
+    <rect x="545" y="108" width="16" height="16" fill="#FDE68A"/>
+    <!-- Row 3 -->
+    <rect x="465" y="124" width="16" height="16" fill="#FCD34D"/>
+    <rect x="497" y="124" width="16" height="16" fill="#FCD34D"/>
+    <rect x="529" y="124" width="16" height="16" fill="#FCD34D"/>
+    <rect x="561" y="124" width="16" height="16" fill="#FCD34D"/>
+    <!-- Row 4 -->
+    <rect x="449" y="140" width="16" height="16" fill="#FDE68A"/>
+    <rect x="481" y="140" width="16" height="16" fill="#FDE68A"/>
+    <rect x="513" y="140" width="16" height="16" fill="#FDE68A"/>
+    <rect x="545" y="140" width="16" height="16" fill="#FDE68A"/>
+    <!-- Row 5 -->
+    <rect x="465" y="156" width="16" height="16" fill="#FCD34D"/>
+    <rect x="497" y="156" width="16" height="16" fill="#FCD34D"/>
+    <rect x="529" y="156" width="16" height="16" fill="#FCD34D"/>
+    <rect x="561" y="156" width="16" height="16" fill="#FCD34D"/>
+
+    <!-- Grid lines -->
+    <line x1="465" y1="76"  x2="465" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="481" y1="76"  x2="481" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="497" y1="76"  x2="497" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="513" y1="76"  x2="513" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="529" y1="76"  x2="529" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="545" y1="76"  x2="545" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="561" y1="76"  x2="561" y2="204" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="92"  x2="577" y2="92"  stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="108" x2="577" y2="108" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="124" x2="577" y2="124" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="140" x2="577" y2="140" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="156" x2="577" y2="156" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="172" x2="577" y2="172" stroke="#D97706" stroke-width="0.7"/>
+    <line x1="449" y1="188" x2="577" y2="188" stroke="#D97706" stroke-width="0.7"/>
+
+    <!-- Pixel footprint: large dashed red rect covering ~5×5 texels centered in texture -->
+    <!-- screen pixel 20px → scales to (20/80)*128 = 32px in texture, at center (513,140) -->
+    <rect x="481" y="108" width="64" height="64"
+          fill="#FEE2E2" fill-opacity="0.5"
+          stroke="#B91C1C" stroke-width="2.2" stroke-dasharray="5,3"/>
+    <!-- Label arrows pointing at the footprint region -->
+    <text x="601" y="106"
+          font-family="Arial, sans-serif" font-size="10" fill="#B91C1C">pixel</text>
+    <text x="601" y="118"
+          font-family="Arial, sans-serif" font-size="10" fill="#B91C1C">footprint</text>
+    <line x1="601" y1="121" x2="549" y2="130"
+          stroke="#B91C1C" stroke-width="1" marker-end="url(#mm-arr-red)"/>
+  </g>
+
+  <!-- Problem note -->
+  <text x="495" y="247" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#B91C1C">
+    ⚠ Covers many texels: which color to use?
+  </text>
+  <text x="495" y="261" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="11" fill="#B91C1C">
+    → Average (filter) over the region
+  </text>
+
+</svg>

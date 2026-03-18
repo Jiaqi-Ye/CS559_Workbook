@@ -1,0 +1,13 @@
+# .gitignore for the Workbook theme - all workbooks get this
+.DS_Store
+.vscode/
+.idea/
+*.log
+*.tmp
+*.bak
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mkv
+*.zip

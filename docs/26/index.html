@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 26: Even More Texture Mapping</h1>
+		</header>
+		<div class="content post__content clearfix"><p>We&rsquo;ve already seen several kinds of texture mapping: regular (color) mapping, normal mapping, bump mapping, displacement mapping, reflection mapping, environment maps for backgrounds, and environment maps for lighting. But there are many more.</p>
+<p>In the next workbook, we will discuss using 3D drawing of the scene to create maps. This will allow us to create dynamic environment maps (where the reflections include moving objects in the scene) and shadow maps (where we simulate shadows).</p>
+<p>There are a few topics that are useful, but we won&rsquo;t be able to discuss them at length. I mention them here so that you have at least heard the terms.</p>
+<h2 id="layered-textures">Layered Textures</h2>
+<p>Sometimes, we create surface effects by &ldquo;layering&rdquo; textures on top of one another to combine them. For example, we might have a texture that has the main surface material (say, painted wood). Then we might add a texture that has the scratches and markings. And then maybe a texture with a sticker to apply.</p>
+<p>The ability to assemble appearances by combining separate textures is used by artists to create complicated looks.</p>
+<figure class="" style="width: 500px; ">
+    <a href="../../docs/26/bowling-pins-trimmed.png">
+        <img src="../../docs/26/bowling-pins-trimmed.png" alt="bowling-pins-trimmed.png" />
+    </a><figcaption><p>Adding successive layers of texture to create a more complex appearance.&nbsp;This image is adapted from an image that was inspired by an old Pixar example. However, I don&rsquo;t know where it comes from.</p></figcaption>
+</figure>
+
+<h2 id="light-maps">Light Maps</h2>
+<p>The idea of a light map is to &ldquo;paint&rdquo; lighting effects right into the surface colors. The texture map for the surface contains the color that the surface appears <em>including</em> the effects of lighting.</p>
+<p>Lightmaps can be used two ways: (1) they can be used to add specific special effects (like adding a highlight), or (2) they can be computed using some complicated rendering process that takes too long to compute for interaction.</p>
+<p>Either way, light maps &ldquo;bake in&rdquo; the lighting: the lighting effects are in the surface colors. They cannot change if the scene changes—for example, if the light moves or the object moves in relationship to the light. Also, any kind of specular effect or reflection will be a problem if the viewpoint moves.</p>
+<p>Light maps are an example of a precomputation strategy. They allow for an expensive lighting simulation to be computed ahead of time, and used for viewing at interactive rates.</p>
+<h2 id="ambient-occlusion">Ambient Occlusion</h2>
+<p>Ambient occlusion is a lighting technique. However, it is common to pre-compute it offline and store the results in a kind of map so it can be used quickly.</p>
+<p>Ambient occlusion refers to the effect that some parts of objects are generally darker because they are exposed to less light. The shape of the object creates self-shadowing that darkens parts of it.</p>
+<figure class="" style="width: 600px; ">
+    <a href="../../docs/26/ao.svg">
+        <img src="../../docs/26/ao.svg" alt="ao.svg" />
+    </a><figcaption><p>Concept of ambient occlusion in 2D. The point on the flat surface gets light from more directions than the point in the corner, which gets more than the point in a crevace. For each point, we compute the amount of the outside world it can see, and darken the color at that point based on how much is blocked.&nbsp;</p></figcaption>
+</figure>
+
+<p>With ambient occlusion, each point on a surface has a number that represents how much light can get to it. The surface is darkened by that amount at that point. It works well to add some realistic contrast to scenes.</p>
+<div style="display:flex">
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/26/bread.png">
+        <img src="../../docs/26/bread.png" alt="bread.png" />
+    </a><figcaption><p>Diffuse Lighting&nbsp;</p></figcaption>
+</figure>
+
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/26/bread-ao.png">
+        <img src="../../docs/26/bread-ao.png" alt="bread-ao.png" />
+    </a><figcaption><p>Lighting+Ambient Occlusion&nbsp;</p></figcaption>
+</figure>
+
+</div>
+<figure class="" style="width: 500px; ">
+    <a href="../../docs/26/ao-arvi.png">
+        <img src="../../docs/26/ao-arvi.png" alt="ao-arvi.png" />
+    </a><figcaption><p>Example of ambient occlusion applied to a scene.
+            <a href="https://vr.arvilab.com/blog/ambient-occlusion">&nbsp;From ARVI: Ambient Occlusion Tutorial</a></p></figcaption>
+</figure>
+
+<p>While there are methods to compute ambient occlusion approximately, computing it correctly requires non-local lighting computations that consider the entire complex object (or even the whole scene).</p>
+<p>A common practice is to compute ambient occlusion for an object off line, and then to store the amount of darkening in an <strong>ambient occlusion map</strong>. At drawing time, this map is used to determine an amount of darkening that should be applied to the object.</p>
+<a href="../../docs/27/" class="Next__Page">Next: Page &nbsp;27&nbsp;-&nbsp;Graphics Town Buildings</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Selected"> 26: Even More Texture Mapping </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p26",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

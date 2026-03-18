@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nearest Neighbor Filtering Problems (Scale Motion)</title>
+  <link rel="stylesheet" href="/libs/CS559/style559.css" />
+  <style>
+    :root {
+      --paper: #ece8df;
+      --card: #faf8f3;
+      --ink: #1f2b35;
+      --line: #8e9ba5;
+      --accent: #0e5b6d;
+      --gap: 0.8rem;
+      --panel-size: 128px;
+    }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      color: var(--ink);
+      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, #fffbe6 0%, #f2efe5 38%, var(--paper) 100%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .meta,
+    .note {
+      margin: 0.35rem 0 0.8rem 0;
+      color: #3a4955;
+      font-size: 0.92rem;
+    }
+
+    .views {
+      display: grid;
+      width: min(600px, 100%);
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap);
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem;
+      box-shadow: 0 3px 8px rgba(21, 34, 45, 0.12);
+    }
+
+    .panel h2 {
+      margin: 0 0 0.45rem 0;
+      color: var(--accent);
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .canvas-wrap {
+      width: var(--panel-size);
+      height: var(--panel-size);
+      border: 1px solid #263541;
+      background: #0d1217;
+      overflow: hidden;
+    }
+
+    .canvas-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .controls {
+      margin-top: 0.8rem;
+      display: grid;
+      gap: 0.4rem;
+      max-width: 420px;
+      font-size: 0.92rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 6rem 1fr 3.2rem;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .row output {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button {
+      width: fit-content;
+      padding: 0.25rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid #4c5d68;
+      background: #f8fbfd;
+      color: #1f2b35;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    @media (max-width: 620px) {
+      .views {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+        "three/": "https://unpkg.com/three@0.180.0/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Problems With Nearest Neighbor Filtering (Scale Motion)</h1>
+  <p class="meta">Implemented by GitHub Copilot using GPT-5.3-Codex. Directed by Gleicher.</p>
+  <p class="note">All three views show the same textured square scaling between full size and one quarter size.</p>
+
+  <section class="views">
+    <article class="panel">
+      <h2>Nearest Neighbor</h2>
+      <div id="nearest-host" class="canvas-wrap" aria-label="Nearest-neighbor view"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Linear + Mipmaps</h2>
+      <div id="mipmap-host" class="canvas-wrap" aria-label="Mipmapped linear view"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Anisotropic</h2>
+      <div id="aniso-host" class="canvas-wrap" aria-label="Anisotropic filtering view"></div>
+    </article>
+  </section>
+
+  <section class="controls" aria-label="Scale controls">
+    <div class="row">
+      <label for="scale">Scale</label>
+      <input id="scale" type="range" min="0.25" max="1" step="0.001" value="1" />
+      <output id="scale-out">1.000</output>
+    </div>
+    <button id="toggle-animation" type="button">Pause Animation</button>
+  </section>
+
+  <script type="module" src="./nearest-filtering-scale-demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 15: Texture Filtering</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Once the mapping process determines the texture coordinate for a pixel, it must look up the color in the texture image. This sounds simple — but it turns out to be one of the trickier parts of texture mapping, because the pixel and the texel grids almost never align perfectly.</p>
+<p>This problem is called <strong>texture filtering</strong>, and getting it right makes an enormous difference to image quality. This page explains why the problem exists, what goes wrong if you ignore it, and the standard algorithms — bilinear interpolation, mipmapping, and anisotropic filtering — that modern hardware uses to solve it efficiently.</p>
+<p>The 2023 lecture discusses the topic well:
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-17D%20Lecture%2017D-%20How%20Textures%20Work%20-was-18D/1_2uqemy5i" target="_blank" rel="noopener">2023 Video: Lecture 18D</a>
+        How Texture Mapping Works&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17D-Texture-was18d-texture-details-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<h2 id="two-scenarios-magnification-and-minification">Two Scenarios: Magnification and Minification</h2>
+<p>There are two distinct situations, depending on whether the object is close to the camera or far away:</p>
+<figure class="" style="width: 95%; ">
+    <a href="../../docs/15/mag-min.svg">
+        <img src="../../docs/15/mag-min.svg" alt="mag-min.svg" />
+    </a><figcaption><p><strong>Magnification</strong> (left): the object is zoomed in, so one screen pixel maps to only a fraction of a texel — the pixel footprint is smaller than one texel. <strong>Minification</strong> (right): the object is zoomed out, so one screen pixel maps to many texels at once — the pixel footprint covers a large region of the texture.&nbsp;</p></figcaption>
+</figure>
+
+<p>In <strong>magnification</strong>, the surface fills many more pixels than the texture has texels. Adjacent screen pixels may both land inside the same texel. If we just round to the nearest texel, we get the same color for all those pixels, producing visible blocky artifacts.</p>
+<p>In <strong>minification</strong>, the surface is rendered small. A single screen pixel corresponds to a large region of the texture — potentially dozens or hundreds of texels. If we only sample the one texel closest to the pixel center, we get an arbitrary color that ignores most of the texture underneath. The result is severe aliasing: moiré patterns, flickering in animation, jagged edges.</p>
+<h2 id="nearest-neighbor-and-its-problems">Nearest-Neighbor and Its Problems</h2>
+<p>The simplest possible approach is <strong>nearest-neighbor lookup</strong>: for any UV coordinate, just find the closest texel center and return its color.</p>
+<p>For magnification, this creates blocky, pixelated results — you can see the individual texel squares. For minification, it is far worse. Imagine a checkerboard texture viewed from an angle. Up close, pixels map to small regions and each pixel correctly covers one or two squares. Far away, a single pixel covers a whole region of black and white squares. Nearest-neighbor picks the color of whichever square the pixel center happens to land on — pure black or pure white, with no averaging. The result is noisy, aliased patterns that shift and flicker as the camera moves.</p>
+<p>Here is a simple example. The checkerboard texture is black and white. With nearest neighbor, all resulting pixels pick one pixel from the texture, so they will be black or white. If we&rsquo;re lucky, we pick an equal number of each. More often, we&rsquo;ll get weird patterns of black and white. The mip-mapping and anisotropic methods average pixels together, so we get shades of gray.</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../texturedemos/nearest-filtering-demo/nearest-filtering-demo.html" class="boxtitlelink">/texturedemos/nearest-filtering-demo/nearest-filtering-demo.html</a>
+    <iframe
+        title="/texturedemos/nearest-filtering-demo/nearest-filtering-demo.html"
+        src="../../texturedemos/nearest-filtering-demo/nearest-filtering-demo.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Here&rsquo;s an even simpler example where we simply make the checkerboard smaller. Even in this simple case, nearest neighbor causes weird stuff to happen. Getting gray might not be perfect, but it&rsquo;s the best we can do: we are trying to cram many texture pixels into a single image pixel.</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../texturedemos/nearest-filtering-demo/nearest-filtering-scale-demo.html" class="boxtitlelink">/texturedemos/nearest-filtering-demo/nearest-filtering-scale-demo.html</a>
+    <iframe
+        title="/texturedemos/nearest-filtering-demo/nearest-filtering-scale-demo.html"
+        src="../../texturedemos/nearest-filtering-demo/nearest-filtering-scale-demo.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<h2 id="bilinear-interpolation-magnification-fix">Bilinear Interpolation (Magnification Fix)</h2>
+<p>A better approach for the magnification case is <strong>bilinear interpolation</strong>. Rather than snapping to the nearest texel center, we find the four texel centers surrounding the UV sample point and blend them together based on how close the point is to each.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/15/bilinear.svg">
+        <img src="../../docs/15/bilinear.svg" alt="bilinear.svg" />
+    </a><figcaption><p>Bilinear interpolation: the query point lies at fractional position (s, t) within a 2×2 block of texels. Step 1 interpolates horizontally in each row to get intermediate values A and B. Step 2 interpolates vertically between A and B to get the final color. Total cost: 4 texture lookups.&nbsp;</p></figcaption>
+</figure>
+
+<p>The name comes from performing linear interpolation twice — once in the u direction and once in the v direction. The two steps can be written as:</p>
+<p><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">00</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">10</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">01</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">11</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">color</span></span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span></p>
+<p>where s and t are the fractional offsets of the sample point within the texel cell. The result is smooth interpolation between texel colors, eliminating the blocky appearance of nearest-neighbor. At the cost of four lookups instead of one, every in-between UV value gets a sensible blended answer.</p>
+<p>Bilinear interpolation solves the magnification problem, but it does nothing for minification — the issue there is not how to interpolate <em>between</em> a handful of texels, but how to <em>summarize</em> a large region quickly.</p>
+<h2 id="filtering-averaging-over-a-region">Filtering: Averaging Over a Region</h2>
+<p>The right conceptual answer for minification is to <strong>average all the texel colors inside the pixel&rsquo;s footprint</strong>, weighted by how much of each texel the pixel covers. This is sometimes called <strong>box filtering</strong> or <strong>area averaging</strong>.</p>
+<p>When a distant pixel covers a black-and-white checkerboard, averaging black and white gives gray — which is the correct answer. The surface in the distance really is a mix of both colors, and gray is the best single color we can put in that pixel. The blurring this produces is not a mistake; it is the physically correct response to the resolution limit imposed by the pixel size.</p>
+<p>The practical challenge is speed. A single pixel can map to hundreds of texels, and computing that average naively — by summing each texel individually — is far too expensive to do per pixel, per frame.</p>
+<p>The practical solution is to (1) simplify the shape of the region to be a rectangle or square, <strong>approximating</strong> the actual filter needed; (2) to <strong>precompute</strong> partial results so that the actual texture computations are fast; and (3) to <strong>amortize</strong> the costs of these precomputations over many texture computations, so the time spent precomputing is made up for by lots of savings later. This three-part strategy, approximate, precompute, amortize, is key to many of the performance strategies in interaction graphics and games.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Historical Notes</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The inventors of the next two methods are people I have personal connections to: they were my mentors when I worked at Apple after graduate school.</p>
+<p>Frank Crow, inventor of the Summed Area Table, was my manager at Apple. He has connections to Madison. He was an undergraduate here at the University of Wisconsin - Madison, and (I believe) was originally from Madison. His father was a professor.</p>
+<p>Lance Williams, inventor of Mip Maps, was a colleague at Apple who taught me a lot about computer graphics. He invented a lot of important techniques including mip-mapping (discussed below) and shadow mapping.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="summed-area-tables-historical-approach">Summed Area Tables (Historical Approach)</h2>
+<p>First, we will look at a historical solution: the <strong>summed area table</strong> (SAT).
+The idea is to precompute, for every texel position (x, y), the sum of all texel values in the rectangle from the top-left corner of the texture to that point:</p>
+<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">SAT</span></span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1858em;vertical-align:-0.4358em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">≤</span><span class="mord mathnormal mtight">x</span><span class="mpunct mtight">,</span><span class="mspace mtight" style="margin-right:0.3253em;"></span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mrel mtight">≤</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">texel</span></span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span><span class="mclose">]</span></span></span></span>
+<figure class="" style="width: 95%; ">
+    <a href="../../docs/15/summed-area.svg">
+        <img src="../../docs/15/summed-area.svg" alt="summed-area.svg" />
+    </a><figcaption><p>With a pre-computed SAT, the sum over any axis-aligned rectangle (red) can be found with four corner lookups and three arithmetic operations — constant time regardless of the rectangle&rsquo;s size.&nbsp;</p></figcaption>
+</figure>
+
+<p>To find the sum over any axis-aligned rectangle, you use inclusion-exclusion: look up the four corners and combine them as shown. Dividing by the number of texels in the rectangle gives the average in O(1) time, no matter how large the area.</p>
+<p>The SAT demonstrates three key principles of graphics algorithm design: <strong>approximation</strong>, <strong>precomputation</strong> (do the expensive work once at load time) and <strong>amortization</strong> (spread that cost over many fast per-pixel queries). In practice, SATs have precision and memory issues on large textures, and they only support rectangular filter shapes. They are not the method modern hardware uses — but the ideas they embody are fundamental, and they lead directly to mipmaps.</p>
+<h2 id="mip-maps">Mip Maps</h2>
+<p>The solution used in all modern graphics hardware is the <strong>mip map</strong>, introduced by Lance Williams in 1983. The name is a Latin abbreviation: <em>multum in parvo</em>, &ldquo;much in little.&rdquo; Just as with summed area tables, mipmaps will allow us to compute the area of any sized filter footprint with a fixed number of lookups (8). It assumes the area is a square, but it avoids the problems of summed area tables.</p>
+<p>The key idea of mipmaps is to precompute the texture at a sequence of progressively halved sizes and store the whole pyramid. The set of images, which form a pyramid is called a <strong>mipmap</strong>.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/15/mipmap-empty.svg">
+        <img src="../../docs/15/mipmap-empty.svg" alt="mipmap-empty.svg" />
+    </a><figcaption><p>Mip maps pre-compute a pyramid of successively smaller images. The 64x64 texture is also stored at 32x32, 16x6 atc. Reducing the image size causes naturally involves averaging. The bottom row shows the smaller images zoomed back to the full size.
+            <a href="https://www.publicdomainpictures.net/en/view-image.php?image=305201&amp;picture=sunflower-field-flowers-sky">&nbsp;Flowers from publicdomainpictures.net.</a></p></figcaption>
+</figure>
+
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Aside: How do we downsize images? What&#39;s a Pyramid?</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>We haven&rsquo;t discussed resizing images in class (yet). But the simple intuition: each image in the smaller image contains the information from many pixels in the larger image. A simple version of this: each pixel in the half sized image comes from a 2x2 region of the full sized one. A reasonable way to combine this information is to average it together.</p>
+<p>This is a simple approach to image downsizing. But, it exactly matches with the idea of averaging we need for mipmapping. Generally, the &ldquo;averaging&rdquo; process used for downsizing is more complicated (and quite interesting). Sadly, we don&rsquo;t discuss this kind of image processing in class.</p>
+<p>If you&rsquo;re wondering why we use the term &ldquo;pyramid&rdquo;: an <strong>image pyramid</strong> is a set of images created by downsizing an image by factors of two. This image gives you a sense of why. The <a href="https://en.wikipedia.org/wiki/Pyramid_(image_processing)">Wikipedia</a> page it comes from explains the history.</p>
+<figure class="" style="width: 400px; ">
+    <a href="../../docs/15/Image_pyramid_svg.png">
+        <img src="../../docs/15/Image_pyramid_svg.png" alt="image_pyramid_svg.png" />
+    </a><figcaption><p>Visual representation of an image pyramid with 5 levels.
+            <a href="https://en.wikipedia.org/wiki/Pyramid_%28image_processing%29">&nbsp;From Wikipedia.</a></p></figcaption>
+</figure>
+
+    </div>
+</details>
+</div>
+<p>The intuition is that we reduce the size of the image, we also reduce the sizes of a region in the image. The texel footprint (the range of pixels we want to average over) in the biggest image would be smaller in the half-sized image, and even smaller in the quarter sized image. At some point, the region will fit within one pixel of the reduced size texture, and we can use bilinear interpolation to get the value.</p>
+<figure class="" style="width: 80%; ">
+    <a href="../../docs/15/mipmap.svg">
+        <img src="../../docs/15/mipmap.svg" alt="mipmap.svg" />
+    </a><figcaption><p>The square filter footprint becomes smaller as the images are downsized. At some point, it fits within one pixel. Here, that level is 4x4. The actual size is somewhere between 4x4 and 8x8. Therefore, mipmapping interpolates between levels.&nbsp;</p></figcaption>
+</figure>
+
+<p>Because we only have powers of 2 sizes, the level where the filter region exactly matches the pixel size is likely to fall between steps. Therefore, mipmapping uses interpolation between levels. We pick a level that is slightly too small, and a level that is slightly too big and interpolate between the levels. Because we use bi-linear interpolation within the levels (to get the right position between the pixels) and linear interpolation between the levels (to get the right level), the overall process is <strong>trilinear interpolation.</strong></p>
+<p>One detail that I skipped: this process works because we are assuming that the region we want to average over is a square. Otherwise, we might need to downsize a different amount in each direction. Therefore a key piece of mipmapping is that we approximate the actual region to average (the texel footprint) as a square.</p>
+<p>Mipmapping with trilinear interpolation is the standard approach in computer graphics. When textures are loaded, the mipmap (the pyramid of images) are computed. Then at render time, every texture lookup follows these steps:</p>
+<p><strong>1. Approximate the footprint as a square.</strong> Rather than computing the exact shape of the pixel&rsquo;s footprint in texture space, mip maps always approximate it as a square. We will see why this is a limitation in a moment.</p>
+<p><strong>2. Choose the right level.</strong> The footprint size tells us which level of the pyramid to use — specifically, the level where one texel is approximately the same size as the footprint square. In practice, the footprint typically falls between two adjacent levels.</p>
+<p><strong>3. Trilinear interpolation.</strong> Use bilinear interpolation within each of the two bracketing levels (4 lookups each), then blend the two results linearly based on how far the footprint size falls between them. Total cost: 8 texture lookups.</p>
+<p>The mip map pyramid takes 33% more storage than the original texture (the sum of a geometric series), but the per-pixel cost is fixed at 8 lookups regardless of how large the footprint is. Like the SAT, mip maps precompute and amortize — the pyramid is built when the texture loads (one reason texture loading takes a moment in Three.js), and everything after that is fast constant-time hardware lookups.</p>
+<p>In Three.js, <code>MeshBasicMaterial</code>, <code>MeshLambertMaterial</code>, and <code>MeshPhongMaterial</code> all use mip maps by default for loaded textures. You can control the filter mode through the texture&rsquo;s <code>minFilter</code> and <code>magFilter</code> properties.</p>
+<h2 id="anisotropic-filtering">Anisotropic Filtering</h2>
+<p>Mip maps work very well when the pixel footprint is roughly square in texture space, but foreshortening can make it far from square. Consider a texture on a surface that recedes steeply from the camera — a road surface, a tiled floor. Pixels along the near edge map to small, nearly-square regions in the texture. Pixels farther away map to tall, narrow slivers.</p>
+<figure class="" style="width: 95%; ">
+    <a href="../../docs/15/anisotropic.svg">
+        <img src="../../docs/15/anisotropic.svg" alt="anisotropic.svg" />
+    </a><figcaption><p><strong>Left:</strong> The true pixel footprint in texture space is a tall, narrow ellipse — anisotropic (not equal in all directions). <strong>Middle:</strong> The MIP map forces a square that covers the tall dimension, dragging in far too many texels horizontally. The result is over-blurred. <strong>Right:</strong> Anisotropic filtering approximates the elongated footprint with a chain of small squares along its long axis, preserving sharpness at the cost of more lookups.&nbsp;</p></figcaption>
+</figure>
+
+<p>Because a mip map level must use a <em>square</em> footprint, it has to use the level that covers the <em>larger</em> dimension of the true footprint. This makes the square much too wide in the shorter dimension, averaging in texels that should not contribute. The result is excessive blurring, especially visible in textures on surfaces viewed at a glancing angle — floors, roads, and walls often look smeared far into the distance.</p>
+<p><strong>Anisotropic filtering</strong> addresses this by allowing non-square filter footprints. The simplest hardware approach approximates the elongated footprint with a series of small square mip-map lookups spaced along the longer axis, then averages them. The ratio of lookups is controlled by an <strong>anisotropy level</strong> parameter (often 1×, 4×, 8×, or 16×) — higher levels use more samples and produce sharper results at the cost of additional texture bandwidth.</p>
+<p>In Three.js, you can set <code>texture.anisotropy</code> on a texture object. The maximum supported level on the current GPU is available from <code>renderer.capabilities.getMaxAnisotropy()</code>. A setting of 4× or 8× is usually a good trade-off between quality and performance.</p>
+<h2 id="the-texture-microscope">The Texture Microscope</h2>
+<p>I created this demo so we could look at the pixels and texels &ldquo;under a microscope&rdquo; to really see what is going on with filtering. The demo has a lot of options, but I think it is worth playing with to really understand what filtering is doing.</p>
+<p>The left side shows texture space. To start, there is a checkerboard texture (you can change it from a dropdown). In the center, there is the 3D view. The red square is shown &ldquo;zoomed in&rdquo; in the right view. The red square in the middle of the texture view is the center of all of the pixels.</p>
+<p>
+
+
+
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 900px;">
+    <a href="../../texturedemos/filterdemo/filterdemo.html" class="boxtitlelink">texturedemos/filterdemo/filterdemo.html</a>
+    <iframe
+        title="texturedemos/filterdemo/filterdemo.html"
+        src="../../texturedemos/filterdemo/filterdemo.html"
+        class="includebox includebox-standard"
+        width="900"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>To start, shrink the square by sliding the &ldquo;Square Width&rdquo; slider so the 3D object is just 4 or so pixels in size. The entire object will fit in the zoom region, and you&rsquo;ll see it on the right. Because we are using mip-mapping, the object appears gray. The white border is a boundary artifact in the demo.</p>
+<p>In the texture space display we see the footprint of each pixel in the zoom area. The red dots are the centers of the pixels, the cyan squares are the &ldquo;footprint&rdquo; of each pixels. The mip-map filtering filters each of those square regions around the red dot to compute the color for the red dot.</p>
+<p>If you hover over a pixel in the zoom window, you will see information about that pixel in the texture space. The footprint of the pixel is shown in orange. Information about the mip-map is shown in purple. The circle is the estimate of the footprint. The two purple squares are the areas of one pixel in the two mip-map levels. One is too big, one is too small.</p>
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/15/hover-crop.png">
+        <img src="../../docs/15/hover-crop.png" alt="hover-crop.png" />
+    </a>
+</figure>
+
+<p>To see the effects of anisotropy, tilt the plane. With nearest-neighbor filtering, it looks really terrible. Notice that the red blotch in texture space has an odd shape: the footprint of the entire object is split into two parts (because the square is made of two triangles), and parts are chopped off because they went off screen.</p>
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/15/tilt-nearest-all.png">
+        <img src="../../docs/15/tilt-nearest-all.png" alt="tilt-nearest-all.png" />
+    </a>
+</figure>
+
+<p>If we shrink the object, the pixel footprints become large enough that we can see them. Here is the object shrunk enough that it fits into the zoom, using mip-mapping.</p>
+<figure class="" style="width: 300px; ">
+    <a href="../../docs/15/tilt-zoom-mip.png">
+        <img src="../../docs/15/tilt-zoom-mip.png" alt="tilt-zoom-mip.png" />
+    </a>
+</figure>
+
+<p>With mipmapping, we get gray - which is correct since many texture pixels are being combined into each image pixel. But, if you notice, the actual footprint of the pixel is elongated because the projection is stretching the object. The mip-map squares are a poor approximation to the actual footprint. In this case, the texture is uniform enough that it doesn&rsquo;t matter (the average of the square is about the same as the average of the rectangle). We can turn on anisotropic filtering, but it won&rsquo;t help much.</p>
+<p>For a better demonstration of the need for anisotropic filtering, try the &ldquo;eye chart&rdquo; texture. Tilt it back all the way. Notice how blurry it looks with mip-mapping: because mip-map is using a square to filter, it is averaging too many pixels. With anisotropic filtering, the system can use narrow rectangular filter regions that more correctly approximate the necessary filtering.</p>
+<div style="display: flex; gap: 24px; justify-content: center; align-items: flex-start;">
+    <div style="flex: 1; text-align: center;">
+        <figure class="" style="width: 300px; ">
+            <a href="../../docs/15/eyechart-linear.png">
+                <img src="../../docs/15/eyechart-linear.png" alt="eyechart-linear.png" />
+            </a><figcaption><p>Mip-Mapping&nbsp;</p></figcaption>
+        </figure>
+
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <figure class="" style="width: 300px; ">
+            <a href="../../docs/15/eyechart-aniso.png">
+                <img src="../../docs/15/eyechart-aniso.png" alt="eyechart-aniso.png" />
+            </a><figcaption><p>Anisotropic Filtering&nbsp;</p></figcaption>
+        </figure>
+
+    </div>
+</div>
+<h2 id="summary">Summary</h2>
+<p>Filtering is a critical component of texturing. Better filtering can lead to better image quality. However, filtering is limited: we can only put so much information in each pixel. It is better to blur things together than to have ugly jagged artifacts.</p>
+<p>Texture filtering is implemented in the hardware and set up for us by Three.js. We need to understand what the options are. Mip-mapping is the usual choice. It requires pre-computing the image pyramid, but it provides decent quality filtering very efficiently.</p>
+<p>On the next page we will learn more about how we use texturing in Three.js.</p>
+<a href="../../docs/16/" class="Next__Page">Next: Page &nbsp;16&nbsp;-&nbsp;Textures in THREE</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Selected"> 15: Texture Filtering </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p15",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

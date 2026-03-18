@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 18: Real Texturing</h1>
+		</header>
+		<div class="content post__content clearfix"><p>There are three categories of things we need to think about:</p>
+<ol>
+<li>The &ldquo;science&rdquo; - how do the methods work?</li>
+<li>The &ldquo;engineering&rdquo; - how do we use the methods in practice? (specifically, in a practical API)</li>
+<li>The &ldquo;art&rdquo; - how do we use these to create interesting effects?</li>
+</ol>
+<p>For 1 (the science), we&rsquo;ve learned how the methods work in theory. Make sure you understand it.</p>
+<p>For 2 (the engineering), we&rsquo;ve seen how THREE exposes the functionality. We&rsquo;ll see more of what is going on &ldquo;under the hood&rdquo; later when we start to program our own shaders.</p>
+<p>For 3 (the art), you&rsquo;ll need to try it out to try to make cool-looking stuff. Look for examples on the web to inspire you. In this workbook, try to focus on how to use textures to make cool appearances. You will have the opportunity to make cool shapes and motions in future workbooks. So you might want to focus on simple objects (primitives are OK) and simple motions for this assignment.</p>
+<p>The exercises in this workbook ask you to try out the features in THREE for fancy texture mapping. We would like you to try to make interesting things to explore what the different types of textures do, but the requirements are pretty minimal for each of the exercises.</p>
+<h2 id="exercise-make-a-real-object">Exercise: Make a Real Object!</h2>
+<p>Textures provide an easy way to make a simple object (like a box) into something more interesting.</p>
+<p>Here is a simple example I made - note how simple geometry (it&rsquo;s basically a box - although I did some extra things to get the cover to overhang the edges) becomes much more interesting with a texture.
+
+
+
+
+<div id="box-05-18-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-18-01</span>&nbsp;
+    <input type="checkbox" id="check-05-18-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-18-01.html class="boxtitlelink">05-18-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-18-01.js" class="boxtitlelink">05-18-01.js</a>
+    <iframe
+        title="eg-book"
+        src="../../for_students/05-18-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-18-01"
+    ></iframe>
+</div></p>
+<p>The example is in 
+<a href="../../for_students/05-18-01.js" class="box-html" data-tag="eg-book">05-18-01.js</a>
+. There are videos of how I made it.
+The video uses old-style three.js geometry, but it should give you some ideas.
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/559-22-17A%20Lecture%2017A-Textures-Review-was-19-1/1_7eq4nl5l?st=18">2023 Video Clip: Why Basic Textures?</a> [0:18 - 2:00 (1.7 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/559-22-17A%20Lecture%2017A-Textures-Review-was-19-1/1_7eq4nl5l">Lecture 18A</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/17A-Texture-was19-1-textures-review-post.pdf">Slides</a>
+</div></p>
+<p>In this video, I try to make my woodgrained table.
+<div class="resourcelink">
+    <a href="https://mediaspace.wisc.edu/media/559-22-18C%20Lecture%2018C-%20Advanced%20Textures%20Other%20Texturing%20Tricks%20-was-19-3/1_jza5ciwj?st=544">2023 Video Clip: Real wood and light maps</a> [9:04 - 9:04 (0.0 mins)]
+    <br>
+    Part of 2023 <a href="https://mediaspace.wisc.edu/media/559-22-18C%20Lecture%2018C-%20Advanced%20Textures%20Other%20Texturing%20Tricks%20-was-19-3/1_jza5ciwj">Lecture 19B</a>
+    |
+    <a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18C-Texture-was19-3-texture-other-post.pdf">Slides</a>
+</div></p>
+<p>You can also see the book in the <a href="https://cs559.github.io/559Tutorials/textures/table/">Book on Table Demo</a>. Here you can also see how to use a repeating texture to make woodgrain.</p>
+<p>
+
+
+
+
+
+
+
+</p>
+<p>Now it&rsquo;s your turn. Create some real-world object with a texture in 
+<a href="../../for_students/05-18-02.js" class="box-html" data-tag="ex-book">05-18-02.js</a>
+ below. Look around and see if there&rsquo;s something you want to model: your laptop, a book, etc. This is a good opportunity to incorporate real photos in a texture.</p>
+<p>A goal here is to use simple shapes, but more complex textures, to make an object that is interesting. And the important thing is that you make it (so, you need to at least take the photograph yourself). You need to make something other than the Fundamentals of Computer Graphics book.</p>
+
+<div id="box-05-18-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-18-02</span>&nbsp;
+    <input type="checkbox" id="check-05-18-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-18-02.html class="boxtitlelink">05-18-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-18-02.js" class="boxtitlelink">05-18-02.js</a>
+    <iframe
+        title="ex-book"
+        src="../../for_students/05-18-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-18-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-18-02-0"></td>
+                <td>standard</td>
+                <td>identifiable as a real object</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-18-02-1"></td>
+                <td>standard</td>
+                <td>texture makes it look like a real object</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Then we&rsquo;ll go on to <a href="../../docs/19/" class="Next__Page">Next: Page &nbsp;19&nbsp;-&nbsp;Advanced Texturing</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Selected"> 18: Real Texturing </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p18",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

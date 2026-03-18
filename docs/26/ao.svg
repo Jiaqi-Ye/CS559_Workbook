@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 468 112.5">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke: #fff;
+      }
+
+      .st0, .st1 {
+        stroke-miterlimit: 2.72;
+        stroke-width: 1.7px;
+      }
+
+      .st0, .st2 {
+        fill: #d94a38;
+      }
+
+      .st1 {
+        stroke: #d94a38;
+      }
+
+      .st1, .st3 {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .st3 {
+        stroke: #1a202c;
+        stroke-linejoin: round;
+        stroke-width: 2.72px;
+      }
+    </style>
+  </defs>
+  <g id="scenario-1-flat">
+    <path class="st3" d="M17.5,99.42h136"/>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="16.53" y2="80.94"/>
+      <polygon class="st2" points="9.96 79.18 16.79 85.23 18.9 77.35 9.96 79.18"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="30.8" y2="53.52"/>
+      <polygon class="st2" points="25.6 49.15 29.22 57.52 34.47 51.27 25.6 49.15"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="55.33" y2="34.71"/>
+      <polygon class="st2" points="52.45 28.55 52.2 37.67 59.6 34.22 52.45 28.55"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="85.5" y2="28.02"/>
+      <polygon class="st2" points="85.5 21.22 81.42 29.38 89.58 29.38 85.5 21.22"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="115.67" y2="34.71"/>
+      <polygon class="st2" points="118.55 28.55 111.4 34.22 118.8 37.67 118.55 28.55"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="140.2" y2="53.52"/>
+      <polygon class="st2" points="145.4 49.15 136.53 51.27 141.78 57.52 145.4 49.15"/>
+    </g>
+    <g>
+      <line class="st1" x1="85.5" y1="99.42" x2="154.47" y2="80.94"/>
+      <polygon class="st2" points="161.04 79.18 152.1 77.35 154.21 85.23 161.04 79.18"/>
+    </g>
+    <circle class="st0" cx="85.5" cy="99.42" r="4.08"/>
+  </g>
+  <g id="scenario-2-corner">
+    <path class="st3" d="M216,13.5l-.56,84.96,81.56.54"/>
+    <g>
+      <line class="st1" x1="215.44" y1="98.46" x2="233.92" y2="29.49"/>
+      <polygon class="st2" points="235.68 22.92 229.63 29.75 237.51 31.86 235.68 22.92"/>
+    </g>
+    <g>
+      <line class="st1" x1="215.44" y1="98.46" x2="255.11" y2="39.09"/>
+      <polygon class="st2" points="258.89 33.44 250.96 37.96 257.74 42.49 258.89 33.44"/>
+    </g>
+    <g>
+      <line class="st1" x1="215.44" y1="98.46" x2="272.09" y2="54.99"/>
+      <polygon class="st2" points="277.48 50.85 268.52 52.59 273.49 59.06 277.48 50.85"/>
+    </g>
+    <g>
+      <line class="st1" x1="215.44" y1="98.46" x2="283.05" y2="75.51"/>
+      <polygon class="st2" points="289.49 73.32 280.45 72.08 283.07 79.81 289.49 73.32"/>
+    </g>
+    <circle class="st0" cx="215.44" cy="98.46" r="4.08"/>
+  </g>
+  <path class="st3" d="M345.7,38.22h40.8l3.4,61.2h20.4l3.4-61.2h40.8"/>
+  <g>
+    <line class="st1" x1="400.1" y1="99.42" x2="389.92" y2="28.75"/>
+    <polygon class="st2" points="388.96 22.02 386.08 30.68 394.16 29.51 388.96 22.02"/>
+  </g>
+  <g>
+    <line class="st1" x1="400.1" y1="99.42" x2="409.35" y2="28.62"/>
+    <polygon class="st2" points="410.23 21.88 405.13 29.44 413.22 30.5 410.23 21.88"/>
+  </g>
+  <circle class="st0" cx="400.1" cy="99.42" r="4.08"/>
+</svg>

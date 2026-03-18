@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <!-- Demo implemented by GitHub Copilot (GPT-5.3-Codex), directed by user request. -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5-3-2 Primitive UV Mappings</title>
+    <link rel="stylesheet" href="/libs/CS559/style559.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 8px;
+      }
+      #demo {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .note {
+        margin: 6px 0 10px;
+        font-size: 0.95rem;
+      }
+      .canvas-wrap {
+        border: 1px solid #888;
+        background: #f8f8f8;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+          "three/": "https://unpkg.com/three@0.180.0/",
+          "CS559/": "/libs/CS559/",
+          "CS559-Framework/": "/libs/CS559-Framework/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="demo"></div>
+    <script src="./primitive-uvs.js" type="module" defer></script>
+  </body>
+</html>

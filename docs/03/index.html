@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 3: Construction Site</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Over the next few weeks, we&rsquo;ll build up Graphics Town. So, to begin, we&rsquo;ll need to get some construction equipment to start building.</p>
+<p>In terms of real learning goals, construction equipment is often a great example of articulated objects - they consist of pieces that rotate or translate relative to each other. Things like dump trucks, excavators, cranes, cement mixers, pile drivers, etc. Also, this will let you try out more of the framework code, in particular the automatic creation of UIs for object parameters.</p>
+<p>If you&rsquo;re curious, this is a simplified version of the <a href="https://graphics.cs.wisc.edu/Courses/559-f2008/posts/assignments-constructionsite/" target="_blank">2008 Construction Site</a>, when they were building WID and Union South. The <a href="https://graphics.cs.wisc.edu/Courses/559-f2008/posts/assignments-excavator/" target="_blank">2008 Excavator</a> was a bit nicer than the one given in the sample here. More recently, we saw similar machines building the new Computer Sciences building. But even that is complete. So our only way to get to see construction is to ask students to simulate it.</p>
+<p>We&rsquo;ve started out with two examples: a tower crane and an excavator. If you look at the construction site at the bottom of the page, you can see we&rsquo;ve given two example machines. For both, the AutoUI creates sliders to control them. Notice how each machine has parameters (and therefore sliders) for position and orientation, but also for its articulations.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>The code is in 
+<a href="../../for_students/05-03-01.js" class="box-html" data-tag="ex-construction">05-03-01.js</a>
+ and 
+<a href="../../for_students/05-03-01-constructionobjects.js" class="box-html" data-tag="ex-construction">05-03-01-constructionobjects.js</a>
+.</p>
+<p>You need to create some more machine types. Here is a list of ideas to help you get started:</p>
+<ul>
+<li>Tower Crane</li>
+<li>Truck Crane</li>
+<li>Telescoping Truck Crane</li>
+<li>Excavator (see <a href="https://graphics.cs.wisc.edu/Courses/559-f2008/posts/assignments-excavator/" target="_blank">2008 Excavator</a>)</li>
+<li>Mini-Loader</li>
+<li>Fork-Lift</li>
+<li>Fork-Lift Crane</li>
+<li>Bulldozer</li>
+<li>Front-End Loader</li>
+<li>Dump Truck</li>
+<li>Cement Mixer</li>
+<li>Backhoe</li>
+<li>Garbage Truck</li>
+<li>Concrete Pumper (<a href="http://gordysconcretepumping.com/" target="_blank">Gordy&#39;s</a>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Pile_driver" target="_blank">Pile Driver</a></li>
+</ul>
+<p>There are examples of a crane and an excavator in 
+<a href="../../for_students/05-03-01-constructionobjects.js" class="box-html" data-tag="ex-construction">05-03-01-constructionobjects.js</a>
+. Both have multiple degrees of freedom (2 for the crane, 4 for the excavator - we don&rsquo;t count the overall position and orientation).</p>
+<p>The requirement is that you must create <strong>two</strong> new types of construction equipment and place them into the world. Each machine needs to have <strong>at least 1 degree of freedom beyond its position and orientation</strong> in the world. So, for example, you could make a dump truck and a fork-lift (each with one degree of freedom). You can get advanced credit for more degrees of freedom.</p>
+<p>The two machines should be different: don&rsquo;t make two variants of a dump truck. If you make another tower crane or excavator, they should be sufficiently different from the ones we&rsquo;ve given you.</p>
+<p>You can make the machines with rough geometry - build them out of boxes and cylinders. Or you can try to make nicer shapes. The most important thing is their behaviors: that you can control their articulations. The machines should be &ldquo;good enough&rdquo; that someone can tell what they are (give them a descriptive name too). You can get advanced points for nicer shapes. We will also give you a point for using colors/materials appropriately (the machines shouldn&rsquo;t be all the same color).</p>
+<p>Remember: the key here is to make things that are articulated. There should be multiple (rigid) pieces that translate and rotate relative to each other (controlled by parameters that can be connected to the sliders).</p>
+<p>You will need to create new classes of objects for your new machine types. You can refer to the examples we have provided.</p>
+<p>Note that in this exercise, you will be using the <code>update</code> method of the objects you define so they can be controlled by sliders. You will also have to define the parameters in the constructor, and include the call for <code>AutoUI</code> in the world setup function.</p>
+<p>The example class <code>HingeCube</code> in <a href="
+../../libs/CS559-Framework/TestObjects.js">TestObjects.js</a> can give you a simple example of an articulation to start with. A hint: the <code>HingeCube</code> can be the beginnings of a dump truck.</p>
+<p>You can load geometry; however, you must articulate it.</p>
+<p>You can earn advanced/creative credit for making an additional machine, for making nicer shapes, for using colors/materials well, and for having more than the minimum degrees of freedom. And possibly for doing something cool that we didn&rsquo;t think of.</p>
+
+<div id="box-05-03-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">05-03-01</span>&nbsp;
+    <input type="checkbox" id="check-05-03-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/05-03-01.html class="boxtitlelink">05-03-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/05-03-01.js" class="boxtitlelink">05-03-01.js</a>
+    <iframe
+        title="ex-construction"
+        src="../../for_students/05-03-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-05-03-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-0"></td>
+                <td>standard</td>
+                <td>equipment 1 is identifiable and articulated</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-1"></td>
+                <td>standard</td>
+                <td>equipment 2 is identifiable and articulated</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-2"></td>
+                <td>standard</td>
+                <td>UI works</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-3"></td>
+                <td>standard</td>
+                <td>good use of colors/materials for all equipment (not just one color)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-4"></td>
+                <td>advanced</td>
+                <td>third machine identifiable and articulated</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-5"></td>
+                <td>advanced</td>
+                <td>at least one object has 4&#43; d.o.f. (beyond position/orientation)</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-05-03-01-6"></td>
+                <td>creative</td>
+                <td>exceptional machines</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Describe what you&rsquo;ve done. Be sure to list any advanced or creative features:</p>
+<div class="input-group">
+    <label for="construction-description" style="vertical-align: top;">Construction Description</label>
+    <textarea id="construction-description" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<a href="../../docs/04/" class="Next__Page">Next: Page &nbsp;4&nbsp;-&nbsp;Meshes: What you need to know</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Selected"> 3: Construction Site </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Lighting with HDRI </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p03",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

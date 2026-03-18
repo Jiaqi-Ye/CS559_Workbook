@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 25: Lighting with HDRI</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The mechanism of environment maps provides a method for implementing lighting. The light that comes from the environment just needs to be bright enough that we see it in the reflections of non-shiny objects. It also means that even non-shiny objects need to access the environment map.</p>
+<p>The use of a picture of the lighting in a scene to achieve lighting is known as Image-Based Lighting (IBL). The technique can improve the realism of a scene. Instead of relying solely on a few artificial, infinitely small point lights or directional lights, IBL uses a 360-degree picture to surround the 3D world. The graphics engine treats every single pixel of that image as an individual light source beaming inward. This allows objects to be illuminated by the complex, nuanced ambient light of a real-world location—such as the soft bounce light of a forest floor or the harsh fluorescent glare of a factory—while also providing highly accurate reflections of that space.</p>
+<p>To make Image-Based Lighting work correctly, the environment map must be a High Dynamic Range (HDR) image, typically stored in formats like <code>.exr</code> or <code>.hdr</code>. Standard 8-bit images (like JPGs or PNGs) cap color values at 255, meaning the engine cannot distinguish between a white piece of paper and the actual blinding surface of the sun; they both just register as &ldquo;white.&rdquo; HDR images store true floating-point values, allowing them to record the extreme, real-world intensity of light sources. When a renderer uses an HDR environment map, the bright pixels (like the sun or a studio lamp) actually emit significantly more energy into the 3D scene, resulting in accurate illumination and correct contrast.</p>
+<p>However, using environment maps for lighting introduces significant mathematical challenges, particularly regarding texture filtering. When a material is highly polished, the engine only needs to look up a single distinct pixel to draw a sharp mirror reflection. But for rough materials (like brushed metal or wood), the light scatters. To simulate this blurry reflection, the engine must average together a large patch of the environment map. Because environment maps are flat 2D representations of 3D spheres (like equirectangular projections or cubemaps), they contain severe geometric distortions at the poles or edges. Standard GPU filtering cannot natively handle these distortions, and if left uncorrected, the blurry reflections will expose ugly seams or pinched artifacts.</p>
+<p>Fortunately, Three.js handles these complex challenges well under the hood. When you assign an HDR texture to <code>scene.environment</code>, Three.js processes the image to calculate the complex irradiance (ambient bounce light) and generates specialized, pre-filtered mipmaps that mathematically correct for the distortions of the projection. This means that by simply loading an EXR file and assigning it to the scene, any Physically Based Rendering (PBR) materials (<code>MeshStandardMaterial</code> or <code>MeshPhysicalMaterial</code>) will automatically react to physically accurate ambient lighting and provide blurred reflections, with little effort.</p>
+<a href="../../docs/26/" class="Next__Page">Next: Page &nbsp;26&nbsp;-&nbsp;Even More Texture Mapping</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 5: Meshes, Texture and Appearance</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Meshes and Textures)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: The CS559 Framework Code </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Graphics Park </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Construction Site </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Meshes: What you need to know </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Meshes in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Fake Normals </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Mesh Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: Shading Overview </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Diffuse Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/10/">10: Specular Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: The Phong Lighting Model </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Fancy Shading </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Texture Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: Texture UVs </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Texture Filtering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Textures in THREE </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Dice and Dominos </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Real Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: Advanced Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Material Property Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Bump, Normal, and Displacement Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Sky Boxes </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Environment Mapping (Reflectance) </a></li>
+        <li class="Side__Item Side__Selected"> 25: Lighting with HDRI </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Even More Texture Mapping </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Graphics Town Buildings </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_05",  
+            pageId:     "p25",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "05",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>
