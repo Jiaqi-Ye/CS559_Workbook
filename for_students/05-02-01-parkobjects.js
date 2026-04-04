@@ -446,7 +446,9 @@ export class GrCarousel extends GrObject {
     let base_mat = new T.MeshStandardMaterial({
       color: "lightblue",
       metalness: 0.3,
-      roughness: 0.8
+      roughness: 0.8,
+      emissive: "#223344",
+      emissiveIntensity: 0.1
     });
     let base = new T.Mesh(base_geom, base_mat);
     base.translateY(0.5);
@@ -493,6 +495,8 @@ export class GrCarousel extends GrObject {
     let opole;
     let num_poles = 10;
     let poles = [];
+    let horses = [];
+    let horse_phases = [];
     for (let i = 0; i < num_poles; i++) {
       opole = new T.Mesh(opole_geom, opole_mat);
       platform_group.add(opole);
@@ -500,6 +504,31 @@ export class GrCarousel extends GrObject {
       opole.rotateY((2 * i * Math.PI) / num_poles);
       opole.translateX(0.8 * width);
       poles.push(opole);
+
+      // simple "horse" (box body + head) attached to each pole
+      let horse = new T.Group();
+      let horse_mat = new T.MeshStandardMaterial({
+        color: "#8b5a2b",
+        metalness: 0.1,
+        roughness: 0.7
+      });
+      let body = new T.Mesh(
+        new T.BoxGeometry(0.22 * width, 0.12 * width, 0.36 * width),
+        horse_mat
+      );
+      body.position.y = -0.12 * width;
+      horse.add(body);
+      let head = new T.Mesh(
+        new T.BoxGeometry(0.12 * width, 0.12 * width, 0.14 * width),
+        horse_mat
+      );
+      head.position.set(0, -0.05 * width, 0.26 * width);
+      horse.add(head);
+
+      opole.add(horse);
+      horse.position.y = -0.6;
+      horses.push(horse);
+      horse_phases.push((2 * i * Math.PI) / num_poles);
     }
 
     let roof_geom = new T.ConeGeometry(width, 0.5 * width, 32, 4);
@@ -507,12 +536,34 @@ export class GrCarousel extends GrObject {
     carousel.add(roof);
     roof.translateY(4.8);
 
+    // small bulbs around the roof edge
+    let roofBulbGeom = new T.SphereGeometry(0.07 * width, 8, 8);
+    let roofBulbMat = new T.MeshStandardMaterial({
+      color: "#fff4b0",
+      emissive: "#fff4b0",
+      emissiveIntensity: 0.6,
+      roughness: 0.4
+    });
+    for (let i = 0; i < 12; i++) {
+      let bulb = new T.Mesh(roofBulbGeom, roofBulbMat);
+      bulb.position.set(
+        width * 0.95 * Math.cos((2 * i * Math.PI) / 12),
+        4.55,
+        width * 0.95 * Math.sin((2 * i * Math.PI) / 12)
+      );
+      carousel.add(bulb);
+    }
+
     // note that we have to make the Object3D before we can call
     // super and we have to call super before we can use this
     super(`Carousel-${carouselObCtr++}`, carousel);
     this.whole_ob = carousel;
     this.platform = platform;
+    this.platform_group = platform_group;
     this.poles = poles;
+    this.horses = horses;
+    this.horse_phases = horse_phases;
+    this.time = 0;
 
     // put the object in its place
     this.whole_ob.position.x = params.x ? Number(params.x) : 0;
@@ -520,6 +571,469 @@ export class GrCarousel extends GrObject {
     this.whole_ob.position.z = params.z ? Number(params.z) : 0;
     let scale = params.size ? Number(params.size) : 1;
     carousel.scale.set(scale, scale, scale);
+  }
+  /**
+   * StepWorld method
+   * @param {*} delta
+   * @param {*} timeOfDay
+   */
+  stepWorld(delta, timeOfDay) {
+    this.time += 0.002 * delta;
+    this.platform_group.rotateY(0.003 * delta);
+    for (let i = 0; i < this.horses.length; i++) {
+      this.horses[i].position.y =
+        -0.6 + 0.45 * Math.sin(this.time + this.horse_phases[i]);
+    }
+  }
+}
+
+let flyingChairsObCtr = 0;
+/**
+ * @typedef FlyingChairsProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrFlyingChairs extends GrObject {
+  /**
+   * @param {FlyingChairsProperties} params
+   */
+  constructor(params = {}) {
+    let ride = new T.Group();
+
+    let base = new T.Mesh(
+      new T.CylinderGeometry(1.2, 1.5, 0.6, 16),
+      new T.MeshStandardMaterial({
+        color: "#555555",
+        metalness: 0.3,
+        roughness: 0.8
+      })
+    );
+    base.position.y = 0.3;
+    ride.add(base);
+
+    let column = new T.Mesh(
+      new T.CylinderGeometry(0.3, 0.35, 4, 16),
+      new T.MeshStandardMaterial({
+        color: "#c0c0c0",
+        metalness: 0.6,
+        roughness: 0.3
+      })
+    );
+    column.position.y = 2.3;
+    ride.add(column);
+
+    let spinner = new T.Group();
+    spinner.position.y = 4;
+    ride.add(spinner);
+
+    let capMat = new T.MeshStandardMaterial({
+      color: "#d35400",
+      metalness: 0.2,
+      roughness: 0.7,
+      emissive: "#a84300",
+      emissiveIntensity: 0.15
+    });
+    let cap = new T.Mesh(
+      new T.ConeGeometry(1.3, 0.6, 16),
+      capMat
+    );
+    cap.position.y = 0.3;
+    spinner.add(cap);
+
+    // light ring on cap
+    let capBulbGeom = new T.SphereGeometry(0.06, 8, 8);
+    let capBulbMat = new T.MeshStandardMaterial({
+      color: "#fff6a5",
+      emissive: "#fff6a5",
+      emissiveIntensity: 0.7,
+      roughness: 0.4
+    });
+    for (let i = 0; i < 12; i++) {
+      let bulb = new T.Mesh(capBulbGeom, capBulbMat);
+      bulb.position.set(
+        1.1 * Math.cos((2 * i * Math.PI) / 12),
+        0.1,
+        1.1 * Math.sin((2 * i * Math.PI) / 12)
+      );
+      spinner.add(bulb);
+    }
+
+    let hangers = [];
+    let num_chairs = 10;
+    for (let i = 0; i < num_chairs; i++) {
+      let hanger = new T.Group();
+      spinner.add(hanger);
+      hanger.rotateY((2 * i * Math.PI) / num_chairs);
+      hanger.translateX(1.2);
+
+      let chain = new T.Mesh(
+        new T.CylinderGeometry(0.03, 0.03, 1.2, 8),
+        new T.MeshStandardMaterial({
+          color: "#aaaaaa",
+          metalness: 0.8,
+          roughness: 0.2
+        })
+      );
+      chain.position.y = -0.6;
+      hanger.add(chain);
+
+      let seat = new T.Mesh(
+        new T.BoxGeometry(0.3, 0.15, 0.3),
+        new T.MeshStandardMaterial({
+          color: "#3498db",
+          metalness: 0.1,
+          roughness: 0.7
+        })
+      );
+      seat.position.y = -1.2;
+      hanger.add(seat);
+
+      hangers.push(hanger);
+    }
+
+    super(`FlyingChairs-${flyingChairsObCtr++}`, ride);
+    this.whole_ob = ride;
+    this.spinner = spinner;
+    this.hangers = hangers;
+    this.time = 0;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    ride.scale.set(scale, scale, scale);
+  }
+  /**
+   * @param {*} delta
+   * @param {*} timeOfDay
+   */
+  stepWorld(delta, timeOfDay) {
+    this.time += 0.003 * delta;
+    this.spinner.rotateY(0.004 * delta);
+    let tilt = 0.2 + 0.15 * Math.sin(this.time);
+    for (let hanger of this.hangers) {
+      hanger.rotation.z = -tilt;
+    }
+  }
+}
+
+let ferrisObCtr = 0;
+/**
+ * @typedef FerrisWheelProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrFerrisWheel extends GrObject {
+  /**
+   * @param {FerrisWheelProperties} params
+   */
+  constructor(params = {}) {
+    let wheel = new T.Group();
+
+    let base = new T.Mesh(
+      new T.CylinderGeometry(1.2, 1.5, 0.5, 16),
+      new T.MeshStandardMaterial({
+        color: "#666666",
+        metalness: 0.3,
+        roughness: 0.8
+      })
+    );
+    base.position.y = 0.25;
+    wheel.add(base);
+
+    let supportMat = new T.MeshStandardMaterial({
+      color: "#999999",
+      metalness: 0.4,
+      roughness: 0.5
+    });
+    let supportGeom = new T.BoxGeometry(0.2, 4.5, 0.2);
+    let leftSupport = new T.Mesh(supportGeom, supportMat);
+    let rightSupport = new T.Mesh(supportGeom, supportMat);
+    leftSupport.position.set(-1, 2.5, 0);
+    rightSupport.position.set(1, 2.5, 0);
+    wheel.add(leftSupport);
+    wheel.add(rightSupport);
+
+    let rimGroup = new T.Group();
+    rimGroup.position.y = 4.5;
+    wheel.add(rimGroup);
+
+    let rim = new T.Mesh(
+      new T.TorusGeometry(2.2, 0.08, 16, 60),
+      new T.MeshStandardMaterial({
+        color: "#f1c40f",
+        metalness: 0.4,
+        roughness: 0.4
+      })
+    );
+    rimGroup.add(rim);
+
+    let spokes = 12;
+    for (let i = 0; i < spokes; i++) {
+      let spoke = new T.Mesh(
+        new T.BoxGeometry(0.05, 2.2, 0.05),
+        supportMat
+      );
+      spoke.position.y = 1.1;
+      spoke.rotateZ((2 * i * Math.PI) / spokes);
+      rimGroup.add(spoke);
+    }
+
+    let cabins = [];
+    for (let i = 0; i < 10; i++) {
+      let cabin = new T.Group();
+      rimGroup.add(cabin);
+      cabin.rotateZ((2 * i * Math.PI) / 10);
+      cabin.translateY(2.2);
+      let car = new T.Mesh(
+        new T.BoxGeometry(0.4, 0.3, 0.4),
+        new T.MeshStandardMaterial({
+          color: "#2ecc71",
+          metalness: 0.1,
+          roughness: 0.7
+        })
+      );
+      car.position.y = -0.2;
+      cabin.add(car);
+      cabins.push(cabin);
+    }
+
+    super(`FerrisWheel-${ferrisObCtr++}`, wheel);
+    this.whole_ob = wheel;
+    this.rimGroup = rimGroup;
+    this.cabins = cabins;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    wheel.scale.set(scale, scale, scale);
+  }
+  /**
+   * @param {*} delta
+   * @param {*} timeOfDay
+   */
+  stepWorld(delta, timeOfDay) {
+    this.rimGroup.rotateZ(0.002 * delta);
+    for (let cabin of this.cabins) {
+      cabin.rotation.z = -this.rimGroup.rotation.z;
+    }
+  }
+}
+
+let rocketObCtr = 0;
+/**
+ * @typedef RocketTowerProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrRocketTower extends GrObject {
+  /**
+   * @param {RocketTowerProperties} params
+   */
+  constructor(params = {}) {
+    let tower = new T.Group();
+
+    let base = new T.Mesh(
+      new T.CylinderGeometry(1.1, 1.3, 0.6, 16),
+      new T.MeshStandardMaterial({
+        color: "#444444",
+        metalness: 0.3,
+        roughness: 0.8
+      })
+    );
+    base.position.y = 0.3;
+    tower.add(base);
+
+    let column = new T.Mesh(
+      new T.CylinderGeometry(0.25, 0.3, 6, 16),
+      new T.MeshStandardMaterial({
+        color: "#aaaaaa",
+        metalness: 0.6,
+        roughness: 0.3
+      })
+    );
+    column.position.y = 3.3;
+    tower.add(column);
+
+    let ring = new T.Group();
+    ring.position.y = 1.5;
+    tower.add(ring);
+
+    let ringMesh = new T.Mesh(
+      new T.TorusGeometry(1.1, 0.08, 12, 36),
+      new T.MeshStandardMaterial({
+        color: "#9b59b6",
+        metalness: 0.4,
+        roughness: 0.5,
+        emissive: "#7d3c98",
+        emissiveIntensity: 0.2
+      })
+    );
+    ring.add(ringMesh);
+
+    // glowing pods
+    let podMat = new T.MeshStandardMaterial({
+      color: "#e74c3c",
+      metalness: 0.2,
+      roughness: 0.6,
+      emissive: "#b83a2f",
+      emissiveIntensity: 0.25
+    });
+
+    let pods = 8;
+    for (let i = 0; i < pods; i++) {
+      let pod = new T.Mesh(new T.BoxGeometry(0.25, 0.2, 0.4), podMat);
+      pod.position.set(1.1, 0, 0);
+      pod.rotateY((2 * i * Math.PI) / pods);
+      ring.add(pod);
+    }
+
+    super(`RocketTower-${rocketObCtr++}`, tower);
+    this.whole_ob = tower;
+    this.ring = ring;
+    this.time = 0;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    tower.scale.set(scale, scale, scale);
+  }
+  /**
+   * @param {*} delta
+   * @param {*} timeOfDay
+   */
+  stepWorld(delta, timeOfDay) {
+    this.time += 0.003 * delta;
+    this.ring.rotation.y += 0.006 * delta;
+    this.ring.position.y = 1.2 + 2.2 * (0.5 + 0.5 * Math.sin(this.time));
+  }
+}
+
+let decorObCtr = 0;
+/**
+ * @typedef EasterDecorProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrEasterDecor extends GrObject {
+  /**
+   * @param {EasterDecorProperties} params
+   */
+  constructor(params = {}) {
+    let decor = new T.Group();
+
+    // light arch
+    let arch = new T.Group();
+    decor.add(arch);
+    let postMat = new T.MeshStandardMaterial({
+      color: "#666666",
+      metalness: 0.4,
+      roughness: 0.5
+    });
+    let postGeom = new T.CylinderGeometry(0.06, 0.06, 2.2, 10);
+    let leftPost = new T.Mesh(postGeom, postMat);
+    let rightPost = new T.Mesh(postGeom, postMat);
+    leftPost.position.set(-1.4, 1.1, 0);
+    rightPost.position.set(1.4, 1.1, 0);
+    arch.add(leftPost);
+    arch.add(rightPost);
+
+    let bulbGeom = new T.SphereGeometry(0.08, 8, 8);
+    let bulbMat = new T.MeshStandardMaterial({
+      color: "#ffeaa7",
+      emissive: "#ffeaa7",
+      emissiveIntensity: 0.6,
+      metalness: 0.1,
+      roughness: 0.4
+    });
+    let bulbs = [];
+    let count = 10;
+    for (let i = 0; i < count; i++) {
+      let bulb = new T.Mesh(bulbGeom, bulbMat);
+      let t = i / (count - 1);
+      let x = -1.4 + 2.8 * t;
+      let y = 2.1 - 0.5 * Math.sin(Math.PI * t);
+      bulb.position.set(x, y, 0);
+      arch.add(bulb);
+      bulbs.push(bulb);
+    }
+
+    // eggs around the base
+    let eggGeom = new T.SphereGeometry(0.16, 10, 8);
+    let eggMats = [
+      new T.MeshStandardMaterial({ color: "#f7b2d9", roughness: 0.6 }),
+      new T.MeshStandardMaterial({ color: "#b2f7d9", roughness: 0.6 }),
+      new T.MeshStandardMaterial({ color: "#b2d9f7", roughness: 0.6 })
+    ];
+    let eggPositions = [
+      [-1.1, 0.2, 0.7],
+      [1.1, 0.2, -0.7],
+      [0.0, 0.2, -1.0],
+      [-0.2, 0.2, 1.0],
+      [0.6, 0.2, 0.9]
+    ];
+    for (let i = 0; i < eggPositions.length; i++) {
+      let egg = new T.Mesh(eggGeom, eggMats[i % eggMats.length]);
+      egg.scale.y = 1.3;
+      egg.position.set(
+        eggPositions[i][0],
+        eggPositions[i][1],
+        eggPositions[i][2]
+      );
+      decor.add(egg);
+    }
+
+    // pastel bunting flags
+    let flagGeom = new T.ConeGeometry(0.12, 0.22, 3);
+    let flagColors = ["#f7c1e3", "#c1f7e3", "#c1d5f7"];
+    for (let i = 0; i < 8; i++) {
+      let flag = new T.Mesh(
+        flagGeom,
+        new T.MeshStandardMaterial({ color: flagColors[i % flagColors.length] })
+      );
+      let t = i / 7;
+      let x = -1.2 + 2.4 * t;
+      let y = 1.7 - 0.35 * Math.sin(Math.PI * t);
+      flag.position.set(x, y, 0.05);
+      flag.rotateX(Math.PI);
+      arch.add(flag);
+    }
+
+    super(`EasterDecor-${decorObCtr++}`, decor);
+    this.whole_ob = decor;
+    this.bulbs = bulbs;
+    this.time = 0;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    decor.scale.set(scale, scale, scale);
+  }
+  /**
+   * @param {*} delta
+   * @param {*} timeOfDay
+   */
+  stepWorld(delta, timeOfDay) {
+    this.time += 0.004 * delta;
+    let glow = 0.4 + 0.2 * Math.sin(this.time);
+    for (let bulb of this.bulbs) {
+      bulb.material.emissiveIntensity = glow;
+    }
   }
 }
 

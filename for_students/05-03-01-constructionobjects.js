@@ -51,9 +51,14 @@ export class GrCrane extends GrObject {
     base_curve.lineTo(-0.5, 0);
     let base_geom = new T.ExtrudeGeometry(base_curve, exSettings);
     let crane_mat = new T.MeshStandardMaterial({
-      color: "yellow",
+      color: "#f1c40f",
       metalness: 0.5,
       roughness: 0.7
+    });
+    let crane_dark = new T.MeshStandardMaterial({
+      color: "#4b4b4b",
+      metalness: 0.6,
+      roughness: 0.4
     });
     let base = new T.Mesh(base_geom, crane_mat);
     crane.add(base);
@@ -74,7 +79,7 @@ export class GrCrane extends GrObject {
     arm_curve.lineTo(4, 0);
     arm_curve.lineTo(-1.5, 0);
     let arm_geom = new T.ExtrudeGeometry(arm_curve, exSettings);
-    let arm = new T.Mesh(arm_geom, crane_mat);
+    let arm = new T.Mesh(arm_geom, crane_dark);
     arm_group.add(arm);
     arm.translateZ(-0.25);
 
@@ -96,7 +101,7 @@ export class GrCrane extends GrObject {
     wire_curve.lineTo(-0.25, 0);
     let wire_geom = new T.ExtrudeGeometry(wire_curve, exSettings);
     let wire_mat = new T.MeshStandardMaterial({
-      color: "#888888",
+      color: "#222222",
       metalness: 0.6,
       roughness: 0.3
     });
@@ -190,11 +195,16 @@ export class GrExcavator extends GrObject {
     base_curve.lineTo(-1, 0);
     let base_geom = new T.ExtrudeGeometry(base_curve, exSettings);
     let excavator_mat = new T.MeshStandardMaterial({
-      color: "yellow",
+      color: "#f1c40f",
       metalness: 0.5,
       roughness: 0.7
     });
-    let base = new T.Mesh(base_geom, excavator_mat);
+    let tread_mat = new T.MeshStandardMaterial({
+      color: "#444444",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+    let base = new T.Mesh(base_geom, tread_mat);
     excavator.add(base);
     base.translateZ(-0.2);
 
@@ -208,7 +218,7 @@ export class GrExcavator extends GrObject {
     pedestal_curve.lineTo(0.35, 0);
     pedestal_curve.lineTo(-0.35, 0);
     let pedestal_geom = new T.ExtrudeGeometry(pedestal_curve, exSettings);
-    let pedestal = new T.Mesh(pedestal_geom, excavator_mat);
+    let pedestal = new T.Mesh(pedestal_geom, tread_mat);
     excavator.add(pedestal);
     pedestal.translateY(0.6);
     pedestal.translateZ(-0.2);
@@ -252,7 +262,7 @@ export class GrExcavator extends GrObject {
     arm_curve.lineTo(-2.25, 0);
     let arm_geom = new T.ExtrudeGeometry(arm_curve, exSettings);
     let arm_mat = new T.MeshStandardMaterial({
-      color: "#888888",
+      color: "#b0b0b0",
       metalness: 0.6,
       roughness: 0.3
     });
@@ -288,7 +298,12 @@ export class GrExcavator extends GrObject {
     bucket_curve.lineTo(0.5, -0.7);
     bucket_curve.lineTo(-0.25, -0.9);
     let bucket_geom = new T.ExtrudeGeometry(bucket_curve, exSettings);
-    let bucket = new T.Mesh(bucket_geom, arm_mat);
+    let bucket_mat = new T.MeshStandardMaterial({
+      color: "#555555",
+      metalness: 0.5,
+      roughness: 0.4
+    });
+    let bucket = new T.Mesh(bucket_geom, bucket_mat);
     bucket_group.add(bucket);
     bucket.translateZ(-0.2);
 
@@ -331,6 +346,832 @@ export class GrExcavator extends GrObject {
     this.arm.rotation.z = degreesToRadians(-paramValues[4]);
     this.forearm.rotation.z = degreesToRadians(paramValues[5]) + Math.PI / 16;
     this.bucket.rotation.z = degreesToRadians(paramValues[6]);
+  }
+}
+
+let towerCraneObCtr = 0;
+/**
+ * @typedef TowerCraneProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrTowerCrane extends GrObject {
+  /**
+   * @param {TowerCraneProperties} params
+   */
+  constructor(params = {}) {
+    let crane = new T.Group();
+
+    let base = new T.Mesh(
+      new T.CylinderGeometry(0.9, 1.1, 0.4, 16),
+      new T.MeshStandardMaterial({
+        color: "#555555",
+        metalness: 0.4,
+        roughness: 0.6
+      })
+    );
+    base.position.y = 0.2;
+    crane.add(base);
+
+    let towerMat = new T.MeshStandardMaterial({
+      color: "#f39c12",
+      metalness: 0.5,
+      roughness: 0.6
+    });
+    let tower = new T.Mesh(new T.BoxGeometry(0.4, 5, 0.4), towerMat);
+    tower.position.y = 2.7;
+    crane.add(tower);
+
+    let topGroup = new T.Group();
+    topGroup.position.y = 5.2;
+    crane.add(topGroup);
+
+    let jibMat = new T.MeshStandardMaterial({
+      color: "#e67e22",
+      metalness: 0.5,
+      roughness: 0.6
+    });
+    let jib = new T.Mesh(new T.BoxGeometry(5, 0.2, 0.2), jibMat);
+    jib.position.x = 2.3;
+    topGroup.add(jib);
+
+    let counterJib = new T.Mesh(new T.BoxGeometry(2, 0.2, 0.2), jibMat);
+    counterJib.position.x = -1.2;
+    topGroup.add(counterJib);
+
+    let trolley = new T.Group();
+    topGroup.add(trolley);
+    trolley.position.set(2.3, -0.1, 0);
+    let trolleyBody = new T.Mesh(
+      new T.BoxGeometry(0.3, 0.2, 0.3),
+      new T.MeshStandardMaterial({
+        color: "#34495e",
+        metalness: 0.6,
+        roughness: 0.4
+      })
+    );
+    trolley.add(trolleyBody);
+
+    let hook = new T.Group();
+    trolley.add(hook);
+    hook.position.y = -0.1;
+    let cable = new T.Mesh(
+      new T.CylinderGeometry(0.03, 0.03, 2.5, 8),
+      new T.MeshStandardMaterial({
+        color: "#222222",
+        metalness: 0.6,
+        roughness: 0.4
+      })
+    );
+    cable.position.y = -1.25;
+    hook.add(cable);
+    let hookBlock = new T.Mesh(
+      new T.BoxGeometry(0.2, 0.2, 0.2),
+      new T.MeshStandardMaterial({
+        color: "#c0392b",
+        metalness: 0.4,
+        roughness: 0.5
+      })
+    );
+    hookBlock.position.y = -2.5;
+    hook.add(hookBlock);
+
+    super(`TowerCrane-${towerCraneObCtr++}`, crane, [
+      ["x", -10, 10, 0],
+      ["z", -10, 10, 0],
+      ["theta", 0, 360, 0],
+      ["spin", 0, 360, 0],
+      ["jib_angle", -20, 20, 0],
+      ["trolley", 0.5, 4.2, 2.3],
+      ["hook", 0.5, 3.0, 2.5]
+    ]);
+
+    this.whole_ob = crane;
+    this.topGroup = topGroup;
+    this.jib = jib;
+    this.trolley = trolley;
+    this.hook = hook;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    crane.scale.set(scale, scale, scale);
+  }
+
+  update(paramValues) {
+    this.whole_ob.position.x = paramValues[0];
+    this.whole_ob.position.z = paramValues[1];
+    this.whole_ob.rotation.y = degreesToRadians(paramValues[2]);
+    this.topGroup.rotation.y = degreesToRadians(paramValues[3]);
+    this.jib.rotation.z = degreesToRadians(paramValues[4]);
+    this.trolley.position.x = paramValues[5];
+    this.hook.position.y = -paramValues[6];
+  }
+}
+
+let mixerObCtr = 0;
+/**
+ * @typedef MixerTruckProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrMixerTruck extends GrObject {
+  /**
+   * @param {MixerTruckProperties} params
+   */
+  constructor(params = {}) {
+    let truck = new T.Group();
+
+    let chassisMat = new T.MeshStandardMaterial({
+      color: "#2c3e50",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+    let cabMat = new T.MeshStandardMaterial({
+      color: "#3498db",
+      metalness: 0.4,
+      roughness: 0.5
+    });
+    let drumMat = new T.MeshStandardMaterial({
+      color: "#ecf0f1",
+      metalness: 0.3,
+      roughness: 0.4
+    });
+
+    let chassis = new T.Mesh(new T.BoxGeometry(3, 0.4, 1.2), chassisMat);
+    chassis.position.y = 0.4;
+    truck.add(chassis);
+
+    let cab = new T.Mesh(new T.BoxGeometry(1, 0.9, 1.1), cabMat);
+    cab.position.set(1.1, 0.95, 0);
+    truck.add(cab);
+
+    let drumGroup = new T.Group();
+    drumGroup.position.set(-0.6, 1.1, 0);
+    truck.add(drumGroup);
+    let drum = new T.Mesh(new T.CylinderGeometry(0.6, 0.8, 1.6, 16), drumMat);
+    drum.rotation.z = Math.PI / 2;
+    drumGroup.add(drum);
+
+    let chute = new T.Group();
+    chute.position.set(-1.6, 0.7, 0);
+    drumGroup.add(chute);
+    let chuteMesh = new T.Mesh(new T.BoxGeometry(0.8, 0.1, 0.3), chassisMat);
+    chute.add(chuteMesh);
+
+    let wheelMat = new T.MeshStandardMaterial({
+      color: "#111111",
+      metalness: 0.2,
+      roughness: 0.8
+    });
+    let wheelGeom = new T.CylinderGeometry(0.25, 0.25, 0.2, 12);
+    let wheelPositions = [
+      [1.1, 0.2, 0.6],
+      [1.1, 0.2, -0.6],
+      [-0.2, 0.2, 0.6],
+      [-0.2, 0.2, -0.6],
+      [-1.4, 0.2, 0.6],
+      [-1.4, 0.2, -0.6]
+    ];
+    let wheels = [];
+    for (let p of wheelPositions) {
+      let w = new T.Mesh(wheelGeom, wheelMat);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(p[0], p[1], p[2]);
+      truck.add(w);
+      wheels.push(w);
+    }
+
+    super(`MixerTruck-${mixerObCtr++}`, truck, [
+      ["x", -10, 10, 0],
+      ["z", -10, 10, 0],
+      ["theta", 0, 360, 0],
+      ["drum_spin", 0, 360, 0],
+      ["drum_tilt", -20, 20, 0],
+      ["chute_angle", -45, 45, 10]
+    ]);
+
+    this.whole_ob = truck;
+    this.drumGroup = drumGroup;
+    this.drum = drum;
+    this.chute = chute;
+    this.wheels = wheels;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    truck.scale.set(scale, scale, scale);
+  }
+
+  update(paramValues) {
+    this.whole_ob.position.x = paramValues[0];
+    this.whole_ob.position.z = paramValues[1];
+    this.whole_ob.rotation.y = degreesToRadians(paramValues[2]);
+    this.drum.rotation.x = degreesToRadians(paramValues[3]);
+    this.drumGroup.rotation.z = degreesToRadians(paramValues[4]);
+    this.chute.rotation.z = degreesToRadians(paramValues[5]);
+  }
+}
+
+let dumpObCtr = 0;
+/**
+ * @typedef DumpTruckProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrDumpTruck extends GrObject {
+  /**
+   * @param {DumpTruckProperties} params
+   */
+  constructor(params = {}) {
+    let truck = new T.Group();
+
+    let redMat = new T.MeshStandardMaterial({
+      color: "#b10f0f",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+    let redAccent = new T.MeshStandardMaterial({
+      color: "#d64545",
+      metalness: 0.3,
+      roughness: 0.5
+    });
+    let darkMat = new T.MeshStandardMaterial({
+      color: "#3b3b3b",
+      metalness: 0.5,
+      roughness: 0.6
+    });
+    let hazardYellow = new T.MeshStandardMaterial({
+      color: "#f1c40f",
+      metalness: 0.2,
+      roughness: 0.6
+    });
+
+    let chassis = new T.Mesh(new T.BoxGeometry(3.3, 0.35, 1.25), darkMat);
+    chassis.position.y = 0.4;
+    truck.add(chassis);
+
+    let cab = new T.Mesh(new T.BoxGeometry(1.15, 0.85, 1.15), redMat);
+    cab.position.set(1.25, 0.95, 0);
+    cab.rotation.z = 0.06;
+    truck.add(cab);
+
+    let windshield = new T.Mesh(new T.BoxGeometry(0.55, 0.35, 1.02), redAccent);
+    windshield.position.set(1.45, 1.1, 0);
+    windshield.rotation.z = 0.25;
+    truck.add(windshield);
+
+    // light bar on cab roof
+    let lightMat = new T.MeshStandardMaterial({
+      color: "#ffd27f",
+      emissive: "#ffd27f",
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    let lightBar = new T.Mesh(new T.BoxGeometry(0.5, 0.08, 0.18), lightMat);
+    lightBar.position.set(1.25, 1.35, 0);
+    truck.add(lightBar);
+
+    // headlights
+    let headlightMat = new T.MeshStandardMaterial({
+      color: "#fff0cc",
+      emissive: "#fff0cc",
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    let hlL = new T.Mesh(new T.BoxGeometry(0.14, 0.1, 0.08), headlightMat);
+    let hlR = new T.Mesh(new T.BoxGeometry(0.14, 0.1, 0.08), headlightMat);
+    hlL.position.set(1.85, 0.55, 0.32);
+    hlR.position.set(1.85, 0.55, -0.32);
+    truck.add(hlL);
+    truck.add(hlR);
+
+    // bed pivot at the rear hinge
+    let bedPivot = new T.Group();
+    bedPivot.position.set(-1.5, 0.75, 0);
+    truck.add(bedPivot);
+
+    let bedGroup = new T.Group();
+    bedGroup.position.set(0.9, 0, 0);
+    bedPivot.add(bedGroup);
+    let bed = new T.Mesh(new T.BoxGeometry(1.85, 0.6, 1.15), redMat);
+    bed.position.set(0, 0.3, 0);
+    bedGroup.add(bed);
+
+    // tailgate pivoted at top edge
+    let tailGatePivot = new T.Group();
+    tailGatePivot.position.set(-0.95, 0.55, 0);
+    bedGroup.add(tailGatePivot);
+    let tailGate = new T.Mesh(new T.BoxGeometry(0.1, 0.5, 1.12), redMat);
+    tailGate.position.set(0, -0.25, 0);
+    tailGatePivot.add(tailGate);
+
+    let sideRailL = new T.Mesh(new T.BoxGeometry(1.85, 0.08, 0.08), redAccent);
+    let sideRailR = new T.Mesh(new T.BoxGeometry(1.85, 0.08, 0.08), redAccent);
+    sideRailL.position.set(0, 0.63, 0.58);
+    sideRailR.position.set(0, 0.63, -0.58);
+    bedGroup.add(sideRailL);
+    bedGroup.add(sideRailR);
+
+    // hazard stripes on rear of bed
+    let stripeCount = 5;
+    for (let i = 0; i < stripeCount; i++) {
+      let stripe = new T.Mesh(
+        new T.BoxGeometry(0.12, 0.48, 0.04),
+        i % 2 === 0 ? darkMat : hazardYellow
+      );
+      stripe.position.set(0, 0.05, -0.45 + i * 0.225);
+      tailGatePivot.add(stripe);
+    }
+
+    // "W" logo on cab side
+    let logoMat = new T.MeshStandardMaterial({
+      color: "#ffffff",
+      metalness: 0.2,
+      roughness: 0.5
+    });
+    // "W" logo made of 4 strokes (connected look)
+    let wGroup = new T.Group();
+    let vGeom = new T.BoxGeometry(0.05, 0.3, 0.02);
+    let dGeom = new T.BoxGeometry(0.05, 0.28, 0.02);
+    let left = new T.Mesh(vGeom, logoMat);
+    let right = new T.Mesh(vGeom, logoMat);
+    let dL = new T.Mesh(dGeom, logoMat);
+    let dR = new T.Mesh(dGeom, logoMat);
+
+    left.position.set(0.0, 0.02, 0);
+    right.position.set(0.36, 0.02, 0);
+    dL.rotation.z = -0.65;
+    dR.rotation.z = 0.65;
+    dL.position.set(0.12, -0.08, 0);
+    dR.position.set(0.24, -0.08, 0);
+
+    wGroup.add(left);
+    wGroup.add(dL);
+    wGroup.add(dR);
+    wGroup.add(right);
+    wGroup.position.set(1.05, 0.9, 0.62);
+    truck.add(wGroup);
+
+    let wheelMat = new T.MeshStandardMaterial({
+      color: "#151515",
+      metalness: 0.2,
+      roughness: 0.8
+    });
+    let stripeMat = new T.MeshStandardMaterial({
+      color: "#d9d9d9",
+      metalness: 0.2,
+      roughness: 0.6
+    });
+    let wheelGeom = new T.CylinderGeometry(0.27, 0.27, 0.22, 12);
+    let wheelPositions = [
+      [1.3, 0.25, 0.65],
+      [1.3, 0.25, -0.65],
+      [0.1, 0.25, 0.65],
+      [0.1, 0.25, -0.65],
+      [-1.2, 0.25, 0.65],
+      [-1.2, 0.25, -0.65]
+    ];
+    let wheels = [];
+    for (let p of wheelPositions) {
+      let wheelGroup = new T.Group();
+      let w = new T.Mesh(wheelGeom, wheelMat);
+      // orient wheel so it rolls forward (+X), axis along Z
+      w.rotation.x = Math.PI / 2;
+      w.position.set(0, 0, 0);
+      wheelGroup.add(w);
+
+      // ring stripe to show rotation
+      let stripe = new T.Mesh(
+        new T.TorusGeometry(0.24, 0.02, 8, 24),
+        stripeMat
+      );
+      stripe.rotation.x = Math.PI / 2;
+      wheelGroup.add(stripe);
+
+      wheelGroup.position.set(p[0], p[1], p[2]);
+      truck.add(wheelGroup);
+      wheels.push(wheelGroup);
+    }
+
+    super(`DumpTruck-${dumpObCtr++}`, truck, [
+      ["x", -10, 10, 0],
+      ["z", -10, 10, 0],
+      ["theta", 0, 360, 0],
+      ["bed_tilt", 0, 60, 0],
+      ["tailgate", 0, 90, 0],
+      ["wheel_spin", 0, 360, 0]
+    ]);
+
+    this.whole_ob = truck;
+    this.bedPivot = bedPivot;
+    this.tailGatePivot = tailGatePivot;
+    this.wheels = wheels;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    truck.scale.set(scale, scale, scale);
+  }
+
+  update(paramValues) {
+    this.whole_ob.position.x = paramValues[0];
+    this.whole_ob.position.z = paramValues[1];
+    this.whole_ob.rotation.y = degreesToRadians(paramValues[2]);
+    // dump bed tilts backward (positive rotation)
+    this.bedPivot.rotation.z = degreesToRadians(paramValues[3]);
+    // tailgate opens downward
+    this.tailGatePivot.rotation.z = degreesToRadians(-paramValues[4]);
+    for (let w of this.wheels) {
+      w.rotation.z = degreesToRadians(paramValues[5]);
+    }
+  }
+}
+
+let forkObCtr = 0;
+/**
+ * @typedef ForkliftProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrForklift extends GrObject {
+  /**
+   * @param {ForkliftProperties} params
+   */
+  constructor(params = {}) {
+    let lift = new T.Group();
+
+    let blueMat = new T.MeshStandardMaterial({
+      color: "#0073bb",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+    let blueAccent = new T.MeshStandardMaterial({
+      color: "#2a8fd4",
+      metalness: 0.3,
+      roughness: 0.5
+    });
+    let darkMat = new T.MeshStandardMaterial({
+      color: "#2f2f2f",
+      metalness: 0.5,
+      roughness: 0.6
+    });
+    let hazardYellow = new T.MeshStandardMaterial({
+      color: "#f1c40f",
+      metalness: 0.2,
+      roughness: 0.6
+    });
+
+    let body = new T.Mesh(new T.BoxGeometry(1.7, 0.35, 0.95), blueMat);
+    body.position.y = 0.35;
+    lift.add(body);
+
+    let cab = new T.Mesh(new T.BoxGeometry(0.75, 0.65, 0.85), blueMat);
+    cab.position.set(0.25, 0.88, 0);
+    cab.rotation.z = -0.04;
+    lift.add(cab);
+
+    let roof = new T.Mesh(new T.BoxGeometry(0.85, 0.08, 0.9), blueAccent);
+    roof.position.set(0.2, 1.23, 0);
+    lift.add(roof);
+
+    // light bar
+    let lightMat = new T.MeshStandardMaterial({
+      color: "#ffd27f",
+      emissive: "#ffd27f",
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    let lightBar = new T.Mesh(new T.BoxGeometry(0.5, 0.06, 0.2), lightMat);
+    lightBar.position.set(0.2, 1.32, 0);
+    lift.add(lightBar);
+
+    // headlights
+    let headlightMat = new T.MeshStandardMaterial({
+      color: "#fff0cc",
+      emissive: "#fff0cc",
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    let hlL = new T.Mesh(new T.BoxGeometry(0.12, 0.08, 0.07), headlightMat);
+    let hlR = new T.Mesh(new T.BoxGeometry(0.12, 0.08, 0.07), headlightMat);
+    hlL.position.set(0.95, 0.5, 0.24);
+    hlR.position.set(0.95, 0.5, -0.24);
+    lift.add(hlL);
+    lift.add(hlR);
+
+    let mastGroup = new T.Group();
+    mastGroup.position.set(-0.75, 0.5, 0);
+    lift.add(mastGroup);
+    let mast = new T.Mesh(new T.BoxGeometry(0.16, 1.65, 0.9), darkMat);
+    mast.position.y = 0.8;
+    mastGroup.add(mast);
+
+    let carriage = new T.Group();
+    carriage.position.y = 0.45;
+    mastGroup.add(carriage);
+    let carriagePlate = new T.Mesh(new T.BoxGeometry(0.1, 0.6, 0.82), darkMat);
+    carriage.add(carriagePlate);
+
+    // hazard stripes on carriage
+    for (let i = 0; i < 4; i++) {
+      let stripe = new T.Mesh(
+        new T.BoxGeometry(0.02, 0.45, 0.06),
+        i % 2 === 0 ? darkMat : hazardYellow
+      );
+      stripe.position.set(0.06, -0.05, -0.24 + i * 0.16);
+      carriage.add(stripe);
+    }
+
+    let forkFrame = new T.Group();
+    carriage.add(forkFrame);
+    forkFrame.position.x = -0.08;
+
+    let forks = new T.Group();
+    forkFrame.add(forks);
+    let forkMat = new T.MeshStandardMaterial({
+      color: "#6b6b6b",
+      metalness: 0.6,
+      roughness: 0.4
+    });
+    let forkL = new T.Mesh(new T.BoxGeometry(0.65, 0.06, 0.12), forkMat);
+    let forkR = new T.Mesh(new T.BoxGeometry(0.65, 0.06, 0.12), forkMat);
+    forkL.position.set(-0.35, -0.28, 0.18);
+    forkR.position.set(-0.35, -0.28, -0.18);
+    forks.add(forkL);
+    forks.add(forkR);
+
+    // "W" logo on cab side
+    let logoMat = new T.MeshStandardMaterial({
+      color: "#ffffff",
+      metalness: 0.2,
+      roughness: 0.5
+    });
+    let wGroup = new T.Group();
+    let vGeom = new T.BoxGeometry(0.04, 0.22, 0.02);
+    let dGeom = new T.BoxGeometry(0.04, 0.2, 0.02);
+    let left = new T.Mesh(vGeom, logoMat);
+    let right = new T.Mesh(vGeom, logoMat);
+    let dL = new T.Mesh(dGeom, logoMat);
+    let dR = new T.Mesh(dGeom, logoMat);
+
+    left.position.set(0.0, 0.02, 0);
+    right.position.set(0.3, 0.02, 0);
+    dL.rotation.z = -0.65;
+    dR.rotation.z = 0.65;
+    dL.position.set(0.1, -0.07, 0);
+    dR.position.set(0.2, -0.07, 0);
+
+    wGroup.add(left);
+    wGroup.add(dL);
+    wGroup.add(dR);
+    wGroup.add(right);
+    wGroup.position.set(0.2, 0.78, 0.5);
+    lift.add(wGroup);
+
+    let wheelMat = new T.MeshStandardMaterial({
+      color: "#151515",
+      metalness: 0.2,
+      roughness: 0.8
+    });
+    let stripeMat = new T.MeshStandardMaterial({
+      color: "#d9d9d9",
+      metalness: 0.2,
+      roughness: 0.6
+    });
+    let wheelGeom = new T.CylinderGeometry(0.18, 0.18, 0.15, 12);
+    let wheelPositions = [
+      [0.6, 0.18, 0.45],
+      [0.6, 0.18, -0.45],
+      [-0.6, 0.18, 0.45],
+      [-0.6, 0.18, -0.45]
+    ];
+    let wheels = [];
+    for (let p of wheelPositions) {
+      let wheelGroup = new T.Group();
+      let w = new T.Mesh(wheelGeom, wheelMat);
+      // orient wheel so it rolls forward (+X), axis along Z
+      w.rotation.x = Math.PI / 2;
+      w.position.set(0, 0, 0);
+      wheelGroup.add(w);
+
+      let stripe = new T.Mesh(
+        new T.TorusGeometry(0.17, 0.015, 8, 24),
+        stripeMat
+      );
+      stripe.rotation.x = Math.PI / 2;
+      wheelGroup.add(stripe);
+
+      wheelGroup.position.set(p[0], p[1], p[2]);
+      lift.add(wheelGroup);
+      wheels.push(wheelGroup);
+    }
+
+    super(`Forklift-${forkObCtr++}`, lift, [
+      ["x", -10, 10, 0],
+      ["z", -10, 10, 0],
+      ["theta", 0, 360, 0],
+      ["mast_tilt", -10, 12, 0],
+      ["lift_height", 0.2, 1.3, 0.6],
+      ["fork_extend", 0, 0.5, 0.1],
+      ["wheel_spin", 0, 360, 0]
+    ]);
+
+    this.whole_ob = lift;
+    this.mastGroup = mastGroup;
+    this.carriage = carriage;
+    this.forkFrame = forkFrame;
+    this.forks = forks;
+    this.wheels = wheels;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    lift.scale.set(scale, scale, scale);
+  }
+
+  update(paramValues) {
+    this.whole_ob.position.x = paramValues[0];
+    this.whole_ob.position.z = paramValues[1];
+    this.whole_ob.rotation.y = degreesToRadians(paramValues[2]);
+    this.mastGroup.rotation.z = degreesToRadians(paramValues[3]);
+    this.carriage.position.y = paramValues[4];
+    this.forks.position.x = -paramValues[5];
+    for (let w of this.wheels) {
+      w.rotation.z = degreesToRadians(paramValues[6]);
+    }
+  }
+}
+
+let miniExcavatorObCtr = 0;
+/**
+ * @typedef MiniExcavatorProperties
+ * @type {object}
+ * @property {number} [x=0]
+ * @property {number} [y=0]
+ * @property {number} [z=0]
+ * @property {number} [size=1]
+ */
+export class GrMiniExcavator extends GrObject {
+  /**
+   * @param {MiniExcavatorProperties} params
+   */
+  constructor(params = {}) {
+    let excavator = new T.Group();
+
+    let bodyMat = new T.MeshStandardMaterial({
+      color: "#8e44ad",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+    let darkMat = new T.MeshStandardMaterial({
+      color: "#444444",
+      metalness: 0.4,
+      roughness: 0.6
+    });
+
+    // base
+    let base = new T.Mesh(new T.BoxGeometry(1.9, 0.35, 1.05), darkMat);
+    base.position.y = 0.25;
+    excavator.add(base);
+
+    // wheels
+    let wheelMat = new T.MeshStandardMaterial({
+      color: "#1d1d1d",
+      metalness: 0.2,
+      roughness: 0.8
+    });
+    let wheelGeom = new T.CylinderGeometry(0.18, 0.18, 0.14, 12);
+    let wheelPositions = [
+      [0.7, 0.15, 0.5],
+      [0.7, 0.15, -0.5],
+      [-0.7, 0.15, 0.5],
+      [-0.7, 0.15, -0.5]
+    ];
+    let wheels = [];
+    for (let p of wheelPositions) {
+      let wheel = new T.Mesh(wheelGeom, wheelMat);
+      wheel.rotation.x = Math.PI / 2;
+      wheel.position.set(p[0], p[1], p[2]);
+      excavator.add(wheel);
+      wheels.push(wheel);
+    }
+
+    // pedestal and cab
+    let pedestal = new T.Mesh(new T.CylinderGeometry(0.4, 0.45, 0.2, 12), darkMat);
+    pedestal.position.y = 0.55;
+    excavator.add(pedestal);
+
+    let cabGroup = new T.Group();
+    cabGroup.position.y = 0.65;
+    excavator.add(cabGroup);
+    let cab = new T.Mesh(new T.BoxGeometry(0.9, 0.55, 0.9), bodyMat);
+    cab.position.y = 0.3;
+    cabGroup.add(cab);
+
+    // headlights
+    let headlightMat = new T.MeshStandardMaterial({
+      color: "#fff0cc",
+      emissive: "#fff0cc",
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    let hlL = new T.Mesh(new T.BoxGeometry(0.12, 0.08, 0.06), headlightMat);
+    let hlR = new T.Mesh(new T.BoxGeometry(0.12, 0.08, 0.06), headlightMat);
+    hlL.position.set(0.35, 0.35, 0.25);
+    hlR.position.set(0.35, 0.35, -0.25);
+    cabGroup.add(hlL);
+    cabGroup.add(hlR);
+
+    // label plate
+    let label = new T.Mesh(
+      new T.BoxGeometry(0.5, 0.18, 0.02),
+      new T.MeshStandardMaterial({
+        color: "#ffffff",
+        metalness: 0.1,
+        roughness: 0.6
+      })
+    );
+    label.position.set(0.3, 0.2, 0.46);
+    cabGroup.add(label);
+
+    // boom
+    let boomGroup = new T.Group();
+    cabGroup.add(boomGroup);
+    boomGroup.position.set(-0.45, 0.25, 0);
+    let boom = new T.Mesh(new T.BoxGeometry(0.9, 0.15, 0.2), darkMat);
+    boom.position.x = -0.45;
+    boomGroup.add(boom);
+
+    // stick
+    let stickGroup = new T.Group();
+    boomGroup.add(stickGroup);
+    stickGroup.position.set(-0.9, 0, 0);
+    let stick = new T.Mesh(new T.BoxGeometry(0.7, 0.12, 0.18), darkMat);
+    stick.position.x = -0.35;
+    stickGroup.add(stick);
+
+    // bucket
+    let bucketGroup = new T.Group();
+    stickGroup.add(bucketGroup);
+    bucketGroup.position.set(-0.7, 0, 0);
+    let bucket = new T.Mesh(new T.BoxGeometry(0.35, 0.2, 0.25), darkMat);
+    bucket.position.x = -0.18;
+    bucket.position.y = -0.05;
+    bucketGroup.add(bucket);
+
+    super(`MiniExcavator-${miniExcavatorObCtr++}`, excavator, [
+      ["x", -10, 10, 0],
+      ["z", -10, 10, 0],
+      ["theta", 0, 360, 0],
+      ["cab_spin", 0, 360, 0],
+      ["boom", -30, 45, 10],
+      ["stick", -60, 60, 10],
+      ["bucket", -90, 45, 0],
+      ["wheel_spin", 0, 360, 0]
+    ]);
+
+    this.whole_ob = excavator;
+    this.cab = cabGroup;
+    this.boom = boomGroup;
+    this.stick = stickGroup;
+    this.bucket = bucketGroup;
+    this.wheels = wheels;
+
+    this.whole_ob.position.x = params.x ? Number(params.x) : 0;
+    this.whole_ob.position.y = params.y ? Number(params.y) : 0;
+    this.whole_ob.position.z = params.z ? Number(params.z) : 0;
+    let scale = params.size ? Number(params.size) : 1;
+    excavator.scale.set(scale, scale, scale);
+  }
+
+  update(paramValues) {
+    this.whole_ob.position.x = paramValues[0];
+    this.whole_ob.position.z = paramValues[1];
+    this.whole_ob.rotation.y = degreesToRadians(paramValues[2]);
+    this.cab.rotation.y = degreesToRadians(paramValues[3]);
+    this.boom.rotation.z = degreesToRadians(paramValues[4]);
+    this.stick.rotation.z = degreesToRadians(paramValues[5]);
+    this.bucket.rotation.z = degreesToRadians(paramValues[6]);
+    for (let w of this.wheels) {
+      w.rotation.z = degreesToRadians(paramValues[7]);
+    }
   }
 }
 

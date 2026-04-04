@@ -47,10 +47,10 @@ function testGrid() {
     // mow make the triangles
     // note: I am intentionally being sloppy with the order
     geometry.setIndex([
-        0,1,3,  1,3,4,
-        1,2,4,  2,4,5,
-        3,4,6,  4,6,7,
-        4,5,7,  5,7,8
+        0,1,4,  0,4,3,
+        1,2,5,  1,5,4,
+        3,4,7,  3,7,6,
+        4,5,8,  4,8,7
     ]);
 
     return geometry;
