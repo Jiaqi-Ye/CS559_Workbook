@@ -21,7 +21,7 @@ class BumpWall extends GrObject {
     const mesh = new T.Mesh(geom, mat);
     super("BumpWall", mesh);
   }
-
+  
   stepWorld(delta) {
     this.objects[0].rotation.y += delta * 0.00035;
   }
