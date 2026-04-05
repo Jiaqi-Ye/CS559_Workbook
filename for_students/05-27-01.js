@@ -134,6 +134,6 @@ for (let i = 0; i < 65; i++) {
             world.add(tree);
         }
     } 
-}
+} 
 
 world.go();
