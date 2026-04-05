@@ -133,7 +133,7 @@ for (let i = 0; i < 65; i++) {
             tree.objects[0].rotation.y = Math.random() * Math.PI;
             world.add(tree);
         }
-    }
+    } 
 }
 
 world.go();
