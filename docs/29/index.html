@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 29: GLSL Exercises 2</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Two more GLSL exercises before we move beyond GLSL.</p>
+<p>Exercise 1 requires lighting. You can do something simple. If we want good lighting, we&rsquo;ll use three.js. But notice - you will be putting two pieces together: you need to combine lighting and the procedural texture. This need to combine will be the key factor in other shading languages.</p>
+<p>Exercises 1 and 2 require some lighting, and 3 recommends it. For the purposes of these exercises, you can assume that the lights are in &ldquo;camera coordinates&rdquo; (if that&rsquo;s easier for you), or use any of the methods we discussed (such as assuming that transformation is a rotation).</p>
+<p>If you do diffuse lighting, the lighting may change as the camera moves (if the lights move with the camera). It is sufficient to create a single directional light either in the camera direction (0,0,1 in view coordinates), or from above the camera (0,1,0 in view coordinates). It is sufficient just to use diffuse lighting (since it is simple); you may want to add some ambient to it so that the parts facing away from the light are not totally black, or add some specular lighting since you have the implementation of it.</p>
+<p>It should be clear that there is lighting (for the examples that have lighting).</p>
+<p>For this page, you should write the shader yourself - on the next page, you can adapt a shader from somewhere. You can reuse the lighting code from a prior page.</p>
+<p>It is OK to use ideas that you find elsewhere. Remember: if you use ideas (or code) from some shader you find someplace else, be sure to give proper attribution. If you adapt a shader from somewhere else, make sure you understand how it works!</p>
+<h2 id="exercise-lighting-and-procedural">Exercise: Lighting and Procedural</h2>
+<p>
+
+
+
+
+
+
+
+</p>
+<p>Write a shader in <a href="../../for_students/06-29-01.vs" class="box-file box-vs" data-tag="10-09-01" data-type="vs">06-29-01.vs</a>
+ and <a href="../../for_students/06-29-01.fs" class="box-file box-fs" data-tag="10-09-01" data-type="fs">06-29-01.fs</a>
+ that creates a procedural texture (one of the ones from page 5 is fine - even one of the examples) and adds lighting. A single directional light source (either in the direction of the camera line of sight or from above the camera) is sufficient. You may not need to modify 
+<a href="../../for_students/06-29-01.js" class="box-html" data-tag="10-09-01">06-29-01.js</a>
+ (<a href="../../for_students/06-29-01.html" class="box-html" data-tag="10-09-01">06-29-01.html</a>), but you can if you want to.</p>
+<p>For advanced points, try to make the light be fixed in the world (and not move with the camera).</p>
+
+<div id="box-06-29-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-29-01</span>&nbsp;
+    <input type="checkbox" id="check-06-29-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-29-01.html class="boxtitlelink">06-29-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-29-01.js" class="boxtitlelink">06-29-01.js</a>
+    <iframe
+        title="10-09-01"
+        src="../../for_students/06-29-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-29-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-29-01-0"></td>
+                <td>standard</td>
+                <td>some lighting</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-29-01-1"></td>
+                <td>advanced</td>
+                <td>lighting does not move with camera</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>Just do some simple lighting. If we want good lighting, we will let three.js do it for us.</p>
+<h2 id="non-exercise-images-and-lighting">Non-Exercise: Images and Lighting</h2>
+<p>In the past, we asked you to make something that uses images and lighting. Practicing lighting isn&rsquo;t worth it. It&rsquo;s better to use three (just wait).</p>
+<h2 id="exercise-students-choice">Exercise: Student&rsquo;s Choice</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>Write a shader in <a href="../../for_students/06-29-02.vs" class="box-file box-vs" data-tag="10-09-03" data-type="vs">06-29-02.vs</a>
+ and <a href="../../for_students/06-29-02.fs" class="box-file box-fs" data-tag="10-09-03" data-type="fs">06-29-02.fs</a>
+ that does something interesting and different from the other shaders you&rsquo;ve made already in this workbook. You will need to modify 
+<a href="../../for_students/06-29-02.js" class="box-html" data-tag="10-09-03">06-29-02.js</a>
+ (<a href="../../for_students/06-29-02.html" class="box-html" data-tag="10-09-03">06-29-02.html</a>) to set up the uniforms and load textures.</p>
+<p>In this exercise, you must add a uniform variable that controls some parameters, and have them controlled by a slider. You can look at the examples to see how to make sliders easily with the framework code.</p>
+<p>If you write a shader that alters the geometry of the object (moving vertices), you may want to increase the tessellation of the sphere (see page 7 for an example). You can add more example geometry if you think it shows off your shader better - but please leave the plane and sphere.</p>
+<p>You need to not only write a pair of shaders, but also explain what they do and how they work in the Workbook Form. You can earn some advanced points for a particularly interesting shader with an explanation.</p>
+<p>Some things to consider trying:</p>
+<ul>
+<li>alter the geometry in the vertex shader (see the displacement map examples, such as the &ldquo;islands&rdquo; demo)</li>
+<li>mix lighting with other colorings</li>
+<li>animate effects (see page 2 for an example)</li>
+<li>have procedural effects modify images (or vice versa)</li>
+<li>create a different pattern</li>
+<li>combine effects (make dirty wood grain, or a checkerboard of different woods)</li>
+</ul>
+<p>Optionally, you can also add a new mesh to showcase your shader, but please keep the sphere and the plane.</p>
+<p>Feel free to add uniform variables (for example, to add a time variable).</p>
+
+<div id="box-06-29-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-29-02</span>&nbsp;
+    <input type="checkbox" id="check-06-29-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-29-02.html class="boxtitlelink">06-29-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-29-02.js" class="boxtitlelink">06-29-02.js</a>
+    <iframe
+        title="10-09-03"
+        src="../../for_students/06-29-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-29-02"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-29-02-0"></td>
+                <td>standard</td>
+                <td>Some shader of student&#39;s choice</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-29-02-1"></td>
+                <td>advanced</td>
+                <td>Interesting Shader</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-29-02-2"></td>
+                <td>creative</td>
+                <td>Exceptional Shader</td>
+            </tr></tbody>
+        </table>
+    </div>
+    <div id="gallery-06-29-02" style="margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px; padding-bottom: 5px;">
+        <strong>Gallery Information</strong><br>
+        <label><input type="checkbox" class="sitekey" id="gallery_optout_06-29-02"> Check this if you do NOT want this submission to be included in the gallery. </label><br>
+        <label><input type="checkbox" class="sitekey" id="gallery_anonymous_06-29-02"> Check this if you DO want to be anonymous if your work is selected for the gallery. </label><br>
+        <div style="margin-top: 5px;">
+            <label for="gallery_statement_06-29-02">If your work is selected for the gallery, the following message will be placed alongside your work:</label><br>
+            <textarea class="sitekey" id="gallery_statement_06-29-02" style="width: 100%; max-width: 600px;" rows="3"></textarea>
+        </div>
+    </div>
+</div>
+<h2 id="summary-procedural-textures">Summary: Procedural Textures</h2>
+<p>We&rsquo;ve done procedural textures in GLSL. Now let&rsquo;s try to move on to make even more complex things. But for this, we&rsquo;ll want some better tools.</p>
+<a href="../../docs/30/" class="Next__Page">Next: Page &nbsp;30&nbsp;-&nbsp;Composition</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Selected"> 29: GLSL Exercises 2 </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p29",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 30: Composition</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Languages like GLSL are good for shader programming in that they map nicely to the hardware, and give us the math tools we need. However, as we start to make more complex shaders, we want languages that can support the bigger challenges. In particular:</p>
+<ol>
+<li>A lot of shader programming involves re-using pieces. We want to use the same lighting for different materials; the same materials with different textures; the same noise functions are used all over, etc.</li>
+<li>A lot of shader programming involves interfacing with the host system. We want convenient access to the lighting, the textures, etc.</li>
+<li>A lot of shader programming is done by artists and involves trial and error. We want a language that supports good tools that allow for exploration and experimentation, preferably without looking at code.</li>
+</ol>
+<p>Over time, these concerns dominated the design of shading languages, so old languages like GLSL have lost favor. It&rsquo;s kind of like C programming for regular computers: it was good to give us low-level access to the hardware, but it&rsquo;s nice to have a modern, high-level language that makes writing programs more convenient.</p>
+<p>Because of #2 and #3, these new languages tend to be part of high-level graphics systems (like game engines), and are specific to them. Normally, in class, I would want to pick a language that could be used in many systems, but the modern shading languages are all system-specific. Fortunately, they are all similar. I believe if you learn one, you can transfer to another one easily.</p>
+<p>In order to address #1, shader programming languages are based on <strong>composition</strong> - they support connecting pieces of shaders together as a primary mechanism. They generally work by making each piece of a program an object, and &ldquo;wiring&rdquo; these objects together to describe how data flows between them. This leads nicely to visual graph interfaces.</p>
+<p>Three.js has a built-in implementation of this paradigm: the Three.js Shading Language (TSL). Calling it a &ldquo;language&rdquo; may seem weird: it is more like a collection of objects that we use in a JavaScript program. But we use it like a language to express shader programs: at runtime, the JavaScript executes, creates the objects, connects them together, and then uses them to &ldquo;compile&rdquo; the shader into the WGSL that ultimately runs on the hardware.</p>
+<p>The beauty of this:</p>
+<ol>
+<li>Any programming is in JavaScript. We can use all of our great JavaScript tools.</li>
+<li>It supports the shader/graph paradigm, allowing us to use a visual editor (if we want). The visual editor spits out JavaScript.</li>
+<li>It is well integrated into three.js. It provides convenient access to all of the three.js features.</li>
+</ol>
+<p>So, I think this is the way we want to build shaders in the future. GLSL was great for learning: by forcing us to be close to the hardware, we had to make sure we understood what was going on. Now that we have that understanding, let&rsquo;s try things that would have been really difficult in GLSL.</p>
+<h2 id="a-first-example-composition-in-tsl">A First Example: Composition in TSL</h2>
+<p>I want to make a simple noise demo that uses the noise to control the colors. But I want the object to have the actual three.js standard material (with reflections and shadows and physical effects and &hellip;).</p>
+<p>I need a noise function. I need the lighting system. I need to get all the light information from three.js. This would be hard in GLSL.</p>
+<p>In TSL, it is easy, especially since it has noise built-in. Here&rsquo;s my program:</p>
+<figure class="" style="width: 500px;  ">
+     <a href="../../docs/30/tsl-graph-1.png">
+         <img src="../../docs/30/tsl-graph-1.png" alt="tsl-graph-1.png" />
+     </a><figcaption><p>A TSL Shader Program that ties a 3D noise function to the RGB colors.&nbsp;</p></figcaption>
+ </figure>
+
+<p>Your first reaction might be: &ldquo;Is this a program?&rdquo;</p>
+<p>I am showing you the program in the graph editor. It is giving me a visual representation of the program. The graph editor is handy: it provides a nice environment for writing the programs and debugging/tuning them. The editor is called <a href="https://www.tsl-graph.xyz/">TSL Graph</a> and is available online.</p>
+<figure class="" style="width: 600px;  ">
+    <a href="../../docs/30/tsl-graph-1-ui.png">
+        <img src="../../docs/30/tsl-graph-1-ui.png" alt="tsl-graph-1-ui.png" />
+    </a><figcaption><p>Our program in the graph editor. Note that it has a tool to help me find the kinds of nodes I can make (left), an inspector to help me understand what the nodes do (lower right), and a visual test of the shader for debugging (upper right).&nbsp;</p></figcaption>
+</figure>
+
+<p>Let&rsquo;s walk through what&rsquo;s happening. We work from right to left.</p>
+<p>The rightmost node in my program is a <code>MeshStandardMaterial</code> node. I want to use the lighting built into this, so I started with it. If you look carefully, you notice that it is showing two inputs: color and position. These are the two most essential inputs. Fortunately, if you don&rsquo;t connect anything, three.js has reasonable defaults. Position gets the object geometry.</p>
+<p><code>MeshStandardMaterial</code> has many possible inputs - the editor is just choosing to show me the two most common ones by default. If I want to see the whole list, they are in the UI (lower right) - there are checkboxes to turn them on.</p>
+<p>The next node is the <code>Noise</code> node. I specifically chose a <code>Noise (vec3)</code> node since I want 3D noise (so I can tie it to the RGB of the material color). It has a few inputs, and a single output. Notice that I have connected the output of the noise to the color input of the material.</p>
+<p>The noise function needs an input - the domain we&rsquo;re generating noise for. I want to tie that to the UV coordinates of the fragments we are shading. So, I need a <code>UV</code> node that gives me the texture coordinates. I also know that if I only look at the values in the 0-1 range of the default texture coordinate on objects, the noise will be boring - I want to have the noise change faster. So, I need to &ldquo;scale up&rdquo; the texture coordinates by multiplying by a constant. This is a place where the graph view is a little less convenient: I want to say uv*10, but instead I have to make a multiply node and a constant value node and wire them together.</p>
+<p>So that&rsquo;s our first TSL program!</p>
+<p>Of course, we could have written it in JavaScript instead.</p>
+<p>In fact, if I press the &ldquo;view code&rdquo; button in the editor, it will show me the JavaScript. A warning: because the editor creates both the material shader and &ldquo;post-processing&rdquo; shader, there is extra stuff (that I am not including).</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node0</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uv</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node1</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">float</span><span style="color:#111">(</span><span style="color:#ae81ff">9.9</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node2</span> <span style="color:#f92672">=</span> <span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">_node0</span><span style="color:#111">,</span> <span style="color:#75af00">_node1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node3</span> <span style="color:#f92672">=</span> <span style="color:#75af00">mx_noise_vec3</span><span style="color:#111">(</span><span style="color:#75af00">_node2</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">MeshStandardNodeMaterial</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span><span style="color:#75af00">material</span><span style="color:#111">.</span><span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">_node3</span><span style="color:#111">;</span></span></span></code></pre></div>
+<p>Notice how the JavaScript code exactly matches the graph structure.</p>
+<p>We can use this anywhere that we would have normally used some other material. There is a slight catch that we need to make sure that we import the correct parts of three.js for TSL. The editor puts this in the programs it provides:
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#00a8c8">import</span> <span style="color:#111">{</span> <span style="color:#75af00">color</span><span style="color:#111">,</span> <span style="color:#00a8c8">float</span><span style="color:#111">,</span> <span style="color:#75af00">mrt</span><span style="color:#111">,</span> <span style="color:#75af00">mul</span><span style="color:#111">,</span> <span style="color:#75af00">mx_noise_vec3</span><span style="color:#111">,</span> <span style="color:#75af00">normalView</span><span style="color:#111">,</span> <span style="color:#75af00">output</span><span style="color:#111">,</span> <span style="color:#75af00">pass</span><span style="color:#111">,</span> <span style="color:#75af00">uv</span><span style="color:#111">,</span> <span style="color:#75af00">vec3</span> <span style="color:#111">}</span> <span style="color:#75af00">from</span> <span style="color:#d88200">&#39;three/tsl&#39;</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#00a8c8">import</span> <span style="color:#111">{</span> <span style="color:#75af00">MeshStandardNodeMaterial</span> <span style="color:#111">}</span> <span style="color:#75af00">from</span> <span style="color:#d88200">&#39;three/webgpu&#39;</span><span style="color:#111">;</span></span></span></code></pre></div></p>
+<p>Or, we can import the whole module.</p>
+<p>Here is that program inside of the class software framework:
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/30/tsl-1.html" class="boxtitlelink">tsl-1.html</a><span> | </span><a href="../../docs/30/tsl-1.js" class="boxtitlelink">tsl-1.js</a><iframe
+        title="tsl-1.html"
+        src="../../docs/30/tsl-1.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>The code produced by the graph editor explicitly creates each node, and imports each node object separately. Here, you can see the code written two different ways - one which is identical to the original (copied) and the other which is written by hand in a very compact form:</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e">// explicit (from TSL Graph Editor)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node0</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uv</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node1</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">float</span><span style="color:#111">(</span><span style="color:#ae81ff">9.9</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node2</span> <span style="color:#f92672">=</span> <span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">_node0</span><span style="color:#111">,</span> <span style="color:#75af00">_node1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span><span style="color:#00a8c8">const</span> <span style="color:#75af00">_node3</span> <span style="color:#f92672">=</span> <span style="color:#75af00">mx_noise_vec3</span><span style="color:#111">(</span><span style="color:#75af00">_node2</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span><span style="color:#75af00">material</span><span style="color:#111">.</span><span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">_node3</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span><span style="color:#75715e">// compact (written by hand)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9</span><span><span style="color:#75af00">material</span><span style="color:#111">.</span><span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">tsl</span><span style="color:#111">.</span><span style="color:#75af00">mx_noise_vec3</span><span style="color:#111">(</span><span style="color:#75af00">tsl</span><span style="color:#111">.</span><span style="color:#75af00">uv</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">).</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#ae81ff">9.9</span><span style="color:#111">),</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>As you can see, you can write these shaders very compactly in JavaScript.</p>
+<h2 id="composition-and-tsl">Composition and TSL</h2>
+<p>Composition-based &ldquo;languages&rdquo; are the new standard for writing shaders. TSL provides an implementation for three.js that embraces JavaScript to make a concise way to express shaders in code, and the graph editor provides a convenient way to write shaders, experiment with them, and debug them.</p>
+<a href="../../docs/31/" class="Next__Page">Next: Page &nbsp;31&nbsp;-&nbsp;Texture Tsl Examples</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Selected"> 30: Composition </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p30",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

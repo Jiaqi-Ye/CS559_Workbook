@@ -1,0 +1,45 @@
+{
+  "extends": "./jsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "lib": ["es2020", "dom", "dom.iterable"],
+    "paths": {
+      "three": ["./_common/types/three/src/Three.d.ts"],
+      "three/tsl": ["./_common/types/three/src/Three.TSL.d.ts"],
+      "three/webgpu": ["./_common/types/three/src/Three.WebGPU.Nodes.d.ts"],
+      "three/src/*": ["./_common/types/three/src/*"],
+      "three/examples/jsm/controls/OrbitControls.js": ["./_common/types/three/OrbitControls.d.ts"],
+      "three/addons/controls/OrbitControls.js": ["./_common/types/three/OrbitControls.d.ts"],
+      "three/addons/*": ["./_common/types/three/examples/jsm/*"],
+      "CS559/*": ["./_common/CS559-Lib/*"],
+      "CS559-Framework/*": ["./_common/CS559-Framework/*"],
+      "examples/*": ["./Workbook07/static/examples/*"]
+    }
+  },
+  "include": [
+    "_common/CS559-Framework/**/*.js",
+    "_common/types/**/*.d.ts",
+    "Workbook04/content/docs/**/*.js",
+    "Workbook05/content/docs/**/*.js",
+    "Workbook07/content/docs/**/*.js",
+    "Workbook07/static/**/*.js"
+  ],
+  "exclude": [
+    "**/*-solution*.js",
+    "**/*solution-too*.js",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/__pycache__/**",
+    "_common/CS559-Framework/out/**",
+    "_past_edits/**",
+    "Analysis/**",
+    "Workbook04_pdf/**"
+  ]
+}

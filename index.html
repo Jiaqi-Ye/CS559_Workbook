@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+	<meta name="generator" content="Hugo 0.160.0">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="./css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="./js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+
+
+<main class="main list" role="main">
+	<header class="main__header">
+		<h1 class="main__title">Workbook 6: Efficiency, Hardware and Shaders</h1>
+	</header>
+	<div class="content main__content clearfix"><p>So far, we&rsquo;ve programmed graphics using high-level APIs. In this workbook, we&rsquo;ll look under the hood a bit. This is important because it will help us understand <strong>why</strong> we do things the way we do. This will help you understand the motivations for the techniques we choose (e.g., why we use environment mapping for reflections). It will help you understand why we need tricks to create shadows. It will help you understand why we prefer to use texture maps. Additionally, it will help you understand how to program the graphics hardware.</p>
+<h2 id="workbook-operations">Workbook Operations</h2>
+<p>The workbook uses both type-in forms that rely on browser local storage and &ldquo;page boxes&rdquo; that are files that must be checked in to GitHub.</p>
+<p>Right now, please put your name on the workbook and press the &ldquo;checkpoint&rdquo; button so that we know that you have at least seen this workbook.</p>
+<p><div class="netid">
+<label for="netid">NetID:</label>
+<input 
+  type="text" 
+  id="netid" 
+  class="netid-input sitekey" 
+  placeholder="e.g. bbadger123" 
+  pattern="^[a-zA-Z][a-zA-Z0-9]*$" 
+  title="NetID must start with a letter and contain only letters and numbers."
+  required
+  oninput="validateNetID(this)"
+> <span id="netid-error" class="netid-error"></span>
+<script>
+  function validateNetID(input) {
+    const errorSpan = document.getElementById("netid-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "NetID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "NetID can only contain letters and numbers.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div class="netid">
+<label for="github">GithubID (user name):</label>
+<input 
+  type="text" 
+  id="github" 
+  class="netid-input sitekey" 
+  placeholder="e.g. octocat" 
+  pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" 
+  title="Github ID must start with a letter and contain only letters and numbers and single hyphens."
+  required
+  oninput="validateGithubID(this)"
+> <span id="github-error" class="netid-error"></span>
+<script>
+  function validateGithubID(input) {
+    const errorSpan = document.getElementById("github-error");
+    
+    if (input.value.includes(" ")) {
+      input.value = input.value.replace(/\s/g, "");
+    }
+    
+    
+    
+
+    
+    if (input.validity.patternMismatch) {
+      
+      if (!/^[a-zA-Z]/.test(input.value)) {
+        errorSpan.textContent = "Github ID must start with a letter.";
+        errorSpan.style.color = "red";
+      } else {
+        errorSpan.textContent = "Github ID can only contain letters and numbers and single hyphens.";
+        errorSpan.style.color = "red";
+      }
+    } else {
+        errorSpan.textContent = ""; 
+        errorSpan.style.color = "black";
+    }
+  }
+</script></div>
+
+<div id="sheets-status-div" class="status-box">
+<strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-check-span">waiting for check</span>
+<br>
+<p>This only logs the JSON data. It does not commit or push file contents. Make sure that your NetID and Github user name are correct before submitting</p>
+<button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+</div></p>
+<p>This workbook contains type-ins that are part of the assignment. Some of these have specific rubric checkboxes at the end of the page.</p>
+<p>The checkboxes for boxes and rubric elements are to help students keep track of their work. The <a href="./docs/33/">Last Page (rubric)</a> page has a list of all boxes and rubric items.</p>
+<p>Remember to save your local storage to the JSON file periodically in case something goes wrong. You should also make a checkpoint periodically.</p>
+<p>Remember to commit your work as you edit files in <code>for_students</code> (you should not need to edit files outside of that directory). Remember to push your work to GitHub - at least at the end, or periodically after you commit, to make a backup. When you have completed the workbook, remember to use the submit button on the last page to signal us that your workbook is ready for grading.</p>
+<p>We only grade the <code>main</code> branch. It must be pushed to GitHub. You must also use the &ldquo;submit&rdquo; button.</p>
+<p>You will probably add files to the workbook (especially textures). Remember to <code>add</code> them to the repository, so they will be committed and pushed.</p>
+<h2 id="timing-and-recommended-pacing">Timing and Recommended Pacing</h2>
+<p>This workbook is set to be released on Wednesday, April 8, 2026. It is due on Tuesday, April 21, 2026, with late assignments accepted until Tuesday, April 28.</p>
+<p>The workbook has 3 parts. The in-class activity (on Wednesday, April 15) will focus on the first 2 parts (foundations and texturing hacks).</p>
+<p>So, I recommend:</p>
+<ul>
+<li>During the first week (before April 15), focus on learning the foundations part and the texturing hacks. Do the texturing practice assignments. Be ready for the ICA.</li>
+<li>During the end of the &ldquo;middle week&rdquo; (April 15-17), focus on learning the concepts of shaders. The end-of-week survey will include the foundations, hacks, and shader concepts.</li>
+<li>Use the last days to practice writing shaders and doing the shader programming exercises.</li>
+</ul>
+<p>This workbook is more &ldquo;learn about stuff&rdquo; than &ldquo;try things by programming&rdquo; than most of the other workbooks.</p>
+<h2 id="overview">Overview</h2>
+<p>This workbook has three distinct parts:</p>
+<ul>
+<li><strong>Part 1: Foundations -</strong> We&rsquo;ll learn the basic algorithms actually used to do the drawing. We&rsquo;ll see how the graphics hardware implements these quickly, but how that efficiency comes at a cost: we can only do things a particular way.</li>
+<li><strong>Part 2: Hacks -</strong> The limitations of the paradigm that the graphics hardware implements mean that we need to use special tricks to achieve certain effects like shadows or dynamic reflections.</li>
+<li><strong>Part 3: Shaders -</strong> The flexibility of modern graphics hardware means we can program it directly. However, this is only possible within the paradigm that the hardware implements.</li>
+</ul>
+<p>Overall, we have the following learning goals:</p>
+<ol>
+<li>Understand the fundamental challenges of discrete representations (aliasing).</li>
+<li>Understand the key algorithsm used in interactive graphics and this leads to the pipeline model.</li>
+<li>Understand the affordances and limitations of the pipeline model in terms of performance and visual effects</li>
+<li>Understand and apply methods such as dynamic textures and shadow maps in order to create visual effects within the rasterization model</li>
+<li>Understand the basic organization of graphics hardware, and how programmability fits into it.</li>
+<li>Learn how the shader programming paradigm leads to specific, real implementations.</li>
+<li>Write shaders in shading languages and apply them with system interfaces.</li>
+<li>Apply key shader strategies for anti-aliasing and similar problems</li>
+<li>Appreciate shader composition approaches as a way to build complex shaders</li>
+</ol>
+<p>Part 1 (foundations) is a bit more content learning than practice learning. You may never need to implement triangle rasterization (the process of converting triangles into pixels): the graphics hardware (or at least the API) implements it for you. However, if you don&rsquo;t understand it, parts 2 and 3 won&rsquo;t make sense.</p>
+<p>Part 2 (hacks) gives you techniques for shadows and dynamic reflections that can work with current graphics hardware. Fortunately, the methods are implemented within three.js. However, if you don&rsquo;t understand the methods, you won&rsquo;t understand their limitations and why they sometimes break.</p>
+<p>Part 3 (shaders) will give you the opportunity to program the graphics hardware. This can be a way to achieve some cool effects. However, it can be tricky, because you need to work within the weird programming paradigm (see #1).</p>
+<h2 id="a-bit-on-shader-programming">A Bit on Shader Programming&hellip;</h2>
+<p>In order to do shader programming, we need to pick some shader language that is well-supported on the platform that we use. We also want something simple that exposes the concepts in a way that fosters learning.</p>
+<p>We will explain this in more detail when we introduce shading languages.</p>
+<p>Unfortunately, the practice of what graphics programmers are actually doing is diverging from what is pedagogically clean for class. Old shader languages were widely supported and exposed the hardware. In practice, graphics and game programmers needed more convenient systems that let them do complicated things. So, the old, simple languages are going away.</p>
+<p>In this workbook, we will ask you to do some shader programming in GLSL - the shading language used for WebGL. However, the world is moving away from this. Three.js only supports GLSL in legacy mode (which we will use for that part of the workbook).</p>
+<p>We will also show you TSL (the Three.js shading language). Unfortunately, it is new and not very well documented. Furthermore, it is specific to three.js. However, it is similar to the kinds of shading languages provided by other, high-level graphics APIs.</p>
+<h2 id="recommended-readings">Recommended Readings</h2>
+<p>I will try to make the workbook self-contained. That means there is a lot of content.</p>
+<p>Even when we used the textbook, the textbook chapters did not cover these topics well. We relied on lectures.</p>
+<p>For shader programming, we relied on ancient resource materials. GLSL never had great documentation. We relied on ancient books from even older languages.</p>
+<p>Be aware that many resources talk about using GLSL with OpenGL. The version of GLSL used in WebGL (OpenGL ES) is slightly different from the &ldquo;real&rdquo; OpenGL GLSL. In particular, WebGL only supports GLSL-ES (and not always the most recent version). Check the <a href="https://www.khronos.org/files/webgl20-reference-guide.pdf" target="_blank">WebGL Reference Card</a> to see what is supported. The GLSL ES shading language (used in WebGL) is a subset of regular OpenGL GLSL. Generally, things just work, but sometimes, things are missing.</p>
+<p>Also, a lot of the resources for GLSL with OpenGL talk about the interface between C++ and GLSL, which is quite complicated. In WebGL, the JavaScript to GLSL interface is somewhat better. But for class, we will let THREE.js take care of it for us.</p>
+<h2></h2>
+<p>Get Started on <a href="./docs/01/">Page &nbsp;1&nbsp; (Recap: Appearance by Shading and Texturing)</a>!</p>
+</div>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Selected">Index (Graphics Hardware and Efficiency) </li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="./docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="./storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="./wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "np",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "\u003cnil\u003e",
+            solution: false
+        };
+</script><script src="./js/localstore.js"></script><script src="./js/check-protocol.js"></script>
+    </body>
+</html>

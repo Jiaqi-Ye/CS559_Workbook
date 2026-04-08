@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.41 97.92">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        font-family: ArialMT, Arial;
+        font-size: 9px;
+      }
+
+      .cls-2 {
+        fill: #ec008c;
+      }
+
+      .cls-3 {
+        fill: #58595b;
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 {
+        stroke-miterlimit: 10;
+        stroke-width: .5px;
+      }
+
+      .cls-3, .cls-5, .cls-6 {
+        stroke: #231f20;
+      }
+
+      .cls-4 {
+        stroke: #a71f67;
+      }
+
+      .cls-4, .cls-5, .cls-7, .cls-8, .cls-9 {
+        fill: none;
+      }
+
+      .cls-6 {
+        fill: #d1d3d4;
+      }
+
+      .cls-7 {
+        stroke: #f7941d;
+      }
+
+      .cls-8 {
+        stroke: #ec008c;
+      }
+
+      .cls-9 {
+        stroke: #f15a29;
+      }
+
+      .cls-10 {
+        fill: #f7941d;
+      }
+
+      .cls-11 {
+        fill: #006838;
+      }
+    </style>
+  </defs>
+  <line class="cls-5" x1="53.12" y1="69.12" x2="10.62" y2="61.29"/>
+  <line class="cls-5" x1="46.13" y1="78.86" x2="10.62" y2="65.79"/>
+  <line class="cls-5" x1="38.48" y1="90.37" x2="10.62" y2="70.29"/>
+  <line class="cls-5" x1="71.23" y1="43.12" x2="10.62" y2="43.29"/>
+  <line class="cls-5" x1="70.39" y1="47.18" x2="10.62" y2="47.79"/>
+  <line class="cls-5" x1="65.31" y1="51.88" x2="10.62" y2="52.29"/>
+  <line class="cls-5" x1="61.35" y1="57.52" x2="10.62" y2="56.79"/>
+  <line class="cls-9" x1="63.46" y1="4.35" x2="69.87" y2="59.04"/>
+  <line class="cls-7" x1="74.37" y1="59.04" x2="63.46" y2="4.35"/>
+  <line class="cls-9" x1="65.37" y1="59.04" x2="63.46" y2="4.35"/>
+  <line class="cls-9" x1="60.79" y1="65.29" x2="63.46" y2="4.35"/>
+  <polygon class="cls-11" points="77.26 34.46 36.03 93.19 92.69 76.82 77.26 34.46"/>
+  <rect class="cls-10" x="62.37" y="14.04" width="4.5" height="4.5"/>
+  <text class="cls-1" transform="translate(75.87 18.54)"><tspan x="0" y="0">Many points in 1 shadow map pixel</tspan></text>
+  <g>
+    <rect class="cls-3" x="8.37" y="45.54" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="8.37" y="50.04" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="8.37" y="54.54" width="4.5" height="4.5"/>
+    <rect class="cls-6" x="8.37" y="41.04" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="8.37" y="63.54" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="8.37" y="68.04" width="4.5" height="4.5"/>
+    <rect class="cls-6" x="8.37" y="59.04" width="4.5" height="4.5"/>
+  </g>
+  <line class="cls-8" x1="63.46" y1="4.35" x2="53.12" y2="69.12"/>
+  <line class="cls-4" x1="63.46" y1="4.35" x2="46.13" y2="78.86"/>
+  <line class="cls-4" x1="63.46" y1="4.35" x2="38.48" y2="90.37"/>
+  <rect class="cls-2" x="57.87" y="14.04" width="4.5" height="4.5"/>
+</svg>

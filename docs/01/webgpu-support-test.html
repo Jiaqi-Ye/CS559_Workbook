@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebGPU Support Test</title>
+  <style>
+    :root {
+      --bg-top: #f2efe2;
+      --bg-bottom: #d9efe2;
+      --panel: #ffffff;
+      --ink: #1d2a2e;
+      --muted: #4a5960;
+      --ok: #1f7a44;
+      --ok-bg: #ddf6e6;
+      --bad: #99263d;
+      --bad-bg: #ffe6ec;
+      --pending: #8b5f00;
+      --pending-bg: #fff3d8;
+      --border: #c8d6d1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+      color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+    }
+
+    .panel {
+      max-width: 780px;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+      box-shadow: 0 14px 36px rgba(12, 37, 33, 0.16);
+      overflow: hidden;
+    }
+
+    .banner {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #f8fbfa;
+    }
+
+    .banner h1 {
+      margin: 0;
+      font-size: 1.12rem;
+      letter-spacing: 0.01em;
+    }
+
+    .body {
+      padding: 16px 18px 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .status {
+      border-radius: 10px;
+      border: 1px solid transparent;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 1.02rem;
+    }
+
+    .status.pending {
+      color: var(--pending);
+      background: var(--pending-bg);
+      border-color: #f3d48f;
+    }
+
+    .status.ok {
+      color: var(--ok);
+      background: var(--ok-bg);
+      border-color: #a8ddbb;
+    }
+
+    .status.bad {
+      color: var(--bad);
+      background: var(--bad-bg);
+      border-color: #f2a8b8;
+    }
+
+    .details {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .results {
+      display: grid;
+      gap: 8px;
+      font-size: 0.96rem;
+    }
+
+    .results div {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #f4f8f6;
+      border: 1px solid #dde9e3;
+    }
+
+    .canvas-wrap {
+      border: 1px dashed #98aea5;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fbfdfc;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 16 / 9;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid #9ab8ae;
+      background: #d5dede;
+    }
+
+    .expected {
+      margin: 0;
+      color: #314047;
+      font-size: 0.92rem;
+    }
+
+    .credit {
+      margin-top: 2px;
+      color: #5c6a6f;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 10px;
+      }
+
+      .banner h1 {
+        font-size: 1rem;
+      }
+
+      .status {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="banner">
+      <h1>WebGPU Browser Support Test</h1>
+    </div>
+    <div class="body">
+      <div id="status" class="status pending">Checking WebGPU support...</div>
+      <p id="detail" class="details">This test verifies API availability, adapter/device creation, and renders a simple frame with WebGPU.</p>
+
+      <div class="results" id="results">
+        <div id="r-api">API presence: not checked yet</div>
+        <div id="r-adapter">Adapter request: not checked yet</div>
+        <div id="r-device">Device request: not checked yet</div>
+        <div id="r-render">Render frame: not checked yet</div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="gpu-canvas" width="640" height="360"></canvas>
+      </div>
+
+      <p class="expected">
+        Expected result: pass shows a green status panel and a bright teal canvas.
+        Fail shows a red status panel with the reason WebGPU is unavailable or blocked.
+      </p>
+      <p class="credit">Implemented by GitHub Copilot (GPT-5.3-Codex), directed by the user via VS Code prompt.</p>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const detailEl = document.getElementById("detail");
+    const canvas = document.getElementById("gpu-canvas");
+
+    function setResult(id, text) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = text;
+      }
+    }
+
+    function setStatus(kind, text, detail) {
+      statusEl.className = "status " + kind;
+      statusEl.textContent = text;
+      detailEl.textContent = detail;
+    }
+
+    async function runWebGPUTest() {
+      if (!navigator.gpu) {
+        setResult("r-api", "API presence: FAIL (navigator.gpu missing)");
+        setStatus(
+          "bad",
+          "WebGPU is NOT supported in this browser.",
+          "The browser does not expose navigator.gpu. Try a recent Chrome, Edge, or other browser with WebGPU enabled."
+        );
+        return;
+      }
+      setResult("r-api", "API presence: PASS");
+
+      let adapter;
+      try {
+        adapter = await navigator.gpu.requestAdapter();
+      } catch (err) {
+        setResult("r-adapter", "Adapter request: FAIL (error)");
+        setStatus(
+          "bad",
+          "WebGPU adapter request failed.",
+          "The browser exposes WebGPU but could not provide a GPU adapter: " + String(err)
+        );
+        return;
+      }
+
+      if (!adapter) {
+        setResult("r-adapter", "Adapter request: FAIL (null adapter)");
+        setStatus(
+          "bad",
+          "WebGPU adapter is unavailable.",
+          "No compatible adapter was returned. This can happen if hardware acceleration is disabled."
+        );
+        return;
+      }
+      setResult("r-adapter", "Adapter request: PASS");
+
+      let device;
+      try {
+        device = await adapter.requestDevice();
+      } catch (err) {
+        setResult("r-device", "Device request: FAIL (error)");
+        setStatus(
+          "bad",
+          "WebGPU device request failed.",
+          "The adapter exists but a GPU device could not be created: " + String(err)
+        );
+        return;
+      }
+      setResult("r-device", "Device request: PASS");
+
+      let context;
+      try {
+        context = canvas.getContext("webgpu");
+      } catch (err) {
+        setResult("r-render", "Render frame: FAIL (cannot get webgpu context)");
+        setStatus(
+          "bad",
+          "WebGPU context creation failed.",
+          "The page could not get a webgpu canvas context: " + String(err)
+        );
+        return;
+      }
+
+      if (!context) {
+        setResult("r-render", "Render frame: FAIL (webgpu context is null)");
+        setStatus(
+          "bad",
+          "WebGPU context was not created.",
+          "The browser returned a null context for canvas.getContext('webgpu')."
+        );
+        return;
+      }
+
+      try {
+        const format = navigator.gpu.getPreferredCanvasFormat();
+        context.configure({
+          device,
+          format,
+          alphaMode: "opaque"
+        });
+
+        const encoder = device.createCommandEncoder();
+        const pass = encoder.beginRenderPass({
+          colorAttachments: [
+            {
+              view: context.getCurrentTexture().createView(),
+              clearValue: { r: 0.13, g: 0.68, b: 0.60, a: 1.0 },
+              loadOp: "clear",
+              storeOp: "store"
+            }
+          ]
+        });
+        pass.end();
+
+        device.queue.submit([encoder.finish()]);
+      } catch (err) {
+        setResult("r-render", "Render frame: FAIL (render command failed)");
+        setStatus(
+          "bad",
+          "WebGPU render test failed.",
+          "The API is present but draw setup/submit failed: " + String(err)
+        );
+        return;
+      }
+
+      setResult("r-render", "Render frame: PASS");
+      setStatus(
+        "ok",
+        "WebGPU is supported and working.",
+        "A GPU device was created and the test frame rendered successfully."
+      );
+    }
+
+    runWebGPUTest();
+  </script>
+</body>
+</html>

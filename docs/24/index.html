@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 24: Aliasing</h1>
+		</header>
+		<div class="content post__content clearfix"><h2 id="one-way-to-fix-aliasing">One Way to Fix Aliasing</h2>
+<p>If you look at the dots on the previous page (repeated below), you&rsquo;ll notice that you can see the pixel boundaries on the texture. Since a point is either part of a dot or not, each pixel matters. As the dots get smaller, this can be ugly. This causes the jagged edges (called &ldquo;jaggies&rdquo; - yes, that&rsquo;s a technical term).</p>
+<p>The problem is that we are making the pixels either light or dark - nothing in between. Even if a pixel is half full of a dot, it has to be either light or dark.</p>
+<p>A different way to look at it: for each pixel, we compute the color at the center and make the entire pixel be that color. Since that point is either inside or outside of the dot, we choose a color for the pixel.</p>
+
+<p>Here is an example in 
+<a href="../../for_students/06-24-01.js" class="box-html" data-tag="10-07-01">06-24-01.js</a>
+ (<a href="../../for_students/06-24-01.html" class="box-html" data-tag="10-07-01">06-24-01.html</a>)</p>
+
+<div id="box-06-24-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-24-01</span>&nbsp;
+    <input type="checkbox" id="check-06-24-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-24-01.html class="boxtitlelink">06-24-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-24-01.js" class="boxtitlelink">06-24-01.js</a>
+    <iframe
+        title="10-07-01"
+        src="../../for_students/06-24-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-24-01"
+    ></iframe>
+</div>
+<p>An answer to this is to make the cutoff for inside/outside less severe. We can &ldquo;blur&rdquo; the dots - making the boundary fuzzy. The transition between inside and outside can be gradual. That way, a pixel can represent the boundary correctly. If you select &ldquo;large blur&rdquo; you can see that in action. Notice that things look blurry, but the shapes are smooth (not jaggy).</p>
+<p>To make implementing things like this easier, we use a common GLSL idiom. On the previous page, we used <code>step</code> to cause the variable that measures whether we are &ldquo;inside the dot&rdquo; to switch from 0 to 1 as the distance to the dot center exceeds the radius.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#00a8c8">float</span> <span style="color:#75af00">dc</span> <span style="color:#f92672">=</span> <span style="color:#75af00">step</span><span style="color:#111">(</span><span style="color:#75af00">radius</span><span style="color:#111">,</span><span style="color:#75af00">d</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#75af00">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span><span style="color:#75af00">vec4</span><span style="color:#111">(</span><span style="color:#75af00">mix</span><span style="color:#111">(</span><span style="color:#75af00">light</span><span style="color:#111">,</span><span style="color:#75af00">dark</span><span style="color:#111">,</span><span style="color:#75af00">dc</span><span style="color:#111">),</span> <span style="color:#ae81ff">1.</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>Here, we change that to use the <code>smoothstep</code> function which gradually transitions from 0 to 1 over a range centered at the threshold. The width of this range is the &ldquo;blurriness&rdquo;. Since we are using the <code>mix</code> function, if we are in the transition zone, we get a blend of colors.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#00a8c8">float</span> <span style="color:#75af00">dc</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span><span style="color:#75af00">smoothstep</span><span style="color:#111">(</span><span style="color:#75af00">radius</span><span style="color:#f92672">-</span><span style="color:#75af00">a</span><span style="color:#111">,</span><span style="color:#75af00">radius</span><span style="color:#f92672">+</span><span style="color:#75af00">a</span><span style="color:#111">,</span><span style="color:#75af00">d</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#75af00">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#75af00">vec4</span><span style="color:#111">(</span><span style="color:#75af00">mix</span><span style="color:#111">(</span><span style="color:#75af00">light</span><span style="color:#111">,</span><span style="color:#75af00">dark</span><span style="color:#111">,</span><span style="color:#75af00">dc</span><span style="color:#111">),</span> <span style="color:#ae81ff">1.</span><span style="color:#111">);</span></span></span></code></pre></div>
+<p>Here&rsquo;s a graph showing what smoothstep does:
+<figure class="" style="width: 80%;  ">
+    <a href="../../diagrams/step-vs-smoothstep.svg">
+        <img src="../../diagrams/step-vs-smoothstep.svg" alt="/diagrams/step-vs-smoothstep.svg" />
+    </a><figcaption><p>Both <code>step</code> and <code>smoothstep</code> return a value in range 0-1. <code>step</code> switches at an edge, while <code>smoothstep</code> makes a C(1) transition starting at edge1 and ending at edge2.&nbsp;</p></figcaption>
+</figure>
+</p>
+<p>By making the transition range <code>a</code> bigger, the line gets blurrier. If <code>a</code> is too big, it will look blurry. if <code>a</code> is too small, we will have aliasing. The trick is to find a balance. Ideally we would make the blur one pixel wide - just big enough to avoid aliasing.</p>
+<p>Try &ldquo;correct anti-aliasing&rdquo; and see the best we can easily achieve. We&rsquo;re still blurring the edge, we&rsquo;re just making the blurriness one pixel wide (rather than fixed in UV space). GLSL has support to help us do that. Basically, it takes the derivative of <code>u</code> and <code>v</code> with respect to screen coordinates to see how much they change. This is a slightly advanced topic - but it is really important for making nice-looking texturing.</p>
+<p>GLSL can compute the derivative of a value (like u and v) with respect to screen space x and y. It basically tells us how much the value changes between pixels. It has a convenient function <code>fwidth</code> that is used in the shader to implement &ldquo;correct anti-aliasing&rdquo; - it basically computes the magnitude of the vector derivative (in x and y directions).</p>
+<p>Note that this is exactly the same problem as trying to figure out what level of the mip-map to look up when we filter image-based textures.</p>
+<h2 id="the-triangle-edges">The triangle edges</h2>
+<p>Our strategy addresses aliasing in the texture. It does not address aliasing at the triangle edges. We can&rsquo;t do that in the fragment shader: it only works within a triangle. In fact, it isn&rsquo;t clear how to do it within the rasterization pipeline, period: to correctly anti-alias at the triangle boundaries, we need to consider multiple triangles, which violates the independence assumption!</p>
+<p>Image-based textures have the same problem.</p>
+<p>Methods for anti-aliasing triangle edges are different, and much more challenging. This is part of the reason why we prefer texture maps to collections of small triangles.</p>
+<h2 id="summary-anti-aliasing">Summary: Anti-Aliasing</h2>
+<p>If you get jaggy-looking textures, you need to do something about it. This is called &ldquo;anti-aliasing&rdquo;.</p>
+<p>For now we&rsquo;ll move on to <a href="../../docs/25/" class="Next__Page">Next: Page &nbsp;25&nbsp;-&nbsp;Noise</a> and learn how to use images in textures.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Selected"> 24: Aliasing </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p24",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

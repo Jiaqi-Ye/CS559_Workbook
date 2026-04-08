@@ -1,0 +1,26 @@
+Box,Link,CheckId,Kind,Description,HTML,JS
+06-02-01,/docs/02/#box-06-02-01,wbsp26_06_check-06-02-01-0,standard,"Car or Vehicle (looks like a car or other vehicle)",06-02-01.html,06-02-01.js
+06-02-01,/docs/02/#box-06-02-01,wbsp26_06_check-06-02-01-1,advanced,"Has texture or materials",06-02-01.html,06-02-01.js
+06-02-01,/docs/02/#box-06-02-01,wbsp26_06_check-06-02-01-2,creative,"Exceptional Vehicles (more than one, interesting)",06-02-01.html,06-02-01.js
+06-05-01,/docs/05/#box-06-05-01,wbsp26_06_check-06-05-01-i,standard,"Aliasing Questions",,
+06-08-01,/docs/08/#box-06-08-01,wbsp26_06_check-06-08-01-i,standard,"Pipeline Questions",,
+06-09-01,/docs/09/#box-06-09-01,wbsp26_06_check-06-09-01-i,standard,"Pipeline Questions",,
+06-15-01,/docs/15/#box-06-15-01,wbsp26_06_check-06-15-01-0,standard,"there are shadows",06-15-01.html,06-15-01.js
+06-15-01,/docs/15/#box-06-15-01,wbsp26_06_check-06-15-01-1,standard,"there are shadows of one object onto another object",06-15-01.html,06-15-01.js
+06-22-04,/docs/22/#box-06-22-04,wbsp26_06_check-06-22-04-0,standard,"Add diffuse shading.",06-22-04.html,06-22-04.js
+06-22-04,/docs/22/#box-06-22-04,wbsp26_06_check-06-22-04-1,standard,"Change the specular highlight to white.",06-22-04.html,06-22-04.js
+06-23-02,/docs/23/#box-06-23-02,wbsp26_06_check-06-23-02-0,standard,"Make different colored dots",06-23-02.html,06-23-02.js
+06-28-01,/docs/28/#box-06-28-01,wbsp26_06_check-06-28-01-0,standard,"Checkerboard",06-28-01.html,06-28-01.js
+06-28-01,/docs/28/#box-06-28-01,wbsp26_06_check-06-28-01-1,standard,"Respond to Slider",06-28-01.html,06-28-01.js
+06-28-02,/docs/28/#box-06-28-02,wbsp26_06_check-06-28-02-0,advanced,"Anti-Aliased Checkerboard",06-28-02.html,06-28-02.js
+06-28-03,/docs/28/#box-06-28-03,wbsp26_06_check-06-28-03-0,standard,"some (new) pattern",06-28-03.html,06-28-03.js
+06-28-03,/docs/28/#box-06-28-03,wbsp26_06_check-06-28-03-1,standard,"interesting pattern",06-28-03.html,06-28-03.js
+06-28-03,/docs/28/#box-06-28-03,wbsp26_06_check-06-28-03-2,standard,"exceptional pattern",06-28-03.html,06-28-03.js
+06-29-01,/docs/29/#box-06-29-01,wbsp26_06_check-06-29-01-0,standard,"some lighting",06-29-01.html,06-29-01.js
+06-29-01,/docs/29/#box-06-29-01,wbsp26_06_check-06-29-01-1,advanced,"lighting does not move with camera",06-29-01.html,06-29-01.js
+06-29-02,/docs/29/#box-06-29-02,wbsp26_06_check-06-29-02-0,standard,"Some shader of student's choice",06-29-02.html,06-29-02.js
+06-29-02,/docs/29/#box-06-29-02,wbsp26_06_check-06-29-02-1,advanced,"Interesting Shader",06-29-02.html,06-29-02.js
+06-29-02,/docs/29/#box-06-29-02,wbsp26_06_check-06-29-02-2,creative,"Exceptional Shader",06-29-02.html,06-29-02.js
+06-32-01,/docs/32/#box-06-32-01,wbsp26_06_check-06-32-01-0,standard,"TSL Graph Screenshot",06-32-01.html,06-32-01.js
+06-32-01,/docs/32/#box-06-32-01,wbsp26_06_check-06-32-01-1,advanced,"TSL used inside of framework",06-32-01.html,06-32-01.js
+06-32-01,/docs/32/#box-06-32-01,wbsp26_06_check-06-32-01-2,creative,"Cool shader with explanation",06-32-01.html,06-32-01.js

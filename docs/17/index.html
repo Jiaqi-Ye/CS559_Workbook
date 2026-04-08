@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 17: Shader Basics</h1>
+		</header>
+		<div class="content post__content clearfix"><p><em>Spring 2026 Note:</em> Let me begin with an apology/warning: the landscape of how shaders work, and the right way to teach them, is in the midst of a change. The old way we taught things is being deprecated, and the new way isn&rsquo;t quite ready yet. I&rsquo;ll explain that more as we go along.</p>
+<p><em>Spring 2026 Note 2:</em> In the past, the workbook was meant as an addendum to class. But making the workbook stand alone is challenging right now, because I don&rsquo;t want to develop new explanations of the old ways of doing things.</p>
+<p>With those warnings&hellip;</p>
+<p>We will learn about programming the graphics hardware by writing <strong>shaders</strong>: which are little programs that run on the graphics hardware. Over time, as the graphics hardware became more flexible, shader programming has evolved. We will focus on the two main types of shaders used in graphics programming: <strong>vertex shaders</strong> and <strong>fragment shaders</strong>. We will not talk about the many other kinds of shaders. In particular, we will not talk about how to use the graphics hardware to do &ldquo;non-graphics&rdquo; computations.</p>
+<p>In order to learn to program the hardware, we will use one of the languages built into the web browser: <strong>GLSL</strong>. I will discuss this decision more when we discuss shading languages. GLSL is a great language for learning shader programming. However, it has some practical problems. It is good for class, but not much else. For now, I still think the best strategy is to learn shader programming with GLSL. It will be easier to transition to other languages when you understand the concepts.</p>
+<p>Previous years&rsquo; lectures were based completely on GLSL and provide a good introduction. And the workbook basically said &ldquo;pay attention to the lectures.&rdquo;</p>
+<p><div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_drywhelo" target="_blank" rel="noopener">2023 Video: Lecture 21</a>
+        Shaders 1&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/21-Shaders1-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_drywhelo" target="_blank" rel="noopener">2023 Video: Lecture 21</a>
+        Shaders 2&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/21-Shaders1-post.pdf" target="_blank" rel="noopener">Slides</a></div></p>
+<p>These lectures provide a review of how the hardware is organized, which motivates how we program them. They move through many aspects of shader programming leading to some advanced examples by the end.</p>
+<h2 id="learning-about-shaders">Learning about Shaders</h2>
+<p>There are (at least) 4 different things that you have to understand in order to really use shaders effectively:</p>
+<ol>
+<li>The basic concepts of what shaders are, and why they are the way they are. This really means understanding how the hardware works and where the shaders fit into the overall process of rendering. If you don&rsquo;t understand these basics, shaders won&rsquo;t make sense. Unless you understand how the pieces work, the rules about writing shaders will seem arbitrary. Shaders need to fit into the rasterization pipeline.</li>
+<li>The language that we write shaders in. In some sense, this is a detail: shading languages are very similar, and differ only slightly in their syntax and built-in functionality. For us, the language is GLSL (GLSL-ES to be precise).</li>
+<li>The ways in which the shader programs communicate with other programs. This includes the interface between shaders and the &ldquo;host&rdquo; program (in our case, the JavaScript code), as well as the way in which different shaders talk to each other. Appreciating these basic mechanisms is important, since the communications can be a hassle. However, it is also important that the shader programs interface well with the more complex host program.</li>
+<li>Some of the specific tricks we use in shader programming to address common problems while still working within the constraints of the rasterization model.</li>
+</ol>
+<p>The most important thing for class is #1 - since if you understand what is going on, everything else will fall into place. GLSL (#2) will be a practical matter, since you will want to write some shaders.</p>
+<p>#3 takes on two forms: one is the low level interface, how we&rsquo;ll pass information between our three.js (JavaScript) programs and the shader programs that run on the graphics hardware. But, it also involves higher level issues as well: how do we make use of all that cool stuff that three.js provides?</p>
+<p>#4 will seem like a collection of tricks. We&rsquo;ll look at a few different things: noise, shader anti-aliasing, texture lookups. Seeing a few different tricks will help you appreciate other ones.</p>
+<p>In class, we&rsquo;ll only really talk about <em>vertex</em> shaders and <em>fragment</em> shaders (also known as pixel shaders). There are other kinds of shaders, but they are optional and not used as often. Until you master these two, the others are even less likely to make sense.</p>
+<p>In fact, in class, we&rsquo;ll focus on the fragment shaders. We&rsquo;ll need to write vertex shaders (since vertex and fragment shaders always appear in pairs), but most of the work we do will be on fragment shaders. And in the future, three.js might not even want us to program vertex shaders.</p>
+<h2 id="things-you-need-to-know-before-starting">Things You Need To Know Before Starting</h2>
+<p>You need to understand the rasterization pipeline - shader programming will not make sense if you don&rsquo;t understand which pieces we are programming and how they fit into the overall process.</p>
+<p>Here are some concepts to make sure you understand:</p>
+<ol>
+<li>The pipeline of how triangles go from a program to the screen. Knowing where the shaders fit into this process helps explain why they do what they do - and only what they do.</li>
+<li>The concepts of a <em>vertex</em> shader and a <em>fragment</em> shader (sometimes known as a pixel shader). You should know why we always need one of each.</li>
+<li>What kinds of things you can (and cannot) do in the shaders - based on what they do in the pipeline.</li>
+<li>What a <strong>fragment</strong> is - roughly it&rsquo;s a pixel (we used to call them &ldquo;pixel shaders&rdquo;), but fragment is the more correct term.</li>
+</ol>
+<p>If you start by trying to learn the GLSL language, or trying to read a fragment shader, it will seem really arbitrary. These basics tell you the rules.</p>
+<p>These basics connect with some terminology (we&rsquo;ll explain more as we go):</p>
+<ol>
+<li><strong>Attribute buffers</strong> are the blocks of memory that contain vertex information. An <strong>attribute</strong> is a property that all vertices (in a block) have, such as position, normal, or uv value.</li>
+<li>Pipeline stages have different types of information that lead to different types of variables we will encounter in our shader programs. In particular, there are three different types of <strong>variables</strong> used to pass information to and from shaders: <strong>uniform</strong>, <strong>attribute</strong>, and <strong>varying</strong> variables. <strong>Uniform</strong> variables are constant for the entire scene (or at least for each block of triangles). <strong>Attribute</strong> variables are information about a vertex. <strong>Varying</strong> variables are information about a specific fragment.</li>
+</ol>
+<h2 id="overview-what-are-all-the-pieces">Overview: What are all the pieces?</h2>
+<p>There are a bunch of concepts - and then there are the places where they get used in a program. Here we&rsquo;ll try to make a connection.</p>
+<ol>
+<li>Before we draw any triangles, we need to define the shader programs that will be run on the graphics hardware for every vertex (the <strong>vertex shader</strong>) and for every fragment (the <em>fragment shader</em>). In THREE, these shaders are defined as part of a Material, so we can have different programs for each Material. When we make a material, the compiler is run to compile the shader programs. In fact, when we change the material, the compiler may need to be run (which is why we need to be careful about changing materials). Most THREE materials use built-in shaders, but we can use the special <code>ShaderMaterial</code> to allow us to provide our own program.</li>
+<li>When we draw the triangles for an object (a set of triangles that a set of shaders will process), our host program needs to send those triangles to the graphics hardware. It does this by putting all of the information about the vertices into an <strong>attribute buffer</strong>, which is a data structure that stores the vertices in a way that makes it efficient to send to the graphics hardware. THREE takes care of this: if we use a <code>BufferGeometry</code> we have to work with the data structures directly. The attribute buffer has all the information about our vertices: our shaders will be given the information about vertices one at a time. (Modern versions of THREE only have <code>BufferGeometry</code> - older versions of THREE had more convenient data structures that were converted.)</li>
+<li>As the triangles are drawn, for each vertex, a <strong>vertex shader</strong> is run. The shader executions for each vertex are independent. The vertex shader is passed the <strong>attributes</strong> of the one vertex it is meant to process. This is why vertex splitting is a big deal: if a vertex is &ldquo;split&rdquo; (so it has different attributes for different triangles), it has to become two vertices so each one can be processed separately. <em>The result of vertex shading is that each vertex has some new properties associated with it, including a screen-space position.</em></li>
+<li>The vertices are re-assembled into triangles, and the rasterizer creates a list of fragments (pixels) that the triangle &ldquo;covers&rdquo;. Each of these fragments is then sent to be shaded. After this stage, each fragment is processed independently. The properties of the vertices of the triangle are interpolated to provide values for each fragment.</li>
+<li>For each fragment, a <strong>fragment shader</strong> is run. The fragment shader sees the fragments independently (effectively one at a time, but in parallel). The fragment shader program processes one fragment - it gets the information about the fragment as <strong>varying</strong> variables (values that we determined by interpolating the vertices that made up the triangle that caused the fragment). The fragment shader can determine the color of the fragment, and it is allowed to change the depth. However, a fragment&rsquo;s position in the image cannot be changed - that would cause it to become a different fragment!</li>
+<li>After the fragment is processed, the fragment is tested and, assuming it passes the tests, the color and depth values are written to the image. The most important test is the depth test (z-buffer), which checks that the fragment is not occluded by other fragments.</li>
+</ol>
+<p>All this has been true for all the triangles we&rsquo;ve been drawing throughout this semester. The only thing that is new is that we&rsquo;re going to write the shader programs in steps 3 and 5, rather than using the ones built-in to THREE. In the past, you&rsquo;ve used materials such as <code>MeshStandardMaterial</code> for which THREE has built-in shader programs. (You can try to read them if you want!)</p>
+<h2 id="so-what-do-shaders-actually-do">So What Do Shaders Actually Do?</h2>
+<p>A <strong>vertex shader</strong> is a small program that runs on one vertex (each vertex is independent). It receives as input the <strong>attributes</strong> of that vertex and things that are constant (the same over all vertices) called <strong>uniforms</strong>. The only thing a vertex shader can do is add new attributes to the vertices. It <strong>must provide the screen-position of the vertex.</strong> It may optionally provide other attributes (we&rsquo;ll call these output attributes, or <strong>varying</strong> variables) that can be used in later stages.</p>
+<p>A <strong>fragment shader</strong> is a small program that runs on one fragment (think of this as a pixel of a triangle). Each fragment is processed independently. It receives as input the properties of the fragment. These are determined by interpolating the &ldquo;output attributes&rdquo; (<strong>varying</strong> variables) from the vertices (this is done automatically, by the rasterizer). The inputs to a fragment shader are these varying variables as well as the values that are constant over the whole object (the <strong>uniform</strong> variables). The output of the fragment shader are more properties of the fragment. The most important one is the color (the thing that will get written to the image, if the fragment makes it through the tests).</p>
+<h2 id="summary-vertex-and-fragment-shaders">Summary: Vertex and Fragment Shaders</h2>
+<p>Make sure that you understand what a vertex shader is and what a fragment shader is. If you don&rsquo;t, re-read this page, watch the lectures again, or read one of the recommended readings.</p>
+<p>To help you check your basic understanding, answer the following 2 questions - a sentence or two for each is OK. This is mainly for you to check you are ready to go on (but we&rsquo;ll give you a few points for writing something).</p>
+<p><strong>Question 1:</strong> What are the <strong>inputs</strong> and <strong>outputs</strong> of a <strong>vertex</strong> shader?
+<div class="input-group">
+    <label for="shader_exp_vertex" style="vertical-align: top;">Q1:</label>
+    <textarea id="shader_exp_vertex" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<p><strong>Question 2:</strong> What are the <strong>inputs</strong> and <strong>outputs</strong> of a <strong>vertex</strong> shader?
+<div class="input-group">
+    <label for="shader_exp_fragment" style="vertical-align: top;">Q2:</label>
+    <textarea id="shader_exp_fragment" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<p>Now that we understand what these programs do, we need to pick a programming language to write them in. We&rsquo;ll discuss that on the next page.</p>
+<a href="../../docs/18/" class="Next__Page">Next: Page &nbsp;18&nbsp;-&nbsp;Shading Languages</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Selected"> 17: Shader Basics </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p17",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

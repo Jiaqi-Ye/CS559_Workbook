@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 9: Graphics Performance</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Trying to make things go fast is a moving target: as the hardware and software evolves, the bottlenecks become different, so the best ways to make most efficient use of system change as well.</p>
+<p>Here, we focus on waste: spending our resources to draw triangles that the user will never see. Effort spend drawing these triangles has no benefit.</p>
+<p>There are two categories of triangles that the user won&rsquo;t see that we will consider separately:</p>
+<ol>
+<li>Triangles (or parts of triangles) that are outside of view (not on the screen).</li>
+<li>Triangles (or parts of triangles) that are occluded by other triangles: they would be on the screen, but some other triangle is in from of them.</li>
+</ol>
+<p>The latter case is potentially very wasteful. In the normal rasterization process, a fragment from a triangle might make it all the way the way to the Z-buffer test which involves all of the pipeline stages, including potentially very expensive fragment coloring computations, only to fail the Z-test. Or worse, it might pass the Z-test, be written to the frame buffer, only to have some later fragment from another triangle overwrite it.</p>
+<p>Much of the secret for graphics performance is to find ways to avoid wastefulness: determining that a triangle or fragment will not be seen before effort is wasted computing things about its appearance.</p>
+<h2 id="backface-culling">Backface culling</h2>
+<p>One special case: if a triangle is &ldquo;one sided&rdquo; (which is actually the default), we only need to draw it if we are looking at its front (outward facing) side. If the front side of the triangle is pointing away from the camera, we don&rsquo;t need to draw it. This <strong>backface culling</strong> can happen in the clipping (or triangle processing) part of the pipeline, saving the effort of rasterization and fragment processing.</p>
+<p>Backface culling is simple, but really helpful: if our objects have volume (so we don&rsquo;t care about the &ldquo;insides&rdquo;) it cuts the number of triangles in half!</p>
+<p>In practice, backfacing is determine by the triangle winding order, not the surface normal (since some triangles don&rsquo;t have surface normals). This is why it is so important to have the winding directions of the triangles in our meshes correct!</p>
+<h2 id="avoiding-off-screen-triangles">Avoiding off-screen triangles</h2>
+<p>If a triangle is off screen, the clipping phase of the pipeline will discard it before rasterization. This happens after vertex processing, so the effort to process vertices is wasted. However, we might need to do the vertex processing in order to know the screen space coordinates (so we know that it is off the screen).</p>
+<p>In practice, transforming the vertices is rarely a bottleneck in modern graphics applications, so its easier just to draw all the triangles and allow clipping to do its work.</p>
+<p>There are strategies for culling triangles before they are drawn. They usually involve a pre-processing stage where spatial data structures are used to organize the triangles, so large groups of them can be removed (culled) quickly.</p>
+<p>The strategy of preprocessing the geometry into spatial data structures that allow for fast testing of groups of triangles at once was a core part of historical game graphics. These data structures, such as binary space partitioning (BSP) trees were a central part of game graphics. They can also be used for doing occlusion culling.</p>
+<h2 id="avoiding-wasted-fragment-shading">Avoiding wasted fragment shading</h2>
+<p>In a modern, high-performance graphics application, the critical bottleneck is often fragment shading, and in particular, the memory bandwidth required. We have many fragments, and for each one, we often want to use a fancy lighting model that reads from multiple textures (with multiple memory reads from each texture to do some filtering strategy).</p>
+<p>There are two reasons a fragment might not appear:</p>
+<ol>
+<li>It fails the Z-test</li>
+<li>A later fragment overwrites it</li>
+</ol>
+<h3 id="earlylate-z">Early/Late Z</h3>
+<p>Problem #1 (failing the Z-test after fragment processing) is the result of a curious architectural decision: we put the write and test after fragment processing. This is called a <strong>late Z-test</strong> In the past, when fragment shading was not the bottleneck this was a reasonable decision because:</p>
+<ol>
+<li>The memory accesses all happen in one place, so its easier to design the memory system to do a &ldquo;read-test-modify-write&rdquo; operation efficiently. This is important because of the latency and caching issues.</li>
+<li>The fragment shader is allowed to modify the Z value.</li>
+</ol>
+<p>The alternative to late Z-test is an <strong>early Z-test</strong>: performing the read/test <em>before</em> fragment processing. Importantly, it requires a major change to the hardware (a different memory architecture). And, to be flexible, a system probably needs to support late Z as well (in case of fragments that do modify the Z-values).</p>
+<p>For all this added complexity, there is little added value: we still waste the work by performing fragment processing for fragments that will pass the Z-test, but be over-written by a later triangle&rsquo;s fragment.</p>
+<h3 id="deferred-shading">Deferred Shading</h3>
+<p>The idea of deferred shading has a long history - early deferred shading systems existed in the late 1980s, although it was motivated by different challenge. As fragment processing became the bottleneck, programmers returned to the concept.</p>
+<p>The basic idea of deferred shading is to put off the lighting calculations (and other expensive per-fragment shading) until after all of the drawing is done. It&rsquo;s a multi-pass algorithm: we first draw all of the triangles using minimal fragment processing; and then we make a second pass where we do fragment processing for the fragments that ultimately had become pixels. The trick: when the fragments are drawn the first time, they write enough information in the frame buffer that the second pass can compute the fragment&rsquo;s color without having to re-render the triangle. This means that the second pass can be drawn as one giant rectangle that covers the whole screen. The expensive shading computations happen once per pixel.</p>
+<p>Deferred shading works in two passes:</p>
+<ol>
+<li>The geometry pass where all triangles are drawn. In this pass, information about the fragments is written into a <strong>geometry buffer</strong> that stores information about the fragments that is required for later shading. The color stored is the object color (before lighting). The depth value is stored (for Z-Buffering). But additional information, such as the normal direction, texture coordinates, and material properties (e.g., roughness, metalness), is also stored.</li>
+<li>A second pass where each pixel is processed, reading the geometry buffer as its input. The color of each pixel is computed based on the information that the fragment provided and access to &ldquo;global&rdquo; information such as lighting information and textures.</li>
+</ol>
+<p>Deferred shading has many benefits:</p>
+<ol>
+<li>Deferred shading avoids the wasted effort of expensive fragment shading being discarded: we only do the fragment shading for the fragments that are visible.</li>
+<li>The fragments are processed in pixel order in the second pass, which means there can be more coherence.</li>
+<li>If the fragment program is too complex to run in a single pass, it is easy to make the &ldquo;send pass&rdquo; consist of multiple redraws of the same single triangle, each one doing part of the work.</li>
+<li>By splitting the fragment shading into sub-passes, they can be designed for coherence of memory access. For example, there can be a separate pass that does the environment map lookups for reflections. That pass only needs to access that one texture. More generally, each pass can access a different texture, reducing the amount of memory bandwidth needed (relative to using many textures for each fragment).</li>
+</ol>
+<p>There are downsides. A big conceptual problem is that all information needed by the second pass shading must be stored by the first pass. It also assumes a certain uniformity of the fragment shading computations: all objects will be processed by the same shader. The model that we are used to with &ldquo;object oriented&rdquo; graphics, where each object can have its own, independent, material, is difficult to apply.</p>
+<p>There are workarounds for these downsides. For example, using information in the G-Buffer to select between different shading algorithms and applying different shading algorithms selectively in different screen-space passes.</p>
+<p>Deferred shading is very common in high-performance games. Especially on mobile platforms where memory bandwidth and fragment shader complexity are limited.</p>
+<h2 id="what-can-we-do-in-class">What can we do in class?</h2>
+<p>In general, the things we do in class are small/simple enough that performance is not an issue.</p>
+<p>But, you should understand:</p>
+<ol>
+<li>How the standard rasterization pipeline leads to wastefulness because it spends time drawing things that the viewer will not see.</li>
+<li>How we can use culling strategies to avoid drawing triangles that are offscreen.</li>
+<li>Methods for avoiding wasted fragment computations and optimizing memory usage. We won&rsquo;t use deferred shading in class, but you are likely to encounter it if you try to make a game or interactive graphics programn that tries to squeeze as much out of the hardware as possible.</li>
+</ol>
+<h2 id="before-we-go-on">Before we go on&hellip;</h2>
+<p>In the next set of pages we&rsquo;ll move on to discuss how we use texturing tricks to work around some of the limitations of the rasterization pipeline.</p>
+<p>Here are a few questions to check your understanding. Answer them in your own words. And then make a checkpoint in case something happens to the localstore.</p>
+<p><strong>Question 1:</strong> Having one-sided triangles is often a hassle as it forces us to orient triangles correctly. What is the benefit?
+<div class="input-group">
+    <label for="performance-q1-tris" style="vertical-align: top;">Q1:</label>
+    <textarea id="performance-q1-tris" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<p><strong>Question 2:</strong> How can deferred shading help with memory bandwidth to the fragment shaders?
+<div class="input-group">
+    <label for="performance-q2-deferred" style="vertical-align: top;">Q2:</label>
+    <textarea id="performance-q2-deferred" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<div id="box-06-09-01" style="border: 2px solid black; padding: 0px; margin: 0;border-radius: 5px; display: inline-block;">
+    <div class="box-rubric-container">
+      <table class="frame-rubric-table">
+        <thead><tr>
+            <td></td>
+            <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+            <td>Description</td>
+        </tr></thead>
+      <tbody><tr>
+            <td><input type="checkbox" class="sitekey" id="check-06-09-01-i"></td>
+            <td>standard</td>
+            <td>Pipeline Questions</td>
+        </tr></tbody>
+      </table>
+    </div>  
+</div>
+<div id="status-widget" class="status-box">
+
+    <strong>File Status:</strong> 
+    <span id="json-status-text">Checking...</span><br>
+    <button onclick="checkJSONStatus()" style="margin-left: 10px; font-size: 0.8rem;">
+        Check Again
+    </button>
+    <button onclick="checkJSONStatus(true)" style="margin-left: 10px; font-size: 0.8rem;">
+        Show Differences
+    </button>
+    <button onclick="savejson()" style="margin-left: 10px; font-size: 0.8rem;">
+        Write JSON
+    </button>
+    <button onclick="loadFromJSON()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Load from file ⚠️
+    </button>
+        <button onclick="resetWorkbook()" style="margin-left: 10px; font-size: 0.8rem;">
+        ⚠️ Reset Storage ⚠️
+    </button>
+    <br/>
+    <strong>Checkpoint Upload:&nbsp;</strong><span class="sheets-status-span" id="sheets-widget-span">waiting for check</span><br>
+    <button id="submit-sheet-button" onclick="submitSheet(event)" class="submit-check">Submit Checkpoint</button>
+
+</div>
+<a href="../../docs/1-hacks/10/" class="Next__Page">Next: Page &nbsp;10&nbsp;-&nbsp;Texturing Hacks</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Selected"> 9: Graphics Performance </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p09",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

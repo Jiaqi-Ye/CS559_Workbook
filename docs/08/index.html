@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 8: The Pipeline</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Historically, I taught this material in a lecture that combined the history and development of graphics hardware with the connection to how shaders worked. The 2022 version of this lecture was better than the 2023 version:</p>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-20&#43;Lecture&#43;20A&#43;Drawing&#43;in&#43;3D&#43;%282%29&#43;-&#43;The&#43;Pipeline/1_vcr3je5u" target="_blank" rel="noopener">2023 Video: pipeline22</a>
+        2022 Pipeline Lecture&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2022/20-Pipeline-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<p>What follows is an attempt to have Claude turn that lecture (I gave it the slides and the transcript) into a workbook page. I had to manually edit almost everything - and rewrite some sections entirely, and redo a lot of the figures.</p>
+<h2 id="a-triangles-journey">A Triangle&rsquo;s Journey</h2>
+<p>Every time your program calls a draw command, something remarkable happens. Triangles specified as a handful of numbers — a few (x, y, z) positions, some normals, maybe some colors — get transformed into thousands of colored pixels on screen, in a fraction of a millisecond. How?</p>
+<p>The answer is the <strong>graphics pipeline</strong>: a hardware architecture designed specifically to process geometry as fast as physically possible. Understanding how it works is essential — not just because it is cool, but because it shapes everything about how you write graphics code. The limitations and affordances of the pipeline are the reason textures are preferred over more accurate lighting, the reason we batch draw calls, the reason vertex shaders exist, and the reason shaders are structured the way they are.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Why should you care?</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The pipeline is not just trivia about hardware internals. Knowing it will help you:</p>
+<ul>
+<li>Understand <em>why</em> certain graphics techniques work the way they do (e.g., why texture hacks often replace principled lighting)</li>
+<li>Know where the bottlenecks are and how to avoid them</li>
+<li>Understand what programmable shaders actually do — which you will need next week when we program the pipeline directly</li>
+</ul>
+<p>Without this foundation, shader programming is just memorizing incantations.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="the-key-insight-everything-is-independent">The Key Insight: Everything is Independent</h2>
+<p>The entire pipeline design rests on one crucial observation about how we model 3D scenes: <strong>everything is independent</strong>.</p>
+<p><strong>Triangles are independent.</strong> We design our scenes so that each triangle does not &ldquo;know about&rdquo; any other triangle. Its color, position, and shading can all be computed without reference to the adjacent triangles. (The Z-buffer then handles the one thing triangles do need to know about each other — which one is in front — but it does this <em>after</em> each triangle has been fully processed.)</p>
+<p><strong>Vertices are independent.</strong> Even within a single triangle, each vertex can be processed separately. All the relevant information (position, normal, color, texture coordinates) lives at the vertex itself.</p>
+<p><strong>Pixels/Fragments are independent.</strong> Once a triangle has been rasterized into a list of pixel candidates, each pixel&rsquo;s final color can be computed independently using local lighting — texture lookups, a light calculation — without needing to know what any neighboring pixel will look like.</p>
+<p>This might seem like a minor design choice, but it has enormous consequences. Independent work items can be processed in parallel. And parallel processing is exactly what modern GPUs do.</p>
+<h2 id="what-is-a-pipeline">What is a Pipeline?</h2>
+<p>In computer architecture, a <em>pipeline</em> is a technique for increasing throughput: rather than waiting for item #1 to finish processing completely before starting on item #2, you start item #2 as soon as the first <em>stage</em> of processing is free — the same way a factory assembly line works.</p>
+<p>CPUs use pipelining too. When executing three instructions:</p>
+<pre tabindex="0"><code>C = A * B      (instruction 1)
+F = D * E      (instruction 2)
+J = G * H      (instruction 3)
+</code></pre><p>The processor can begin fetching instruction 2 while instruction 1 is still being computed. This works as long as there are no <strong>dependencies</strong> — if instruction 2 needed the result <code>C</code> from instruction 1, it would have to wait (a <em>pipeline stall</em>). Pipeline stalls are expensive, and a lot of CPU microarchitecture complexity exists to detect and handle them.</p>
+<p>Now notice something elegant about the graphics case: because triangles are independent, <strong>there are no pipeline stalls</strong>. Triangle #2&rsquo;s vertex processing does not depend on triangle #1&rsquo;s results. The hardware can begin processing triangle #2 the moment the first stage is free, without any stall-detection logic whatsoever. This simplicity is a key reason GPU pipelines can run so fast.</p>
+<p>Beyond pipelining, the independence of vertices and pixels enables a second performance technique: <strong>parallelism</strong>. If each vertex can be processed independently, you can have <em>many</em> vertex processors all working simultaneously. Modern GPUs have many shader cores doing exactly this. The same applies to fragments: thousands of pixel/fragment processors running in parallel, each coloring one fragment of one triangle independently. The fragments don&rsquo;t even need to be from the same triangle.</p>
+<h2 id="the-logical-steps">The Logical Steps</h2>
+<p>We divide the rasterization process into 6 pieces. Each has a distinct function, and specific inputs and outputs. Each takes input from the step before it and outputs to the step after it (with the exception of the uniform variables that can be read by many stages).</p>
+<figure class="" style="width: 100%; ZgotmplZ ">
+    <a href="../../diagrams/pipeline-stages.svg">
+        <img src="../../diagrams/pipeline-stages.svg" alt="diagrams/pipeline-stages.svg" />
+    </a>
+</figure>
+
+<p><strong>Application:</strong> The program that creates and specifies the graphics. It sends a description of what to draw to the hardware. This information consists of the triangles themselves and <strong>uniform</strong> information (that doesn&rsquo;t change while drawing the triangles). The triangles are sent in groups, and within the group, the uniforms do not change. Uniforms include matrices (for example, the modeling, viewing, and projection matrices), textures, lighting information, and shader programs. The triangle information consists of properties of each vertex, called <strong>attributes</strong>.</p>
+<p><strong>Vertex Processing:</strong> The graphics hardware processes each vertex separately. If a vertex is shared between triangles, it only needs to be processed once (although, sometimes it might need to be re-processed if there isn&rsquo;t adequate storage to cache the results). Importantly, each vertex is processed independently. This allows for parallelism and re-ordering (to enhance sharing). The input and output of this phase are lists of vertices. However, by going through processing, the vertices get additional information added. Importantly, during this stage, the screen space position of each vertex is computed and attached to the vertex.</p>
+<p><strong>Triangle Processing:</strong> The vertices are re-assembled into triangles. At this step, triangles may be removed (if they are determined to be off the screen) or modified (if they are partially off the screen). Getting rid of triangles that are off the screen is called <strong>clipping</strong>. In modern graphics pipelines, this stage might be programmable with a <em>geometry shader</em> that can process triangles and add or remove them.</p>
+<p><strong>Rasterization:</strong> The triangles are turned into a list of fragments (pixels). There is one fragment for each pixel the triangle covers. After this stage, each fragment is independent. Once the rasterizer creates the fragment, the fragment does not remember what triangle it came from. Information from the vertices of the triangle (positions, normals, texture coordinates, etc.) are interpolated using barycentric interpolation so that every fragment has a value. The set of properties of the vertices that are interpolated, such that every fragment has a value as well, is called <strong>varying</strong> variables.</p>
+<p><strong>Fragment Processing:</strong> Computations are performed for each fragment. This stage can change the properties of the fragment. Usually, processing computes the fragment&rsquo;s color, and sometimes it will change its depth. The inputs are the values for the fragment provided by the varying variables. Importantly, fragment processing cannot change the screen space position of the fragment: that would make it a different fragment. Fragments are associated with a specific pixel (a place in the final image).</p>
+<p><strong>Test and Write:</strong> Once the color and depth of a fragment are determined, they can be written to the target memory (usually, the frame buffer, but sometimes a texture). However, this step might involve a test where the memory is first read, a test is performed, and the write is dependent on passing this test. The Z-Buffer algorithm is the most standard of these tests, but there are others.</p>
+<p>With a modern GPU, we can program the vertex processor, the triangle processor, and the fragment processor. In class, we will focus on programming the vertex processor and the triangle processor.</p>
+<p>An important thing to understand here is what information each step is passing to the next step. This will be critical when we discuss how to program the steps.</p>
+<figure class="" style="width: 100%; ZgotmplZ ">
+    <a href="../../diagrams/pipeline-stages2.svg">
+        <img src="../../diagrams/pipeline-stages2.svg" alt="diagrams/pipeline-stages2.svg" />
+    </a>
+</figure>
+
+<p>Importantly, the main flow is vertices into and out of the vertex processor, and fragments into and out of the fragment processor. These stages process their items independently: each vertex or fragment is independent of all others.</p>
+<h2 id="the-demo-what-the-gpu-is-working-on">The Demo: What the GPU is Working On</h2>
+<p>Claude decided to put in this demo. I kept it since otherwise the page gets boring.</p>
+<p>The scene below contains several 3D objects, each made up of many triangles. Click <strong>Show Wireframe</strong> to see the actual triangle mesh — this is a good way to understand what &ldquo;sending triangles to the GPU&rdquo; really means. Every one of those triangles flows through all the pipeline stages every frame.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 690px;">
+    <a href="../../docs/08/06-07-01.html" class="boxtitlelink">06-07-01.html</a><span> | </span><a href="../../docs/08/06-07-01.js" class="boxtitlelink">06-07-01.js</a><iframe
+        title="06-07-01.html"
+        src="../../docs/08/06-07-01.html"
+        class="includebox includebox-standard"
+        width="690"
+        height="480"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>You can look at the code to see how the scene is set up. Notice that the triangle and vertex counts (shown below the demo) represent the GPU&rsquo;s per-frame workload. <del>All those vertices are processed <em>simultaneously</em> by the vertex stage.</del></p>
+<p>Claude said the vertices are processed simultaneously. This isn&rsquo;t really true. Understanding this distinction is useful.</p>
+<p>First, they are processed in groups. Each mesh is a separate buffer of triangles, and these are submitted one at a time. Within each group, the triangles are processed in parallel. Conceptually, they are independent so we can think of them as being processed simultaneously. But in reality, some number of them are being processed in parallel, in some order.</p>
+<h2 id="the-hardware-pipeline">The Hardware Pipeline</h2>
+<p>The logical stages above map onto a specific hardware arrangement. This is the pipeline as it existed in the programmable-GPU era (roughly 2006 onward), which is still the model your WebGL/WebGPU code targets today:</p>
+<figure class="" style="width: 100%; ZgotmplZ ">
+    <a href="../../diagrams/2006-pipeline.svg">
+        <img src="../../diagrams/2006-pipeline.svg" alt="/diagrams/2006-pipeline.svg" />
+    </a>
+</figure>
+
+<p>Let us walk through each block, noting what it does, what its inputs and outputs are, and why it could be a bottleneck.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">The History of The Pipeline (pre-2006)</summary>
+    <div class="markdown-inner myexpand-content">
+      <h2 id="a-brief-history">A Brief History</h2>
+<p>The pipeline we have described did not appear fully formed. It has an interesting history that explains why the programming model is the way it is.</p>
+<p><strong>Custom hardware (pre-1980s):</strong> Flight simulators and scientific visualization systems had bespoke graphics hardware, but each was different.</p>
+<p><strong>The Silicon Graphics (SGI) era (1982–mid-1990s).</strong> SGI was founded on research from Stanford (Jim Clark&rsquo;s Geometry Engine, 1980). They built workstations that implemented the pipeline in dedicated chips — the first time a fixed-function pipeline existed in hardware in a form recognizable today. The abstractions they established were:</p>
+<ul>
+<li>Points, lines, and triangles as the primitives</li>
+<li>4D homogeneous vertices (the <code>w</code> coordinate for perspective division)</li>
+<li>RGBA color (including alpha for transparency)</li>
+<li>Per-vertex transform (4×4 matrix multiply + divide by <code>w</code>)</li>
+<li>Per-vertex lighting</li>
+<li>Barycentric color interpolation (Gouraud shading)</li>
+<li>Triangle fill</li>
+<li>Z-test and other per-fragment tests</li>
+<li>Double buffering</li>
+</ul>
+<p>This list is essentially the entire fixed-function pipeline. SGI&rsquo;s API became <strong>IrisGL</strong>, which was then standardized as <strong>OpenGL</strong> in 1992, and later evolved into <strong>WebGL</strong>. You can see why understanding the SGI pipeline is understanding the foundation of everything we do.</p>
+<p><strong>Consumer graphics hardware (mid-1990s).</strong> Graphics accelerators became cheap enough for consumer PCs. The fixed-function pipeline was implemented in affordable cards (3dfx Voodoo, NVIDIA RIVA, ATI Rage). Texturing was added (1990), then multi-texturing (1992–1998). This era brought the pipeline to the masses but kept it fixed-function — you could configure it, not program it.</p>
+<p><strong>Programmable pipelines (2002–present).</strong> NVIDIA&rsquo;s GeForce 3 (2001) introduced the first programmable vertex shader; OpenGL 2.0 (2004) standardized GLSL, making the vertex and fragment stages fully user-programmable. The geometry shader stage was added in 2006–2008. The pipeline you program today in WebGL and THREE.js is this programmable pipeline, with the same essential structure the SGI engineers established in 1982 — but with the key fixed-function stages (vertex processing and fragment processing) replaced by your code.</p>
+<p>The pipeline has evolved since 2008. The biggest differences are that GPUs are now designed to be more general, so they can do things other than rasterize triangles. The low-level implementation has changed. However, the conceptual model (for rasterization) remains.</p>
+
+    </div>
+</details>
+</div>
+<h3 id="application-program">Application Program</h3>
+<p>This is your code. You set up transform matrices, lighting uniforms, and issue draw commands. Critically, you also upload triangle data — positions, normals, texture coordinates — into <em>attribute buffers</em> on the GPU.</p>
+<p>Early OpenGL required 11 separate function calls (with 35 pushed arguments) per triangle. This was tolerable when drawing a triangle was much slower than processing things on the CPU. This overhead would be completely unacceptable today when scenes contain many triangles. The solution, which you have been using via THREE.js, is <strong>attribute buffers</strong>: send a large block of vertex data to the GPU in one batch, then issue a single draw call that processes all of it.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Old-style OpenGL vs. modern</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The old per-triangle API:</p>
+<pre tabindex="0"><code>begin(TRIANGLE);
+c3f(r1,g1,b1);  n3f(nx1,ny1,nz1);  v3f(x1,y1,z1);
+c3f(r2,g2,b2);  n3f(nx2,ny2,nz2);  v3f(x2,y2,z2);
+c3f(r3,g3,b3);  n3f(nx3,ny3,nz3);  v3f(x3,y3,z3);
+end(TRIANGLE);
+</code></pre><p>That is an enormous number of function calls and memory accesses for just one triangle. Modern graphics APIs replace this entirely with pre-uploaded vertex buffers (VBOs/VAOs in WebGL, <code>BufferGeometry</code> in THREE.js), so one draw call can process thousands of triangles.</p>
+
+    </div>
+</details>
+</div>
+<p><strong>Potential bottleneck:</strong> The CPU-to-GPU data transfer. If you upload large amounts of new geometry every frame, the memory bandwidth between the CPU and GPU becomes the limiting factor. The solution: upload static geometry once and reuse it across many frames.</p>
+<h3 id="graphics-driver-and-command-buffer">Graphics Driver and Command Buffer</h3>
+<p>Your draw calls go to the <strong>graphics driver</strong>, a software layer that translates high-level API calls (WebGL, Vulkan, Metal, etc.) into the low-level commands the specific GPU hardware understands. The driver queues these into a <strong>command buffer</strong> — a structured list of &ldquo;draw this set of triangles with these settings.&rdquo; The command buffer decouples your application&rsquo;s call rate from the GPU&rsquo;s consumption rate, smoothing out timing irregularities.</p>
+<h3 id="vertex-queue">Vertex Queue</h3>
+<p>The command buffer&rsquo;s triangle descriptions are split back into individual vertices and placed into a <strong>vertex queue</strong>. This is where the GPU begins its parallel processing: instead of waiting for all vertices to be queued before processing begins, the vertex processor starts consuming from the front of the queue immediately.</p>
+<h3 id="vertex-processing-tcl--transform-clip-light">Vertex Processing (TCL — Transform, Clip, Light)</h3>
+<p>This is the first major programmable stage: the <strong>vertex shader</strong>. Each vertex enters independently and is processed by the same program, running on one of the GPU&rsquo;s many shader cores. The acronym TCL describes what the fixed-function hardware did here before shaders existed:</p>
+<ul>
+<li><strong>Transform</strong>: Apply the model, view, and projection matrices to convert the vertex position from object space into clip space (homogeneous coordinates).</li>
+<li><strong>Clip</strong>: Determine whether the vertex is inside the view frustum. Vertices (and triangles assembled from them) outside the frustum are discarded (or chopped to fit on screen).</li>
+<li><strong>Light</strong>: Compute per-vertex color from the lighting equations (normals, light positions, material properties).</li>
+</ul>
+<p><strong>Vertex in → vertex out.</strong> This constraint is fundamental to the architecture. The vertex shader receives one vertex&rsquo;s data and outputs that same vertex&rsquo;s data, possibly transformed and augmented. It cannot create new vertices (that is the geometry shader&rsquo;s job) or read neighboring vertex data.</p>
+<p><strong>Potential bottleneck:</strong> If your scene has an extremely large number of vertices and complex vertex shaders, the vertex stage can become the bottleneck. Reducing vertex count (LOD systems) or simplifying vertex shaders helps.</p>
+<p>In modern pipelines, clipping usually happens later (after the triangles are processed).</p>
+<h3 id="vertex-cache">Vertex Cache</h3>
+<p>Processed vertex results are stored in a small <strong>vertex cache</strong> so they can be reused if the same vertex appears in multiple triangles (which is common in meshes). In the early days, this was critical for performance. Modern hardware handles reuse differently, but the conceptual idea — avoid reprocessing identical vertices — still shapes how meshes are structured.</p>
+<h3 id="assembly">Assembly</h3>
+<p>Once vertices have been processed, they need to be grouped back into triangles. The <strong>assembly</strong> stage looks up the three vertex indices that make up each triangle and reconstitutes the triangle as a unit, ready for rasterization. This is one of the few places in the pipeline where a triangle exists as a whole entity rather than as independent vertices.</p>
+<h3 id="triangle-processing-geometry-shading">Triangle Processing (Geometry Shading)</h3>
+<p>In the original fixed-function pipeline, there was nothing here — triangles passed straight through to the rasterizer. The <strong>geometry shader</strong> stage was added later (around 2006) as an optional programmable step that can receive an entire triangle and emit new primitives: subdivide a triangle into smaller ones, discard it, or even transform it into a line or point. We won&rsquo;t discuss Geometry Shaders in class.</p>
+<h3 id="rasterization">Rasterization</h3>
+<p>This fixed-function stage performs the actual conversion from triangles to pixel candidates. For each triangle, the rasterizer:</p>
+<ol>
+<li>Determines which pixels fall inside the triangle (using the projected 2D coordinates)</li>
+<li>Generates a <em>fragment</em> for each such pixel</li>
+<li>Interpolates per-vertex attributes (color, texture coordinates, normals) across the triangle using <em>barycentric interpolation</em></li>
+</ol>
+<p>The output is a stream of fragments, each carrying interpolated vertex data and a screen (x, y) position. Fragments are the inputs to the fragment shader.</p>
+<p><strong>Potential bottleneck:</strong> Rasterization scales with the number of pixels a triangle covers, not the number of triangles. Very small triangles (one or two pixels) waste the GPU&rsquo;s rasterization hardware. Very large triangles covering the whole screen generate many fragments and may stress the fragment stage. Knowing this helps you understand artifacts like overdraw problems and why tiny triangles are inefficient.</p>
+<p>Important: the rasterizer interpolates so that each fragment gets information that depends on all three of a triangle&rsquo;s vertices.</p>
+<h3 id="fragment-queue">Fragment Queue</h3>
+<p>Fragments are buffered in a <strong>fragment queue</strong> before the fragment shaders consume them, for the same reason the vertex queue exists: to smooth out the rate mismatch between rasterization (fast, deterministic) and fragment shading (variable cost, especially with texture lookups).</p>
+<h3 id="pixel-processing-fragment-shading">Pixel Processing (Fragment Shading)</h3>
+<p>The <strong>fragment shader</strong> runs on each fragment independently. Like the vertex shader, it is fully parallel — all fragments from the current frame can be processed simultaneously by the GPU&rsquo;s shader cores. The fragment shader is what you program when you want per-pixel effects:</p>
+<ul>
+<li><strong>Texture lookups</strong>: Sample one or more textures at the fragment&rsquo;s UV coordinates (read from the texture memory unit).</li>
+<li><strong>Per-pixel lighting</strong>: Compute a full lighting calculation at each pixel using the interpolated normals and the light positions. This is Phong shading (per-pixel) vs. Gouraud shading (per-vertex).</li>
+<li><strong>Procedural patterns</strong>: Generate colors mathematically without any texture at all.</li>
+</ul>
+<p><strong>Fragment in → fragment out.</strong> Just as the vertex shader has a constrained interface (one vertex in, one vertex out), the fragment shader has a constrained interface: one fragment in, one fragment color out.
+Its main job is to determine the color of the fragment, although it is also allowed to change the depth value or set other information in the fragment (in case those values need to be written to memory).</p>
+<p><strong>Texture Memory</strong> is a separate memory subsystem connected to the fragment processors, optimized for 2D spatial locality of access (since adjacent pixels often sample nearby texture regions). The GPU also supports <em>render to texture</em> — the output frame buffer can be fed back in as an input texture on the next pass, enabling effects like shadow maps, reflection maps, and post-processing.</p>
+<p><strong>Potential bottleneck:</strong> Fragment shading is often the bottleneck in modern applications. Complex shaders with many texture lookups, or very high-resolution frame buffers with lots of overdraw, can make this stage the limiting factor. This is why optimizing shaders — reducing texture fetches, simplifying math — is important.</p>
+<p>Important: the fragment shader cannot change the screen space position of a fragment. If you change x,y, it becomes a different fragment!</p>
+<h3 id="pixel-tests">Pixel Tests</h3>
+<p>Before a fragment&rsquo;s color is written, it must pass a set of <strong>per-fragment tests</strong>:</p>
+<ul>
+<li><strong>Depth test (Z-test)</strong>: Compare the fragment&rsquo;s depth to the value already in the Z-buffer at this pixel. Discard if farther away.</li>
+<li><strong>Alpha test</strong>: Optionally discard based on the fragment&rsquo;s opacity (useful for cutout transparency).</li>
+<li><strong>Stencil test</strong>: A programmable masking test used for effects like reflections and shadows.</li>
+</ul>
+<p>If a fragment fails any test, it is discarded and the frame buffer is unchanged. A fragment that passes all tests writes its color (and new depth) to the frame buffer.</p>
+<p>One important note: the <em>normal</em> order of operations is to compute the expensive fragment shader <em>before</em> the Z-test. This means we do all that work and then potentially throw it away if the fragment is occluded. <strong>Early Z-test</strong> is a hardware optimization where the depth test is performed <em>before</em> the fragment shader, skipping shading for occluded fragments entirely. This is why rendering opaque objects front-to-back often improves performance.</p>
+<h3 id="frame-buffer">Frame Buffer</h3>
+<p>The <strong>frame buffer</strong> is the final destination: the 2D array of RGBA pixels that will be sent to the display. When the frame is complete (all draw calls processed, all tests passed), the frame buffer contents are presented on screen — typically via a <em>double-buffer swap</em> to avoid showing partially-rendered frames.</p>
+<h3 id="texture-memory">Texture Memory</h3>
+<p>In a modern graphics system, all of the programmable elements have the ability to read from the texture memory. This means that vertex shaders (and geometry shaders) can access textures, which allows things such as displacement mapping. Most texture access happens in the fragment shader.</p>
+<h2 id="what-you-can-program">What You Can Program</h2>
+<p>Looking back at the hardware diagram, you can identify which boxes you control:</p>
+<ul>
+<li><strong>Vertex Shader</strong>: You control vertex processing entirely. You read per-vertex attributes (position, normal, UV coords) and write clip-space position plus any data you want to pass to the fragment stage.</li>
+<li><strong>Fragment Shader</strong>: You control fragment processing entirely. You read interpolated vertex outputs and write an RGBA color.</li>
+<li><strong>Geometry Shader</strong>: Optionally, you can add/remove primitives between assembly and rasterization (we won&rsquo;t discuss this in class).</li>
+<li>Everything else (driver, rasterization, Z-test, frame buffer write) is handled by the fixed-function hardware.</li>
+</ul>
+<p>This is why understanding the pipeline matters so much for the next section: when you write a vertex shader, you are literally programming the Vertex Processing box. When you write a fragment shader, you are programming the Pixel Processing box. Knowing their constraints — one vertex in / one vertex out; one fragment in / one color out — is not arbitrary syntax, it is the architecture of the hardware.</p>
+<h2 id="check-your-understanding">Check Your Understanding&hellip;</h2>
+<p>Fill in the type-in boxes to check that you understand these important concepts. Write answers (a sentence or two should be fine) in your own words.</p>
+<p><strong>Question 1:</strong> Why do we need to put information (such as colors) on vertices not triangles? (You should remember we have to do this from prior discussions of meshes)
+<div class="input-group">
+    <label for="pipeline-q1-tris" style="vertical-align: top;">Q1:</label>
+    <textarea id="pipeline-q1-tris" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div></p>
+<p><strong>Question 2:</strong> What kind of shader would you implement displacement mapping in? Why? Hint: compare this with environment or bump mapping.</p>
+<div class="input-group">
+    <label for="pipeline-q2-dispmap" style="vertical-align: top;">Q2:</label>
+    <textarea id="pipeline-q2-dispmap" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<p><strong>Question 3:</strong> The fragment shader cannot get information about particular verticies. What does it get instead?</p>
+<div class="input-group">
+    <label for="pipeline-q3-varying" style="vertical-align: top;">Q3:</label>
+    <textarea id="pipeline-q3-varying" class="" rows="3" cols="60" placeholder="Type Here..."></textarea>
+</div>
+<div id="box-06-08-01" style="border: 2px solid black; padding: 0px; margin: 0;border-radius: 5px; display: inline-block;">
+    <div class="box-rubric-container">
+      <table class="frame-rubric-table">
+        <thead><tr>
+            <td></td>
+            <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+            <td>Description</td>
+        </tr></thead>
+      <tbody><tr>
+            <td><input type="checkbox" class="sitekey" id="check-06-08-01-i"></td>
+            <td>standard</td>
+            <td>Pipeline Questions</td>
+        </tr></tbody>
+      </table>
+    </div>  
+</div>
+<h2 id="summary-a-triangles-journey">Summary: A Triangle&rsquo;s Journey</h2>
+<p>A triangle enters the pipeline as three vertices with positions and attributes. It flows through:</p>
+<ol>
+<li><strong>Vertex stage</strong> — each vertex is independently transformed; all vertices processed in parallel by thousands of shader cores</li>
+<li><strong>Assembly</strong> — vertices are regrouped into triangles</li>
+<li><strong>Rasterization</strong> — each triangle is converted into a list of fragments with interpolated attributes</li>
+<li><strong>Fragment stage</strong> — each fragment is independently shaded (texture, lighting, etc.); all fragments processed in parallel</li>
+<li><strong>Pixel tests</strong> — each fragment is depth-tested and either written to the frame buffer or discarded</li>
+</ol>
+<p>The whole process exploits one architectural principle: <strong>independence at every stage enables parallelism at every stage</strong>. This is the reason a modern GPU can render tens of millions of triangles per second.</p>
+<p>Next, we will start programming this pipeline directly — writing vertex and fragment shaders in GLSL.</p>
+<a href="../../docs/09/" class="Next__Page">Next: Page &nbsp;9&nbsp;-&nbsp;Graphics Performance</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Selected"> 8: The Pipeline </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p08",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

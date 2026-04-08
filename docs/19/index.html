@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 19: GLSL and three.js</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Part of writing shaders is that you have to work in a shading language, which is yet another programming language to learn. What is challenging for most students is the <em>concept</em> of shaders, the details of the language follow. In fact, in old assignments we used to make students translate shaders from one language to another to emphasize that the languages aren&rsquo;t that different.</p>
+<p>GLSL is convenient: it is one shading language that works almost everywhere, and the compiler is built into the graphics drivers. Back in the old days, you had to worry about getting the compiler and hoping it worked with your graphics card.</p>
+<p>While it is a bit of a pain to have &ldquo;yet another&rdquo; language to learn, the fact that GLSL is highly specialized for shaders means it has a lot of nice features for doing shader programming. It has excellent support for vectors and matrices (since graphics programming always has vectors and matrices). It has all kinds of convenient math functions built in.</p>
+<p>Technically, we are using &ldquo;GLSL-ES&rdquo; - which is a variant of GLSL. This only comes up because the documentation often refers to it as &ldquo;GLSL-ES&rdquo;.</p>
+<p>A good way to learn to program in GLSL is to try to read and write shaders, and then look up features in a reference card (for example, the <a href="https://www.khronos.org/files/webgl20-reference-guide.pdf" target="_blank">WebGL Reference Card</a>). Expect to make lots of mistakes (which is painful, since you don&rsquo;t get to see the errors until the compiler runs).</p>
+<p>Here are a few things that will help you get started:</p>
+<p><strong>GLSL is C-like in syntax.</strong> It uses the same basic syntax, but uses different keywords and operators, has different built-in types, and a different feature set.</p>
+<p><strong>GLSL is strongly typed.</strong> Everything has a type, and must be of that type. For example, integers and floats are different. <code>1</code> is an integer. <code>1.0</code> is a float. <code>1 + 1.0</code> is not <code>2.0</code> or <code>2</code>, it is a type error.</p>
+<p><strong>GLSL has many vector and matrix types.</strong> In graphics, we use 2-, 3-, and 4-component vectors and 2x2, 3x3, and 4x4 matrices. GLSL has all of these built in. They are different. You cannot assign a <code>vec2</code> to a <code>vec3</code>.</p>
+<p><strong>GLSL has very flexible constructors for matrices and vectors.</strong> You can construct a <code>vec4</code> from a <code>vec3</code> and a float, or two <code>vec2</code>s, or &hellip; You do have to explicitly construct things (<code>vec3 p = vec3(vec2(1,2),3)</code>).</p>
+<p><strong>GLSL has very flexible accessors for vectors.</strong> If you have a <code>vec3</code> variable <code>p</code>, you can access the first component of the vector as <code>p[0]</code> or <code>p.x</code> or <code>p.r</code> (as in RGB). You can also refer to other subparts, like <code>p.xy</code> (which is a 2-vector), or even <code>p.zy</code> (which selects and re-orders the subparts). The ability to select and re-order vector parts is called <strong>swizzling.</strong></p>
+<h2 id="tools-for-glsl">Tools for GLSL</h2>
+<p>Having good tools for writing shaders is helpful. But, unfortunately, most of the tools for GLSL are either poor or deprecated. In fact, the challenge of developing good tools for GLSL was one of the language&rsquo;s downfalls.</p>
+<p>So, for now (Spring 2026) - you&rsquo;ll need to write shaders in VS Code. There are extensions for VS Code (and &ldquo;glsl mode&rdquo; for syntax highlighting).</p>
+<p>When we want better tools, we&rsquo;ll switch to a different shading language.</p>
+<h2 id="shaders-in-threejs">Shaders in three.js</h2>
+<p>For using shaders in three.js: there are tutorials out there. Not as many as for other topics, because the built-in shaders for three.js are so good that you usually don&rsquo;t need to write your own.</p>
+<p>However, we want to write shaders (1) to learn how they work and (2) to create custom shaders for specific tasks (we&rsquo;ll see some examples in a bit).</p>
+<p>Generally, three.js makes adding shaders easy. With the <code>ShaderMaterial</code> (see the <a href="https://threejs.org/docs/#api/en/materials/ShaderMaterial" target="_blank">documentation</a>), you can give it shader code, and it adds GLSL declarations to the beginning so your program can access the information it needs (see the <a href="https://threejs.org/docs/#api/en/renderers/webgl/WebGLProgram" target="_blank">docs</a>). It also takes care of converting between JavaScript and GLSL data types, putting your vertex information into buffers to send as attributes, and a host of other details you don&rsquo;t want to worry about.</p>
+<p>The CS559 Framework provides support for handling shaders (see the <a href="https://cs559.github.io/CS559-Framework26/module-shaderHelper.html" target="_blank">documentation</a>). It makes using three.js <code>ShaderMaterial</code> even easier.</p>
+<p>One tricky thing: three.js has very fancy lighting and materials. We will ignore three.js&rsquo;s lights, and do something simpler for ourselves in GLSL. When we want to interface with three.js&rsquo;s lighting, we&rsquo;ll use a different shading language.</p>
+<h2 id="some-advice">Some Advice</h2>
+<p>Some GLSL/WebGL/three.js gotchas:</p>
+<ul>
+<li>If compilation fails, it will dump error information into the console. However, since three.js adds a lot of code to your program, the line numbers will no longer work. If you don&rsquo;t see your object/shader, check the console for errors!</li>
+<li>Integers are not automatically coerced to floats. This is the opposite of JavaScript.</li>
+<li>Unless it knows otherwise, GLSL treats numbers without decimal points as integers, and then creates compilation errors. <code>1 + 2.0</code> is an error (since <code>1</code> is an integer). Always use <code>1.0</code> if you mean a floating point number.</li>
+<li>WebGL is very good at assembling vectors from smaller pieces. For example, <code>vec4(vec2(1.0,2.0),vec2(3.0,4.0))</code> creates a 4-dimensional vector from a pair of 2-dimensional vectors. However, you need to explicitly create the correctly sized vectors.</li>
+<li>Some things in regular GLSL are not built into GLSL-ES (the variant of the language used by WebGL). Many of them are available as &ldquo;extensions&rdquo;. Three.js sets up the most common extensions for us, but shaders need to enable them.</li>
+<li>You can write if/then/else statements, but it&rsquo;s often better to try to write them using computation functions (step, smoothstep, clamp, etc). These are not only more efficient, but also easier to change to anti-aliased versions later.</li>
+<li>To GLSL, a vector is a vector. You can refer to a <code>vec3</code> as xyz, or rgb; x is the same as r.</li>
+<li>You can also refer to parts of vectors: if you have <code>vec3 p</code>, you can refer to <code>p.xz</code> (which is a 2-vector).</li>
+</ul>
+<h2 id="summary-the-glsl-language-and-threejs">Summary: The GLSL Language and three.js</h2>
+<p>The best way to learn GLSL is to look at some examples, which we will do on the next page.</p>
+<p><a href="../../docs/20/" class="Next__Page">Next: Page &nbsp;20&nbsp;-&nbsp;Simple Shaders</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Selected"> 19: GLSL and three.js </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p19",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

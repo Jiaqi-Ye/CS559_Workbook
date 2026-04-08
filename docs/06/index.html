@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 6: Rasterization: How we draw</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Now that we&rsquo;ve learned what pixels are, and the problems with using them, we can ask the question: How do we turn our 3D scene into pixels? Or, to be precise, how do we compute the color for each image pixel that is created by the camera viewing the 3D scene?</p>
+<h2 id="pixels-vs-fragments">Pixels vs. Fragments</h2>
+<p>First, I want to make a fine terminology point.</p>
+<p>We defined a pixel as a point sample of the image: it is the value that actually is in the image.</p>
+<p>Imagine a point sample that is made on a triangle. It could be a pixel - if it appears on the screen. However, it might not become a pixel. For example, we might compute the color of that point sample and decide that some other triangle is blocking it, or that it needs to be combined with something else for anti-aliasing purposes.</p>
+<p>We use the term <strong>fragment</strong> to refer to something that is basically a pixel that hasn&rsquo;t made it to the final image yet. We distinguish it from a pixel because it might not become a pixel.</p>
+<p>You might think of a fragment as a &ldquo;pixel candidate&rdquo; - it is something that is computed (a point sample on a triangle) because it might become a pixel.</p>
+<p>The terms are sometimes conflated: we talk about pixels, even though they are really fragments. Early descriptions of graphics hardware and shaders used the term pixel for everything. I will try to use the terms pixels and fragments correctly.</p>
+<h2 id="rasterization">Rasterization</h2>
+<p>The algorithm that the graphics hardware uses is called <strong>rasterization.</strong> Basically, we convert each triangle separately.</p>
+<p>We can figure out where a triangle in the world is in the 2D plane of the image by applying a transformation to its vertices. We can then draw this 2D triangle by determining which pixels it covers (i.e., those that are inside of it).</p>
+<style>
+.pseudo { background:#f7f7f7; padding:0.75rem 1rem; border-left:4px solid #999; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.pseudo .kw { font-weight:700; color:#7a1fa2; }
+.pseudo .op { color:#005a9c; }
+.pseudo .cm { color:#6C6; font-style:italic; }
+.pseudo .va { font-weight:700; color:#0000C2; }
+</style>
+<pre class="pseudo"><code>
+1  <span class="kw">for each</span> triangle <span class="va">T</span>
+2      <span class="va">T'</span> <span class="op">=</span> transform(<span class="va">T</span>) <span class="cm">// find screen space triangle</span>
+3      <span class="kw">for each</span> pixel that <span class="va">T'</span> covers
+4          fill the pixel with the appropriate color
+</code></pre>
+<p>There is a catch: if multiple triangles cover the same pixel, we want to see the triangle that is closest to the camera (close triangles occlude farther ones). For now, we will assume the triangles are not transparent. This problem is called <strong>occlusion</strong> and we will need algorithms to handle it. We&rsquo;ll discuss that on the next page.</p>
+<p>So, technically, this algorithm computes fragments, since the colors computed in line 4 might not make it to the final image.</p>
+<p>Notice that there is a nested loop: for each triangle, we consider each fragment (pixel) of the triangle. There is a potential for inefficiency: if the triangle isn&rsquo;t visible, we still may spend time processing it.</p>
+<h2 id="the-need-for-speed">The Need for Speed</h2>
+<p>There are a few key things we need to do to make the rasterization process fast.</p>
+<ol>
+<li>We need to be able to process triangles and pixels in parallel.</li>
+<li>We do not want to waste time drawing triangles and pixels that we cannot see.</li>
+<li>We want to perform bounded computations for each triangle and pixel.</li>
+</ol>
+<p>The desire for parallelism, and for bounded computation, means that each triangle should be independent. If one triangle can depend on others, we have order dependencies (so we cannot process them in parallel), and potentially unbounded computations (there may be many triangles to consider).</p>
+<p>The rasterization &ldquo;algorithm&rdquo; generally does treat each triangle and each fragment independently, which allows for parallelization. There is a dependency created by the need to do occlusion. On the next page, we&rsquo;ll learn about the Z-buffer algorithm which allows us to keep the independence of this algorithm by handling occlusion after the fragments have been collected.</p>
+<p>The desire to keep each triangle and fragment independent does cause limitations. It means that all shading computations (lighting) must be local: the color of a fragment can depend on lights and textures, but not on other fragments or triangles. It means that anti-aliasing is challenging for pixels that are &ldquo;partially covered&rdquo; by multiple triangles. It can be wasteful: one triangle cannot know if another triangle will occlude it.</p>
+<p>However, the simplicity and efficiency that come from the independence assumption mean that it is the primary way that graphics systems are built. These downsides are handled with &ldquo;hacks&rdquo; and extra processing steps outside the rasterization process.</p>
+<h2 id="ray-tracing-vs-rasterization">Ray Tracing vs. Rasterization</h2>
+<p>Rasterization loops over the triangles, working more like a painter drawing objects onto the canvas than the physical process by which light travels and forms images in the real world.</p>
+<p>Ray tracing is a different algorithm for drawing 3D scenes. It more closely mimics the natural process: we ask for each pixel (or other position - we&rsquo;ll get to that in a moment), where did the light coming to that position come from? Ray tracing is a big topic unto itself - we introduce it briefly here to contrast it with rasterization.</p>
+<p>In the real world, light starts at a light source, bounces around, and then some small amount of it makes it to our eye, or the camera/sensor that we are making a picture with. We call this &ldquo;algorithm&rdquo; <strong>from-the-source ray tracing</strong>. Because nature is massively parallel (lots of photons), the fact that most photons won&rsquo;t make it to our sensor doesn&rsquo;t matter. Light doesn&rsquo;t exist just for us to see it.</p>
+<p>In the graphics world, we only care about the light that eventually affects the image. Therefore, most ray tracing works &ldquo;backwards&rdquo;. We start where the light ends up, and ask &ldquo;where could it have come from?&rdquo; While the term &ldquo;backwards ray-tracing&rdquo; was sometimes used, it is ambiguous. Is it backwards from physics, or backwards from how we normally do things in graphics? Therefore, I prefer terms like <strong>from-the-eye ray tracing.</strong></p>
+<p>From-the-eye ray tracing has a very similar structure to rasterization: we consider every pixel, and check it against every triangle:</p>
+<pre class="pseudo"><code>
+1  <span class="kw">for each</span> pixel <span class="va">P</span> 
+2      <span class="kw">for each</span> triangle <span class="va">T</span>
+3          <span class="kw">if</span> <span class="va">T</span> is seen by <span class="va">P</span>
+4              fill the pixel with the appropriate color
+</code></pre>
+<p>Line 3 asks whether the ray of light that reaches the pixel could have come from the triangle. Or, shooting the ray from the eye, does the ray intersect the triangle? This ray/object intersection is a core computation. One advantage to ray tracing: it can easily handle primitives other than triangles; any shape that has a ray/object intersection procedure can work.</p>
+<p>Notice that the ray tracing algorithm is also a nested loop like rasterization; however, it has the loops in the reverse order. Ray tracing requires its inner loop to consider all triangles. The key to making ray tracing efficient is to use spatial data structures so the inner loop doesn&rsquo;t have to consider all objects in the scene.</p>
+<p>Historically, ray tracing has been difficult to make efficient because the key computations have to consider large numbers of objects. However, recent hardware advances make the spatial data structures practical.</p>
+<p>The real advantage to ray tracing is that it can be applied <strong>recursively</strong>. We start at a pixel and trace backwards to a point on an object where the light for that pixel would have come from. We can then apply ray tracing from that point (recursively) to ask where the light came from to reach that point. This process mimics how nature does lighting (except that we trace backwards). It does allow for objects to interact with each other: the light that hits one object might come from bouncing off another object.</p>
+<p>We will return to discuss ray tracing later in the course, although sadly, we don&rsquo;t have enough time to discuss it in depth. For now, the main thing to know is that it is <strong>not</strong> how most interactive 3D graphics are created.</p>
+<h2 id="how-are-triangles-drawn">How are Triangles Drawn?</h2>
+<p>The key step of rasterization is to convert a triangle into a list of fragments. That is, to figure out which pixels the triangle &ldquo;covers&rdquo;.</p>
+<p>Notice that this inherently creates an aliasing problem: we ask whether the pixel is inside of the triangle, which is a binary test. It creates a hard edge, which is susceptible to aliasing. We won&rsquo;t worry about that for now.</p>
+<p>Here is a very simple algorithm for converting a triangle to pixels:</p>
+<pre class="pseudo"><code>
+1  <span class="kw">for each</span> pixel <span class="va">P</span> 
+2      compute the barycentric coordinates
+3      if the coordinates are positive, include the pixel
+</code></pre>
+<p>It is easy to estimate what pixels to consider (for example, the rectangular bounding box around the triangle). Computing the barycentric coordinates gives a quick inside/outside test; and if the test succeeds, the barycentric coordinates are very useful (we use them to interpolate colors, texture coordinates, and depth values). It might seem a little wasteful to try extra points, but this is made up for by the fact that we can do each one of these tests in parallel. This algorithm lends itself well to hardware.</p>
+<p>There are fancier &ldquo;software&rdquo; methods for enumerating the pixels inside of triangles. Often, it involves finding the left and right edges of each horizontal row by tracing along the edges of the triangles. These algorithms are called <strong>scan conversion</strong>. They are more complicated to implement.</p>
+<h2 id="what-do-we-need-to-know">What do we need to know?</h2>
+<p>We generally don&rsquo;t need to implement rasterization: it&rsquo;s done by the hardware and controlled by the API.</p>
+<p>The independence assumption explains why many of the choices in how we implement graphics are the way they are. For example, it explains why we need hacks for reflections and shadows, and why anti-aliasing between triangles is a problem.</p>
+<p>Central to rasterization is the strategy for handling occlusion, which we will discuss next.</p>
+<a href="../../docs/07/" class="Next__Page">Next: Page &nbsp;7&nbsp;-&nbsp;Handling Occlusion</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Selected"> 6: Rasterization: How we draw </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p06",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

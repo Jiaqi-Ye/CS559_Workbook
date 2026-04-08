@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Still Life Frozen Picture</title>
+    <link rel="stylesheet" href="/libs/CS559/style559.css" />
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #div1 {
+        width: 100%;
+        min-height: 72vh;
+      }
+
+      .meta {
+        margin: 0.5rem auto 1rem auto;
+        max-width: 70ch;
+        padding: 0 1rem;
+        font-size: 0.9rem;
+        color: #2a2a2a;
+      }
+    </style>
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+        "three/": "https://unpkg.com/three@0.180.0/",
+        "CS559/": "/libs/CS559/",
+        "CS559-Framework/": "/libs/CS559-Framework/",
+        "three/webgpu": "https://unpkg.com/three@0.180.0/build/three.webgpu.js",
+        "three/tsl": "https://unpkg.com/three@0.180.0/build/three.tsl.js"
+    }
+}
+    </script>
+  </head>
+  <body>
+    <div id="div1"></div>
+    <p class="meta">
+      Implemented by GitHub Copilot using GPT-5.3-Codex. Directed by Prof. Gleicher.
+      The wall picture is captured once from the main camera, then remains frozen.
+    </p>
+    <script src="./still-life-frozen-picture.js" type="module"></script>
+  </body>
+</html>

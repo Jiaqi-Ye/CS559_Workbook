@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 405.03 114.62">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4 {
+        fill: url(#radial-gradient-2);
+      }
+
+      .cls-5 {
+        fill: #231f20;
+      }
+
+      .cls-6 {
+        fill: url(#radial-gradient);
+      }
+
+      .cls-2 {
+        fill: #4a72b8;
+      }
+
+      .cls-3 {
+        fill: #aec4e6;
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="237.68" cy="38.96" fx="237.68" fy="38.96" r="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4a72b8"/>
+      <stop offset="1" stop-color="#fff"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-2" cx="363.68" fx="363.68" xlink:href="#radial-gradient"/>
+  </defs>
+  <circle class="cls-6" cx="237.68" cy="38.96" r="36"/>
+  <circle class="cls-4" cx="363.68" cy="38.96" r="36"/>
+  <rect class="cls-2" x="3.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-1" x="39.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-1" x="111.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-1" x="147.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-2" x="219.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-1" x="255.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-3" x="327.68" y="70.46" width="36" height="36"/>
+  <rect class="cls-3" x="363.68" y="70.46" width="36" height="36"/>
+  <circle class="cls-2" cx="21.68" cy="38.96" r="9"/>
+  <circle class="cls-2" cx="147.68" cy="38.96" r="9"/>
+  <g>
+    <line class="cls-1" x1="21.68" y1="55.02" x2="21.68" y2="88.46"/>
+    <polygon class="cls-5" points="21.68 47.96 17.62 57.91 21.68 55.55 25.75 57.91 21.68 47.96"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="57.68" y1="55.02" x2="57.68" y2="88.46"/>
+    <polygon class="cls-5" points="57.68 47.96 53.62 57.91 57.68 55.55 61.75 57.91 57.68 47.96"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="129.68" y1="57.27" x2="129.68" y2="90.71"/>
+    <polygon class="cls-5" points="129.68 50.21 125.62 60.16 129.68 57.8 133.75 60.16 129.68 50.21"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="165.68" y1="57.27" x2="165.68" y2="90.71"/>
+    <polygon class="cls-5" points="165.68 50.21 161.62 60.16 165.68 57.8 169.75 60.16 165.68 50.21"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="237.68" y1="59.52" x2="237.68" y2="92.96"/>
+    <polygon class="cls-5" points="237.68 52.46 233.62 62.41 237.68 60.05 241.75 62.41 237.68 52.46"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="273.68" y1="59.52" x2="273.68" y2="92.96"/>
+    <polygon class="cls-5" points="273.68 52.46 269.62 62.41 273.68 60.05 277.75 62.41 273.68 52.46"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="345.68" y1="59.52" x2="345.68" y2="92.96"/>
+    <polygon class="cls-5" points="345.68 52.46 341.62 62.41 345.68 60.05 349.75 62.41 345.68 52.46"/>
+  </g>
+  <g>
+    <line class="cls-1" x1="381.68" y1="59.52" x2="381.68" y2="92.96"/>
+    <polygon class="cls-5" points="381.68 52.46 377.62 62.41 381.68 60.05 385.75 62.41 381.68 52.46"/>
+  </g>
+</svg>

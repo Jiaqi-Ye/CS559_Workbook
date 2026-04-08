@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 15: Shadow Maps in Three.js</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Implementing shadow maps can be tricky. Fortunately, they are built into THREE.</p>
+<p>THREE makes it pretty easy to use shadow maps. All you need to do is:</p>
+<ol>
+<li>Make sure that your renderer has <code>shadowMap.enabled</code> set to true.</li>
+<li>Make sure that you set the appropriate properties for objects. Some objects should cast shadows, and some objects should receive shadows. You need to use the <code>castShadow</code> and <code>receiveShadow</code> properties of objects.</li>
+<li>Make sure your lights are set to <code>castShadow</code>. It&rsquo;s easiest to use shadows with spotlights (for reasons we&rsquo;ll discuss in class).</li>
+</ol>
+<p>That&rsquo;s pretty much it. There are plenty of parameters and options you can tune to make things look the way you want.</p>
+<h2 id="shadow-maps-in-threejs">Shadow Maps in THREE.js</h2>
+<p>THREE.js handles all the multi-pass rendering machinery for you. You only need to flip four switches.</p>
+<p><strong>1. Enable shadows in the renderer</strong></p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">renderer</span><span style="color:#111">.</span><span style="color:#75af00">shadowMap</span><span style="color:#111">.</span><span style="color:#75af00">enabled</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">true</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This tells THREE to set up the multi-pass rendering pipeline. Without this, no shadow maps are created at all.</p>
+<p><strong>2. Tell lights to cast shadows</strong></p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">spotlight</span><span style="color:#111">.</span><span style="color:#75af00">castShadow</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">true</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Each shadow-casting light will generate its own shadow map. For a <code>SpotLight</code>, THREE automatically picks a reasonable frustum and map resolution. You can tune these:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">spotlight</span><span style="color:#111">.</span><span style="color:#75af00">shadow</span><span style="color:#111">.</span><span style="color:#75af00">mapSize</span><span style="color:#111">.</span><span style="color:#75af00">width</span>  <span style="color:#f92672">=</span> <span style="color:#ae81ff">1024</span><span style="color:#111">;</span>  <span style="color:#75715e">// shadow map resolution
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">spotlight</span><span style="color:#111">.</span><span style="color:#75af00">shadow</span><span style="color:#111">.</span><span style="color:#75af00">mapSize</span><span style="color:#111">.</span><span style="color:#75af00">height</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1024</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">spotlight</span><span style="color:#111">.</span><span style="color:#75af00">shadow</span><span style="color:#111">.</span><span style="color:#75af00">camera</span><span style="color:#111">.</span><span style="color:#75af00">near</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75af00">spotlight</span><span style="color:#111">.</span><span style="color:#75af00">shadow</span><span style="color:#111">.</span><span style="color:#75af00">camera</span><span style="color:#111">.</span><span style="color:#75af00">far</span>  <span style="color:#f92672">=</span> <span style="color:#ae81ff">500</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>3. Tell objects to cast shadows</strong> (appear in the shadow map)</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">mesh</span><span style="color:#111">.</span><span style="color:#75af00">castShadow</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">true</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>An object with <code>castShadow = true</code> is rendered during Pass 1, so it shows up in the shadow map and can block light from reaching other surfaces.</p>
+<p><strong>4. Tell objects to receive shadows</strong> (be darkened when in shadow)</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">mesh</span><span style="color:#111">.</span><span style="color:#75af00">receiveShadow</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">true</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>An object with <code>receiveShadow = true</code> samples the shadow map when it is shaded, so its surface can be darkened where the light is blocked.</p>
+<p>Note that <code>castShadow</code> and <code>receiveShadow</code> are independent. An object can cast shadows without receiving them, or receive shadows without casting them. Typically, you want both set to <code>true</code> for most objects.</p>
+<figure class="" style="width: 700px;  ">
+    <a href="../../docs/15/fig-three-checklist.svg">
+        <img src="../../docs/15/fig-three-checklist.svg" alt="fig-three-checklist.svg" />
+    </a><figcaption><p>The four properties that enable shadow maps in THREE.js, and what each one does in the rendering pipeline.&nbsp;</p></figcaption>
+</figure>
+
+<h2 id="shadow-map-exercise">Shadow Map Exercise</h2>
+<p>
+
+
+
+
+
+
+
+
+For this exercise, all you need to do is make shadows in the scene below. Note: you&rsquo;ll have to make your own spotlight. You are welcome to remove my objects and put in your own. The file is 
+<a href="../../for_students/06-15-01.js" class="box-html" data-tag="ex-shadow">06-15-01.js</a>
+. Of course, you can use this as an opportunity to experiment with more lights and shadows.</p>
+<p>It needs to be obvious that one object casts a shadow on another (besides the ground plane). So, in the sample scene, make sure to place the light far enough above the ground that the flying ring casts a shadow on the cube and the knot.
+
+<div id="box-06-15-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-15-01</span>&nbsp;
+    <input type="checkbox" id="check-06-15-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-15-01.html class="boxtitlelink">06-15-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-15-01.js" class="boxtitlelink">06-15-01.js</a>
+    <iframe
+        title="ex-shadow"
+        src="../../for_students/06-15-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-15-01"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-15-01-0"></td>
+                <td>standard</td>
+                <td>there are shadows</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-15-01-1"></td>
+                <td>standard</td>
+                <td>there are shadows of one object onto another object</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div></p>
+<h2 id="summary">Summary</h2>
+<p>Shadow maps are the classic texture hack: we work around the limits of the rasterization pipeline by using its flexible abstractions in a clever way. Shadow maps use multi-pass rendering and render-to-texture, along with modifying the lighting process to access the texture map.</p>
+<a href="../../docs/16/" class="Next__Page">Next: Page &nbsp;16&nbsp;-&nbsp;Exercise: Texture Demo</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Selected"> 15: Shadow Maps in Three.js </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p15",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shadow Maps — Interactive Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1e293b; color: #e2e8f0; font-family: system-ui, sans-serif;
+           display: flex; flex-direction: column; width: 640px; }
+
+    #header {
+      background: #0f172a;
+      padding: 8px 14px;
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid #334155;
+    }
+    #header h1 { font-size: 14px; font-weight: 700; color: #f1f5f9; }
+    #header p  { font-size: 11px; color: #94a3b8; }
+
+    #main { display: flex; height: 390px; overflow: hidden; }
+    #canvas-wrap { flex: 1; position: relative; }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    #panel {
+      width: 220px; background: #0f172a;
+      border-left: 1px solid #334155;
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto;
+    }
+    .panel-section { border-top: 1px solid #1e293b; padding-top: 8px; }
+    .panel-section:first-child { border-top: none; padding-top: 0; }
+    .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 6px; }
+
+    button {
+      width: 100%; padding: 6px 10px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 12px; font-weight: 600; transition: all 0.15s;
+    }
+    #btn-shadows { background: #3b82f6; color: white; }
+    #btn-shadows:hover { background: #2563eb; }
+    #btn-shadows.off { background: #475569; color: #94a3b8; }
+    #btn-light-type { background: #7c3aed; color: white; }
+    #btn-light-type:hover { background: #6d28d9; }
+    #btn-helper { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+    #btn-helper:hover { background: #334155; }
+
+    .badge {
+      display: inline-block; padding: 3px 9px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-on  { background: #dcfce7; color: #15803d; }
+    .badge-off { background: #fee2e2; color: #b91c1c; }
+
+    label { font-size: 11px; color: #94a3b8; display: block; margin-bottom: 2px; }
+    input[type=range] { width: 100%; accent-color: #3b82f6; margin-bottom: 4px; }
+    .val-display { font-size: 11px; color: #93c5fd; text-align: right; }
+
+    .info-box {
+      background: #1e293b; border-radius: 6px; padding: 8px;
+      font-size: 10px; line-height: 1.5; color: #94a3b8;
+    }
+    .info-box strong { color: #e2e8f0; }
+    .key { color: #fbbf24; font-weight: 700; }
+    #status-bar {
+      padding: 4px 14px; background: #0f172a; border-top: 1px solid #1e293b;
+      font-size: 10px; color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <div>
+      <h1>Shadow Maps Demo</h1>
+      <p>Toggle shadows to see their effect on depth perception and realism.</p>
+    </div>
+    <span id="shadow-badge" class="badge badge-on">Shadows ON</span>
+  </div>
+
+  <div id="main">
+    <div id="canvas-wrap">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="panel">
+      <div class="panel-section">
+        <div class="section-title">Light Type &nbsp;<span id="light-type-label" style="color:#a78bfa;font-weight:700;text-transform:none;letter-spacing:0;font-size:12px;">Directional</span></div>
+        <button id="btn-light-type">Switch to SpotLight</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Shadow Control</div>
+        <button id="btn-shadows">Toggle Shadows OFF</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Light Position</div>
+        <label>Height: <span id="lh-val" class="val-display">8</span></label>
+        <input type="range" id="light-h" min="2" max="16" step="0.5" value="8"/>
+        <label>Angle: <span id="la-val" class="val-display">90°</span></label>
+        <input type="range" id="light-a" min="0" max="360" step="2" value="90"/>
+        <label>Radius: <span id="lr-val" class="val-display">7</span></label>
+        <input type="range" id="light-r" min="2" max="14" step="0.5" value="7"/>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Shadow Quality</div>
+        <label>Map size: <span id="ms-val" class="val-display">256</span></label>
+        <input type="range" id="map-size" min="0" max="4" step="1" value="2"/>
+        <div style="font-size:10px; color:#64748b; margin-top:3px;">64 · 128 · 256 · 512 · 1024</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Scene Options</div>
+        <button id="btn-helper">Show Light Helper</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">What You're Seeing</div>
+        <div class="info-box">
+          <strong>Directional:</strong> uniform parallel light (like the sun) — the whole ground is lit and only object-cast shadows appear.<br><br>
+          <strong>SpotLight:</strong> cone-shaped beam — notice the dark rim at the edge of the cone, which can look like a shadow but isn't one.<br><br>
+          <strong>With shadows OFF:</strong> all surfaces are lit with no depth testing — notice how flat and ungrounded the scene looks.<br><br>
+          <span class="key">Orbit:</span> left-drag &nbsp; <span class="key">Zoom:</span> scroll
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-bar">
+    <span id="fps">–</span> fps &nbsp;|&nbsp;
+    Shadow map: <span id="smap-size">256×256</span> &nbsp;|&nbsp;
+    Three.js r180
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="shadow-demo.js"></script>
+</body>
+</html>

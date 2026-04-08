@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 25: Noise</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Real-world textures often involve randomness. While there are some patterns, like checkerboards or polka dots, most things in the natural world have structure that is too complex for the eye to identify a pattern. If we look at the patterns of marble, of dirt on the floor, of the spacing of trees in a forest, etc., it looks random. Having randomness (unpredictability) is a key element of making interesting-looking textures.</p>
+<p>The randomness we need for computer graphics isn&rsquo;t completely random. We need it to be repeatable and controllable. If we make a pattern for marble, it needs to have the correct &ldquo;structure&rdquo; so it looks like marble (each position is not completely independent), and it needs to be coherent (the marble should be the same if we redraw things on each frame).</p>
+<p>This idea of controlled randomness is called <strong>noise</strong> and it is a key element of computer graphics. The most obvious uses are in creating procedural textures, but it also comes up in creating imperfect geometry, varying motion, realistic lighting, and a host of other applications where we want some of the unpredictability that makes the real world interesting.</p>
+<p>Using noise has two key parts: the mathematical aspects of generating these &ldquo;pseudo-random&rdquo; numbers, and the artistic aspects of how we control that randomness to use it to make interesting patterns. And then there is the minor detail of actually putting noise into our shaders.</p>
+<p>On this page, we&rsquo;ll discuss the intuitions behind the mathematics: the better you understand the intuitions, the more likely you are to be able to do the artistic aspects of using noise effectively. On the next page, we&rsquo;ll talk about some practical issues in using noise in class, and give you the opportunity to try using it yourself.</p>
+<p>This page is taken from a lecture video. The transcript was given to AI to turn into a draft, which was manually edited. The AI even wrote programs to reproduce the images in my slides (and I added some other images).</p>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/t/1_phjdus5z" target="_blank" rel="noopener">2023 Video: Lecture 24A</a>&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/24-A-Noise-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">AI Disclosure</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>A lot of this page was written by taking the transcript of my existing lecture and giving it to Claude, who drafted text and wrote programs to generate many of the figures. I did read it carefully, and edited it extensively.</p>
+<p>It did a surprisingly good job.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="some-history">Some History</h2>
+<p>Ken Perlin developed the key concepts of modern noise functions. Importantly, he not only provided the first practical noise functions, but also had the good artistic sense and taste to show how effectively they could be used, inspiring everyone else. His initial 1985 paper <a href="https://dl.acm.org/doi/10.1145/325334.325247">An Image Synthesizer</a> even showed how this fit nicely into a systems-level design.</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/25/perlin_1985_IS_00.png">
+        <img src="../../docs/25/perlin_1985_IS_00.png" alt="perlin_1985_IS_00.png" />
+    </a><figcaption><p>Example uses of noise from Perlin&rsquo;s 1985 paper.
+            <a href="https://www.sci.utah.edu/~kpotter/Library/Papers/perlin:1985:IS/">&nbsp;From a web library.</a></p></figcaption>
+</figure>
+
+<p>Over the years, he is responsible for a series of different ways to generate noise. The naming can be confusing; Perlin Noise generally refers to his original concept, and the later versions (that he also invented) usually are referred to by different names. The history is further complicated because some of the versions were protected by patents.</p>
+<h2 id="understanding-noise">Understanding Noise</h2>
+<p>Why do we want randomness? Because regular patterns look boring. Think about what a checkerboard looks like when every square is a perfect, uniform color — it reads immediately as a mathematical pattern. In the real world, materials like wood, stone, clouds, and skin have visual complexity that feels random. The tree grew a certain way to produce those grain patterns; the rock formed under pressure to make those streaks; clouds formed according to fluid dynamics. The underlying causes are real and physical, but the complexity is so great that the result <em>seems</em> random. That apparent randomness is what makes these materials look interesting and believable.</p>
+<p>The trick to noise is that it is not random; it needs to be coherent and controllable.</p>
+<p>The key ideas:</p>
+<ol>
+<li>We need it to be <strong>pseudo-random</strong> so we get the same result every time. We define the noise as a function over some domain (say 1D or 2D), for example <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span> in 1D. If we ask the same <em>u</em> value, we get the same answer each time. However, for different <em>u</em> values, we expect unpredictable differences.</li>
+<li>To be <strong>controllable</strong> we define the functions so that they have controlled frequency: they only &ldquo;wiggle&rdquo; at the rate that we specify.</li>
+</ol>
+<p>The goal, then, is <strong>controlled randomness</strong>: not too perfect (boring), and not too chaotic (also boring). We want structure combined with unpredictability.</p>
+<figure class="" style="width: 500px;  ">
+    <a href="../../docs/25/img1_white_noise_vs_flat.png">
+        <img src="../../docs/25/img1_white_noise_vs_flat.png" alt="img1_white_noise_vs_flat.png" />
+    </a><figcaption><p>The two boring extremes: a perfectly flat color (left) and pure white noise where every pixel is independent (right). Neither is interesting — the goal is controlled randomness in between.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<p>On the right, things are &ldquo;too random&rdquo;; they change so much that they can&rsquo;t be controlled. Every pixel being different is a problem.</p>
+<p>With shaders, every vertex is computed independently, and every fragment is computed independently. We compute each one completely separately, which is fine for performance because the GPU does all this work in parallel. But it means we need coherence: pixels near each other need to get the &ldquo;same randomness&rdquo;.</p>
+<h2 id="what-noise-actually-is">What Noise Actually Is</h2>
+<p>Noise has two key properties that distinguish it from true randomness.</p>
+<p><strong>1. Pseudo-random.</strong> A noise function has a pattern, but the pattern is so complex that the eye cannot detect it. The crucial word is &ldquo;deterministic&rdquo; — given the same input, you always get the same output. This means our texture is stable across frames, and two fragments at the same position will always compute the same value.</p>
+<p><strong>2. Structured.</strong> We can control the <em>properties</em> of the randomness that we care about. In particular, we want nearby inputs to produce nearby outputs — we want coherence, so that neighboring pixels aren&rsquo;t wildly different. We can also control the <em>frequency</em> (how fast the pattern changes) and the overall character of the variation.</p>
+<figure class="" style="width: 600px;  ">
+    <a href="../../docs/25/img2_randomness_spectrum.png">
+        <img src="../../docs/25/img2_randomness_spectrum.png" alt="img2_randomness_spectrum.png" />
+    </a><figcaption><p>The randomness spectrum. Flat color and pure white noise are both visually uninteresting for opposite reasons. Noise — structured, controlled randomness — lives between the two extremes and is where interesting visuals come from.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<hr>
+<h2 id="historic-examples">Historic Examples</h2>
+<p>The person most responsible for developing practical noise for computer graphics is Ken Perlin, who worked on the film <em>Tron</em> in the early 1980s. He faced the problem that artists couldn&rsquo;t hand-paint every marble surface — he needed a way to generate convincing material textures procedurally at scale. His insight was that natural materials like marble have structure (veins run in directions, the scale of variation is controlled) but also apparent randomness (you can&rsquo;t predict exactly where a vein will be or how it will curve).</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/25/perlin_1985_IS_03.png">
+        <img src="../../docs/25/perlin_1985_IS_03.png" alt="perlin_1985_IS_03.png" />
+    </a><figcaption><p>Marble vase from Perlin&rsquo;s 1985 paper.
+            <a href="https://www.sci.utah.edu/~kpotter/Library/Papers/perlin:1985:IS/">&nbsp;From a web library.</a></p></figcaption>
+</figure>
+
+<p>Perlin&rsquo;s approach turned out to generalize far beyond marble. Simple geometric objects — a checkerboard, a sphere, a solid-colored object — immediately become more visually interesting when small amounts of noise are mixed into their color or surface detail. The smoke-like misty variation in a scene background, the variation in a wood grain, the subtle mottling in a painted surface — all of these come from controlled noise.</p>
+<p><strong>Wood</strong> is a particularly instructive case. The underlying structure of wood is concentric rings (the tree&rsquo;s annual growth). If you render <em>only</em> that ring structure — perfectly circular, perfectly regular — it doesn&rsquo;t look like wood at all; it looks like a mathematical diagram. The trick is to add just a bit of randomness to the rings: vary their eccentricity slightly, add a gentle twist along the length, tilt them a little. Each of these variations is small, but together they produce a result that reads convincingly as real wood grain.</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/25/umbc-wood.jpg">
+        <img src="../../docs/25/umbc-wood.jpg" alt="umbc-wood.jpg" />
+    </a><figcaption><p>Demonstration of how noise makes wood.
+            <a href="https://userpages.cs.umbc.edu/olano/s2002c17/">&nbsp;From Marc Olano&rsquo;s SIGGRAPH 2002 course notes.</a></p></figcaption>
+</figure>
+
+<h2 id="building-noise-three-key-ideas">Building Noise: Three Key Ideas</h2>
+<p>To understand how noise is constructed, start with a 1D case — it&rsquo;s easier to visualize, and the extension to 2D works the same way.</p>
+<p>Imagine we want a function <code>r = noise(u)</code> that maps our texture coordinate <code>u</code> to a value in [0,1]. We want this function to be:</p>
+<ul>
+<li>Deterministic (same <code>u</code> → same output)</li>
+<li>&ldquo;Random-looking&rdquo; (you can&rsquo;t predict the output from the input)</li>
+<li>Coherent (nearby <code>u</code> values produce nearby outputs — no wild jumps)</li>
+</ul>
+<h3 id="idea-1-a-pseudo-random-function">Idea 1: A Pseudo-Random Function</h3>
+<p>A common trick for a quick pseudo-random scalar in GLSL is:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#111">r</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span> <span style="color:#111">sin</span><span style="color:#111">(</span><span style="color:#111">u</span><span style="color:#111">)</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">100000.0</span> <span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The idea: <code>sin(u)</code> is a smooth, slowly-varying function. But, if we take some digits from the middle of number, these jump all over the place, without any predictable patern. Therefore, we take <code>fract()</code> (the fractional part) to keep the result in [0,1] after multiplying by a large number (to grab digits from the farther in the sequence). The result changes wildly for even tiny changes in <code>u</code>, so visually it looks random. There are many better pseudo-random functions out there — this is pedagogically simple, not production quality.</p>
+<figure class="" style="width: 600px;  ">
+    <a href="../../docs/25/img3_sin_noise_1d.png">
+        <img src="../../docs/25/img3_sin_noise_1d.png" alt="img3_sin_noise_1d.png" />
+    </a><figcaption><p>Building a 1D pseudo-random function. (a) sin(u) varies smoothly and predictably. (b) Multiplying by 100000 causes the sine to oscillate so fast that a tiny change in u produces a completely different value (shown here zoomed in near u=0). (c) Taking fract() keeps the result in [0,1] and the output looks random — but it is fully deterministic.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<p>This generates pseudo-randomness, but there is no coherence. A tiny change in <em>u</em> can lead to an arbitrary change in the output. So, not only is the pattern boring (very thin stripes), if the pixels shift even a little bit, the U values will be slightly different, and the texture changes completely. In fact, when you apply this to a triangle, the slight errors in how the sides of the triangle line up can cause artifacts.</p>
+<p>Here we apply that function as a texture (using the u value, and holding v constant).</p>
+<div class="sn-demo" data-step="1"></div>
+<p>This is a form of <strong>aliasing</strong>. The pseudo-random function has such high frequency that we&rsquo;re critically undersampling it — small changes in the sample location produce wildly different values. We can use this as a feature (since every measurement is effectively random).</p>
+<h3 id="idea-2-discretize-sample-at-a-grid">Idea 2: Discretize (Sample at a Grid)</h3>
+<p>The solution is to <em>slow down</em> the change. Instead of evaluating the pseudo-random function at every possible <code>u</code> value, we sample it only at a set of evenly-spaced integer positions. For example, if we want 40 &ldquo;noise bands,&rdquo; we evaluate the function only at <code>u = 0, 1, 2, ..., 39</code> (or equivalently, we quantize <code>u * 40</code> to the nearest integer).</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">i</span> <span style="color:#f92672">=</span> <span style="color:#111">floor</span><span style="color:#111">(</span><span style="color:#111">u</span> <span style="color:#f92672">*</span> <span style="color:#111">bands</span><span style="color:#111">);</span>        <span style="color:#75715e">// which band are we in?</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">r</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">sin</span><span style="color:#111">(</span><span style="color:#111">i</span><span style="color:#111">)</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">100000.0</span><span style="color:#111">);</span> <span style="color:#75715e">// pseudo-random value for this band</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now every fragment within the same band gets <em>exactly the same</em> value. The result is a set of bands of varying gray values — structured randomness, where the pattern stays stable as the surface moves.</p>
+<div class="sn-demo" data-step="2"></div>
+<p>Think of this as controlling the <strong>frequency</strong> of the noise. More bands = higher frequency = finer pattern. The choice of how many bands (or equivalently, how many samples per unit) determines the &ldquo;scale&rdquo; of the noise features.</p>
+<p>The frequency control is important: it allows us to control the kind of noise. Do we want big areas or small areas?</p>
+<h3 id="idea-3-interpolate-to-smooth">Idea 3: Interpolate to Smooth</h3>
+<p>Flat, constant bands look artificial — notice the hard edge where each band transitions to the next. The fix is to <strong>interpolate</strong> between the pseudo-random values at neighboring sample points.</p>
+<p>For each fragment, find which two sample points it falls between, look up the pseudo-random value at each endpoint, and mix between them based on the fractional position within the interval. Use a smooth interpolation function — a cubic or smoothstep — rather than linear interpolation, to avoid the gradient kinks you&rsquo;d get at the sample points.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">i</span> <span style="color:#f92672">=</span> <span style="color:#111">floor</span><span style="color:#111">(</span><span style="color:#111">u</span> <span style="color:#f92672">*</span> <span style="color:#111">bands</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">f</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">u</span> <span style="color:#f92672">*</span> <span style="color:#111">bands</span><span style="color:#111">);</span>       <span style="color:#75715e">// 0..1 position within the interval</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">r0</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">sin</span><span style="color:#111">(</span><span style="color:#111">i</span><span style="color:#111">)</span>     <span style="color:#f92672">*</span> <span style="color:#ae81ff">100000.0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">r1</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">sin</span><span style="color:#111">(</span><span style="color:#111">i</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1.0</span><span style="color:#111">)</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">100000.0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">smooth_f</span> <span style="color:#f92672">=</span> <span style="color:#111">smoothstep</span><span style="color:#111">(</span><span style="color:#ae81ff">0.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#111">f</span><span style="color:#111">);</span>   <span style="color:#75715e">// smoother than linear</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">r</span> <span style="color:#f92672">=</span> <span style="color:#111">mix</span><span style="color:#111">(</span><span style="color:#111">r0</span><span style="color:#111">,</span> <span style="color:#111">r1</span><span style="color:#111">,</span> <span style="color:#111">smooth_f</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The result is a smoothly-varying noise function that changes continuously but unpredictably.</p>
+<div class="sn-demo" data-step="3"></div>
+<p>So, we can create a &ldquo;random&rdquo; function that is unpredictable at the scale of the frequency, but coherently changes between these random values. This demo lets you see the effect of the number of bands (frequency).</p>
+<div class="sn-freq-demo"></div>
+<p>This is a very simple form of 1D noise. In practice, we use a better pseudo-random function and better interpolation.</p>
+<h2 id="extending-to-2d">Extending to 2D</h2>
+<p>The 1D construction extends naturally to 2D. Instead of a line of sample points, we have a grid of sample points, each with its own pseudo-random value. For a 2D noise function, we need a pseudo-random function of two inputs:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">hash</span><span style="color:#111">(</span><span style="color:#00a8c8">vec2</span> <span style="color:#111">p</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">return</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">sin</span><span style="color:#111">(</span><span style="color:#111">dot</span><span style="color:#111">(</span><span style="color:#111">p</span><span style="color:#111">,</span> <span style="color:#00a8c8">vec2</span><span style="color:#111">(</span><span style="color:#ae81ff">127.1</span><span style="color:#111">,</span> <span style="color:#ae81ff">311.7</span><span style="color:#111">)))</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">43758.5453</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Given a UV position, we find the four surrounding grid points, look up a random value at each, and bilinearly (or bicubically) interpolate between them.</p>
+<figure class="" style="width: 500px;  ">
+    <a href="../../docs/25/img4_2d_noise_frequencies.png">
+        <img src="../../docs/25/img4_2d_noise_frequencies.png" alt="img4_2d_noise_frequencies.png" />
+    </a><figcaption><p>2D value noise at four grid spacings. The grid spacing directly controls feature size: a 50×50 grid produces many small features (top left), while a 1×1 grid produces a single smooth gradient spanning the whole image (bottom right). Choosing the right frequency is the first step in dialing in the noise to match a natural phenomenon.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<p>The grid spacing controls the <strong>spatial frequency</strong> of the features. A fine grid produces small, rapidly-changing features. A coarse grid produces large, slowly-varying blobs. By choosing the grid spacing, we choose what &ldquo;scale&rdquo; of variation we&rsquo;re generating.</p>
+<h2 id="perlin-noise-and-better-approaches">Perlin Noise and Better Approaches</h2>
+<p>The simple approach above gives us functional noise, but it has several limitations. The pseudo-random function based on <code>sin</code> has visible patterns if you look closely. The interpolation exposes the underlying grid structure. And we&rsquo;ve only shown it at one frequency at a time.</p>
+<p><strong>Ken Perlin&rsquo;s approach</strong> (and modern variants of it) address all of these issues. The core ideas:</p>
+<p><strong>Better pseudo-randomness.</strong> Rather than using <code>sin()</code>, Perlin noise uses pre-computed tables of gradients at each lattice point. Modern GPU-friendly variants use hash functions with better statistical properties — the patterns are truly invisible.</p>
+<p><strong>Better interpolation.</strong> Perlin&rsquo;s improved noise uses a specific quintic polynomial for interpolation that has zero first <em>and</em> second derivatives at the lattice points. This prevents any visual artifacts at the grid locations.</p>
+<p><strong>Tileable.</strong> Good noise implementations are designed to tile seamlessly — the pattern repeats, but in a way that&rsquo;s hard to see. This matters for texture atlases and when you want a noise pattern to wrap around an object.</p>
+<p><strong>Multi-dimensional.</strong> Perlin noise works efficiently in 1D, 2D, and 3D. 3D noise is particularly useful for &ldquo;solid textures&rdquo; — procedural materials where the pattern is defined throughout 3D space, so when you cut a surface at any angle, you see a consistent cross-section of the material (like cutting through real marble or wood).</p>
+<figure class="" style="width: 500px;  ">
+    <a href="../../docs/25/img5_perlin_noise.png">
+        <img src="../../docs/25/img5_perlin_noise.png" alt="img5_perlin_noise.png" />
+    </a><figcaption><p>Perlin noise in 1D and 2D. Left: 1D Perlin noise rendered as horizontal brightness stripes, with the underlying 1D curve overlaid in green — note the smooth, continuous transitions. Center: 2D Perlin noise at low frequency, producing large organic blobs. Right: the same noise at higher frequency, producing fine-grained detail. Changing the frequency scale is the primary knob for controlling feature size.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<p>In practice, you don&rsquo;t need to implement Perlin noise yourself. <strong>Three.js</strong> has noise built in. The <a href="https://github.com/stegu/webgl-noise">webgl-noise</a> and <a href="https://github.com/stegu/psrdnoise">psrdnoise</a> libraries provide excellent open-source GLSL implementations that you can drop into your shaders.</p>
+<h2 id="multi-frequency-noise">Multi-Frequency Noise</h2>
+<p>A single frequency of noise produces patterns that look uniform — every feature is the same size. Natural materials, however, have variation at many scales simultaneously. A mountain has large-scale shape (the mountain), medium-scale roughness (rocky ridges and valleys), and fine-scale detail (individual rocks, dirt texture). Clouds have large billowing forms and small wispy edges.</p>
+<p>The technique for achieving this is straightforward: <strong>add noise at multiple frequencies together</strong>, typically with decreasing amplitude as frequency increases. This is often called <strong>fractal noise</strong> or <strong>turbulence</strong>, and the different frequency contributions are called <strong>octaves</strong>. Technically, an octave is a doubling of frequency.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">noise_val</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">noise_val</span> <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1.0</span>   <span style="color:#f92672">*</span> <span style="color:#111">noise</span><span style="color:#111">(</span><span style="color:#111">uv</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4.0</span><span style="color:#111">);</span>   <span style="color:#75715e">// low frequency, large contribution</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">noise_val</span> <span style="color:#f92672">+=</span> <span style="color:#ae81ff">0.5</span>   <span style="color:#f92672">*</span> <span style="color:#111">noise</span><span style="color:#111">(</span><span style="color:#111">uv</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">8.0</span><span style="color:#111">);</span>   <span style="color:#75715e">// medium frequency</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">noise_val</span> <span style="color:#f92672">+=</span> <span style="color:#ae81ff">0.25</span>  <span style="color:#f92672">*</span> <span style="color:#111">noise</span><span style="color:#111">(</span><span style="color:#111">uv</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">16.0</span><span style="color:#111">);</span>  <span style="color:#75715e">// high frequency, small contribution</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">noise_val</span> <span style="color:#f92672">/=</span> <span style="color:#ae81ff">1.75</span><span style="color:#111">;</span>                        <span style="color:#75715e">// normalize</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The result has large-scale structure dominated by the low-frequency component, but with medium and fine details overlaid. The ratio of amplitude between successive octaves is often called <strong>persistence</strong> — lower persistence means the fine detail is weaker relative to the coarse structure.</p>
+<figure class="" style="width: 600px;  ">
+    <a href="../../docs/25/img6_multifrequency_noise.png">
+        <img src="../../docs/25/img6_multifrequency_noise.png" alt="img6_multifrequency_noise.png" />
+    </a><figcaption><p>Multi-frequency noise mixing. Low-frequency noise alone (left) gives large, smooth blobs. High-frequency noise alone (right) gives fine-grained detail with no large-scale structure. Adding them together (center, weighted 70% low + 30% high) produces blobs with textured interiors — a much more natural and interesting appearance than either component alone.&nbsp;Image generated by Claude.</p></figcaption>
+</figure>
+
+<h2 id="using-noise">Using Noise</h2>
+<h2 id="how-to-use-noise-in-practice">How to Use Noise in Practice</h2>
+<p>Once you have a noise function, the question is how to put it to work. Here are the main patterns:</p>
+<p><strong>Noise as color variation.</strong> Blend between two colors based on the noise value, or shift the hue/saturation. A solid wood-colored surface, modified by noise to vary between light and dark grain, immediately reads as more realistic than a flat color.</p>
+<p><strong>Noise as a pattern input.</strong> Rather than coloring directly, use noise to perturb an input to some other function. For the wood grain example: compute the radius from the tree&rsquo;s axis, add a noise value to it, then use <code>sin(radius + noise)</code> to get the ring pattern. The rings are still rings, but they wobble naturally.</p>
+<p><strong>Noise as displacement or bump.</strong> Use noise to perturb a surface normal (bump mapping) or to offset a texture lookup. This adds apparent surface detail — the surface looks rough or textured — without changing the actual geometry.</p>
+<p><strong>Noise to break up motion.</strong> When objects move, adding noise to their trajectories or to their animation parameters prevents them from looking mechanical. A firefly that wanders with noise-based offsets reads as alive; one that follows a sine wave reads as a toy.</p>
+<p><strong>Mixing frequencies.</strong> For most natural-looking results, mix at least two or three octaves of noise. Start with a low-frequency component that provides the large-scale structure, then add a higher-frequency component at lower amplitude to add fine detail. Adjust the frequencies and amplitudes until the result matches the natural phenomenon you&rsquo;re trying to simulate.</p>
+<p><strong>It is an art.</strong> There&rsquo;s no formula for the right combination of frequency and amplitude. You tune it the same way a sculptor works clay — iteratively, by eye, until it feels right. Looking at reference images of the real material helps: notice what scale the features are, how much contrast there is between light and dark areas, whether the features are round and blobby or elongated and streaky.</p>
+<h2 id="an-example">An Example</h2>
+<p>How do we turn Perlin noise into something meaningful? Again, it&rsquo;s an art, and requires experimentation. Here is an example that Gemini made:</p>
+<p><canvas id="cloud-canvas" width="600" height="400"></canvas></p>
+<p>I had it explain what it did:</p>
+<p>To turn abstract, mathematical noise into a convincing natural feature like <strong>white clouds in a blue sky</strong>, we apply three core concepts from graphics programming: <strong>Fractal Summation</strong>, <strong>Thresholding</strong>, and <strong>Color Blending</strong>.</p>
+<h2 id="1-the-core-color-the-sky">1. The Core Color (The Sky)</h2>
+<p>We begin with a solid base. A simple vertical gradient, moving from a deep blue at the top to a lighter, hazier blue at the horizon, provides a realistic foundation.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#75715e">// --- Base Sky Color (Fragment Shader) ---</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">vec3</span> <span style="color:#111">topColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">0.1</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.4</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.9</span><span style="color:#111">);</span>    <span style="color:#75715e">// Deep blue</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">vec3</span> <span style="color:#111">bottomColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">0.5</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.7</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">);</span> <span style="color:#75715e">// Light blue</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">vec3</span> <span style="color:#111">skyColor</span> <span style="color:#f92672">=</span> <span style="color:#111">mix</span><span style="color:#111">(</span><span style="color:#111">bottomColor</span><span style="color:#111">,</span> <span style="color:#111">topColor</span><span style="color:#111">,</span> <span style="color:#111">vUv</span><span style="color:#111">.</span><span style="color:#111">y</span><span style="color:#111">);</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="2-the-cloud-texture-fbm-noise">2. The Cloud Texture (fBm Noise)</h2>
+<p>A single layer of &ldquo;classic&rdquo; Perlin or Simplex noise looks like soft, blurry lumps. It lacks the &ldquo;wispy&rdquo; detail of real vapor. To fix this, we use <strong>Fractional Brownian Motion (fBm)</strong>.</p>
+<p>We &ldquo;stack&rdquo; multiple octaves of the same noise function. Each successive layer has:</p>
+<ul>
+<li><strong>Higher Frequency:</strong> More small-scale detail.</li>
+<li><strong>Lower Amplitude:</strong> Less influence on the overall shape.</li>
+</ul>
+<p>This creates high-frequency &ldquo;wispiness&rdquo; that sits on top of the low-frequency &ldquo;mass&rdquo; of the cloud.</p>
+<p>In short, <strong>fBm</strong> (Fractional Brownian Motion) is the process of &ldquo;stacking&rdquo; multiple layers of noise to create natural complexity. We take a smooth base shape and add smaller and smaller details on top of it, much like how a mountain has large peaks, smaller crags, and tiny pebbles.</p>
+<p>By doubling the <strong>frequency</strong> (detail) and halving the <strong>amplitude</strong> (strength) in each step, we simulate the &ldquo;self-similarity&rdquo; found in clouds, terrain, and fire.</p>
+<p>Here is the specific loop used in the cloud example:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">fBm</span><span style="color:#111">(</span><span style="color:#00a8c8">vec2</span> <span style="color:#111">st</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">value</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">amplitude</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// We loop 6 times (6 &#34;octaves&#34;) to build up the detail</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">for</span> <span style="color:#111">(</span><span style="color:#00a8c8">int</span> <span style="color:#111">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#111">;</span> <span style="color:#111">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">6</span><span style="color:#111">;</span> <span style="color:#111">i</span><span style="color:#f92672">++</span><span style="color:#111">)</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Add a layer of noise</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#111">value</span> <span style="color:#f92672">+=</span> <span style="color:#111">amplitude</span> <span style="color:#f92672">*</span> <span style="color:#111">snoise</span><span style="color:#111">(</span><span style="color:#111">st</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Prepare the next layer: </span>
+</span></span><span style="display:flex;"><span>        <span style="color:#111">st</span> <span style="color:#f92672">*=</span> <span style="color:#ae81ff">2.0</span><span style="color:#111">;</span>          <span style="color:#75715e">// Double the frequency (smaller details)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#111">amplitude</span> <span style="color:#f92672">*=</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>   <span style="color:#75715e">// Halve the amplitude (weaker influence)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">return</span> <span style="color:#111">value</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="3-shaping-and-thresholding-defining-puffs">3. Shaping and Thresholding (Defining &ldquo;Puffs&rdquo;)</h2>
+<p>Raw fBm noise is a continuous grayscale signal (outputting values from 0.0 to 1.0). If we simply colored it white, the sky would look like a flat gray fog.</p>
+<p>To define the cloud edges, we apply <strong>Thresholding</strong>. We &ldquo;cut away&rdquo; the lower noise values (representing clear air) and keep only the highest peaks (representing dense vapor). We use the <code>smoothstep()</code> function for this because it provides a soft, non-linear transition, mimicking how light scatters at the soft boundary of a cloud.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#75715e">// --- Shaping Logic ---</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">noiseValue</span> <span style="color:#f92672">=</span> <span style="color:#111">fBm</span><span style="color:#111">(</span><span style="color:#111">vUv</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4.0</span><span style="color:#111">);</span>                 <span style="color:#75715e">// The detailed noise terrain</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#111">density</span> <span style="color:#f92672">=</span> <span style="color:#111">smoothstep</span><span style="color:#111">(</span><span style="color:#ae81ff">0.4</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.7</span><span style="color:#111">,</span> <span style="color:#111">noiseValue</span><span style="color:#111">);</span>  <span style="color:#75715e">// 0.4 = edge start, 0.7 = fully opaque</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="4-the-final-blend">4. The Final Blend</h2>
+<p>We now have our base <code>skyColor</code> and a grayscale <code>density</code> mask. The final step is to define the color of our clouds (pure white) and use the <code>density</code> mask to blend them into the sky.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#75715e">// --- Final Blend ---</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">vec3</span> <span style="color:#111">cloudColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">);</span> 
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">vec3</span> <span style="color:#111">finalResult</span> <span style="color:#f92672">=</span> <span style="color:#111">mix</span><span style="color:#111">(</span><span style="color:#111">skyColor</span><span style="color:#111">,</span> <span style="color:#111">cloudColor</span><span style="color:#111">,</span> <span style="color:#111">density</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">finalResult</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="summary-of-the-thinking-process">Summary of the &ldquo;Thinking&rdquo; Process</h3>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Step</th>
+          <th style="text-align: left">Goal</th>
+          <th style="text-align: left">Mathematical Tool</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>Environment</strong></td>
+          <td style="text-align: left">Create a sense of atmosphere.</td>
+          <td style="text-align: left">Linear Gradient (<code>mix</code>)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Turbulence</strong></td>
+          <td style="text-align: left">Create natural-looking complexity.</td>
+          <td style="text-align: left">Fractal Summation (<code>fBm</code>)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Volume</strong></td>
+          <td style="text-align: left">Define where the &ldquo;object&rdquo; begins and ends.</td>
+          <td style="text-align: left">Thresholding (<code>smoothstep</code>)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Animation</strong></td>
+          <td style="text-align: left">Simulate wind and movement.</td>
+          <td style="text-align: left">Coordinate Offsetting (<code>uv.x += time</code>)</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="putting-it-together-impressive-results">Putting It Together: Impressive Results</h2>
+<p>When used well, noise transforms simple geometry into visually compelling renderings. Ken Perlin&rsquo;s noise-based approach enabled the generation of entire natural environments — terrains, skies, water — that would have been impossible to model by hand. The mountains in a procedurally-generated landscape use multi-frequency noise for elevation, and then layer on additional noise to determine where snow falls, where rock faces are exposed, and where vegetation grows.</p>
+<p>The takeaway is this: noise is not just a trick for making textures look rough. It is a fundamental tool for procedural content generation — the way to turn mathematical patterns into things that look as if they emerged from natural processes. A shader that uses noise well can produce materials that are indistinguishable from photographs.</p>
+<h2 id="implementing-noise">Implementing Noise</h2>
+<p>While the noise functions are simple in concept, the details of the implementation can matter a lot. Therefore, it is often best to use a standard implementation where someone has thoroughly thought through all of the details. An implementation is built into three.js (for TSL). Good, open source implementations are available for standard shading languages in the <a href="https://github.com/stegu/webgl-noise">webgl-noise</a> and <a href="https://github.com/stegu/psrdnoise">psrdnoise</a> libraries.</p>
+<p>If you want to use noise in GLSL, you pretty much need to copy one of the open source implementations into your shader.</p>
+<h2 id="summary">Summary</h2>
+<ul>
+<li>Shaders cannot use true randomness: each frame and each fragment is independent, making truly random values unstable and incoherent.</li>
+<li><strong>Noise</strong> = pseudo-random + structured: looks random but is deterministic and coherent.</li>
+<li>The basic construction: sample a pseudo-random function at evenly-spaced grid points, then interpolate smoothly between them. Grid spacing controls frequency; interpolation quality controls smoothness.</li>
+<li><strong>Perlin noise</strong> is the classic implementation; modern variants (simplex noise, etc.) are more efficient on GPUs and have better properties.</li>
+<li><strong>Multi-frequency noise</strong> (fractal/turbulence) combines several octaves to produce detail at multiple scales simultaneously.</li>
+<li>In practice: find a quality implementation, mix frequencies to taste, and use noise to break up the perfect regularity of procedural patterns. The results are worth the effort.</li>
+</ul>
+<p>
+
+</p>
+<script src="sin-noise-demo.js"></script>
+<script src="noise-frequency.js"></script>
+<script src="cloud.js" type="module"></script>
+<a href="../../docs/26/" class="Next__Page">Next: Page &nbsp;26&nbsp;-&nbsp;Procedural Texture Examples</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Selected"> 25: Noise </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p25",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

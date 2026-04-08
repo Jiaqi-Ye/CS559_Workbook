@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 11: Using Multiple Maps</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Modern graphics use a variety of texture mapping tricks to create the appearances of objects. This means that for any point on an object, many different texture maps may be involved.</p>
+<p>We can categorize these into two rough categories:</p>
+<ul>
+<li>Maps that provide information about the <strong>specific point</strong>. This is the classic texture mapping application where each point on an object has a texture (uv) coordinate that specifies a location to lookup in a texture. Points could have different coordinates for different maps. Regular (color) texture maps and bump/normal maps are examples of these textures.</li>
+<li>Maps that provide information about the <strong>scene</strong>. Environment maps and shadow maps are examples. For these, the texture coordinates are usually computed dynamically based on where the object is.</li>
+</ul>
+<h2 id="advanced-material-maps">Advanced Material Maps</h2>
+<p>Controlling object appearance with texture maps allows each point on the object to have different properties. The idea is that there is a single &ldquo;super-material&rdquo; that supports many different appearances, and that these appearances are controlled per-point using parameters from the texture map. The alternative is to use different shading algorithms for each triangles, which is problematic because switching between materials is costly (it requires switching shader programs).</p>
+<p>The standard maps used for appearance include:</p>
+<ul>
+<li>Color (albedo) - this is the primary color the point appears. It is used for diffuse shading, and can be used for metalic highlights. This is what &ldquo;normal texture maps&rdquo; do.</li>
+<li>Bump/Normal - this changes the direction of the normal directions to make the surface look less smooth.</li>
+<li>Metalness - this controls the color of the specular highlights. Metallic objects reflect their primary color; plastic objects have white specular highlights.</li>
+<li>Roughness - this controls how shart the specular highlights are, roughly what the specular exponents does in the Phong model. It also controls the amount of specular reflection.</li>
+<li>Ambient Occlusion - this controls how much light gets to the point, simulating the effect of self shadowing.</li>
+</ul>
+<p>The idea is that an object is one mesh that has UVs set to connect points on the object to appropriate places in the maps (plural) that switch between the varied properties.</p>
+<p>The ambient occlusion map is typically computed by running an lighting calculation that computes detailed shadows. This precomputation is only for self-occlusions (or limited inter-object occlusions), but can add a lot of appearance detail.</p>
+<p>You can see a demo with some complex surface appearances that use multiple maps (and a tool that lets you turn the maps on and off) at the <a href="https://cs559.github.io/AmbientCG-Viewer/">AmbientCG Viewer</a>. AmbiegCG is a website that has many texture examples, including surface properties.</p>
+<h2 id="layers">Layers</h2>
+<p>An object might use multiple textures to &ldquo;layer&rdquo; appearances. For example, the main maps might provide a shiny metal or wood surface and a layer might add dirt or other imperfections.</p>
+<h2 id="summary-multi-maps">Summary: Multi-Maps</h2>
+<p>The computation of the color for a single point can involve a lot of different maps. But they allow a consistent process to be applied to all points on an object which avoids switching costs.</p>
+<a href="../../docs/12/" class="Next__Page">Next: Page &nbsp;12&nbsp;-&nbsp;Multi-Pass Rendering</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Selected"> 11: Using Multiple Maps </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p11",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

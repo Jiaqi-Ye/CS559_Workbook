@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pipeline Demo: Many Triangles</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #16213e;
+      font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+      width: 680px;
+    }
+    #div1 { width: 680px; }
+  </style>
+</head>
+<body>
+  <div id="div1"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+      "three/": "https://unpkg.com/three@0.180.0/"
+    }
+  }
+  </script>
+  <script type="module" src="06-07-01.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 531 67.5">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #662d91;
+      }
+
+      .cls-3 {
+        font-size: 9px;
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-2, .cls-6 {
+        font-family: ArialMT, Arial;
+      }
+
+      .cls-3, .cls-5 {
+        fill: #231f20;
+      }
+
+      .cls-4, .cls-5, .cls-2, .cls-6 {
+        font-size: 6px;
+      }
+
+      .cls-4, .cls-7 {
+        fill: #006838;
+      }
+
+      .cls-8 {
+        stroke: #006838;
+      }
+
+      .cls-8, .cls-9, .cls-10, .cls-11 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-8, .cls-9, .cls-11 {
+        fill: none;
+      }
+
+      .cls-9 {
+        stroke: #214194;
+      }
+
+      .cls-6, .cls-12 {
+        fill: #214194;
+      }
+
+      .cls-13 {
+        letter-spacing: 0em;
+      }
+
+      .cls-14 {
+        letter-spacing: 0em;
+      }
+
+      .cls-10 {
+        fill: #fff;
+        stroke: #231f20;
+      }
+
+      .cls-15 {
+        letter-spacing: -.11em;
+      }
+
+      .cls-16 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-17 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-18 {
+        letter-spacing: -.04em;
+      }
+
+      .cls-11 {
+        stroke: #662d91;
+      }
+    </style>
+  </defs>
+  <rect class="cls-10" x="4.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-3" transform="translate(18.49 25.5)"><tspan x="0" y="0">Application</tspan></text>
+  <rect class="cls-10" x="94.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <rect class="cls-10" x="229.5" y="4.5" width="27" height="36" rx="11.74" ry="11.74"/>
+  <text class="cls-5" transform="translate(241 33.23) rotate(-90)"><tspan class="cls-18" x="0" y="0">T</tspan><tspan x="3.44" y="0">riangle</tspan><tspan x="-4.11" y="7.2">Processing</tspan></text>
+  <rect class="cls-10" x="184.5" y="4.5" width="27" height="36" rx="11.74" ry="11.74"/>
+  <text class="cls-5" transform="translate(196 33.23) rotate(-90)"><tspan class="cls-18" x="0" y="0">T</tspan><tspan x="3.44" y="0">riangle</tspan><tspan x="-2.28" y="7.2">Assembly</tspan></text>
+  <text class="cls-3" transform="translate(117.74 21)"><tspan class="cls-17" x="0" y="0">V</tspan><tspan x="5.51" y="0">ertex</tspan><tspan x="-9.5" y="10.8">Processing</tspan></text>
+  <rect class="cls-10" x="274.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-3" transform="translate(284.24 25.5)"><tspan x="0" y="0">Rasterization</tspan></text>
+  <rect class="cls-10" x="364.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-3" transform="translate(381.24 21)"><tspan x="0" y="0">Fragment</tspan><tspan x="-3" y="10.8">Processing</tspan></text>
+  <rect class="cls-10" x="454.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-3" transform="translate(461.82 25.5)"><tspan class="cls-15" x="0" y="0">T</tspan><tspan class="cls-13" x="4.5" y="0">est and </tspan><tspan class="cls-16" x="36.52" y="0">W</tspan><tspan class="cls-14" x="44.85" y="0">rite</tspan></text>
+  <polygon class="cls-12" points="76.5 18 76.5 27 85.5 27 85.5 31.5 94.5 22.5 85.5 13.5 85.5 18 76.5 18"/>
+  <polygon class="cls-12" points="166.5 18 166.5 27 175.5 27 175.5 31.5 184.5 22.5 175.5 13.5 175.5 18 166.5 18"/>
+  <polygon class="cls-7" points="211.5 18 211.5 27 220.5 27 220.5 31.5 229.5 22.5 220.5 13.5 220.5 18 211.5 18"/>
+  <polygon class="cls-7" points="256.5 18 256.5 27 265.5 27 265.5 31.5 274.5 22.5 265.5 13.5 265.5 18 256.5 18"/>
+  <polygon class="cls-1" points="346.5 18 346.5 27 355.5 27 355.5 31.5 364.5 22.5 355.5 13.5 355.5 18 346.5 18"/>
+  <polygon class="cls-1" points="436.5 18 436.5 27 445.5 27 445.5 31.5 454.5 22.5 445.5 13.5 445.5 18 436.5 18"/>
+  <g>
+    <line class="cls-9" x1="81" y1="49.5" x2="81" y2="34.06"/>
+    <polygon class="cls-12" points="81 27 85.07 36.95 81 34.59 76.94 36.95 81 27"/>
+  </g>
+  <text class="cls-6" transform="translate(70.66 58.5)"><tspan x="0" y="0">vertices</tspan><tspan x="-5" y="7.2">w/attributes</tspan></text>
+  <g>
+    <line class="cls-9" x1="171" y1="49.5" x2="171" y2="34.06"/>
+    <polygon class="cls-12" points="171 27 175.07 36.95 171 34.59 166.94 36.95 171 27"/>
+  </g>
+  <text class="cls-6" transform="translate(160.66 58.5)"><tspan x="0" y="0">vertices</tspan><tspan x="-7.34" y="7.2">w/screen pos</tspan></text>
+  <g>
+    <line class="cls-8" x1="216" y1="49.5" x2="216" y2="34.06"/>
+    <polygon class="cls-7" points="216 27 220.07 36.95 216 34.59 211.94 36.95 216 27"/>
+  </g>
+  <text class="cls-4" transform="translate(204.66 58.5)"><tspan x="0" y="0">triangles</tspan></text>
+  <g>
+    <line class="cls-8" x1="261" y1="49.5" x2="261" y2="34.06"/>
+    <polygon class="cls-7" points="261 27 265.07 36.95 261 34.59 256.94 36.95 261 27"/>
+  </g>
+  <text class="cls-4" transform="translate(249.66 58.5)"><tspan x="0" y="0">triangles</tspan></text>
+  <g>
+    <line class="cls-11" x1="351" y1="49.5" x2="351" y2="34.06"/>
+    <polygon class="cls-1" points="351 27 355.07 36.95 351 34.59 346.94 36.95 351 27"/>
+  </g>
+  <text class="cls-2" transform="translate(337.66 58.5)"><tspan x="0" y="0">fragments</tspan></text>
+  <g>
+    <line class="cls-11" x1="441" y1="49.5" x2="441" y2="34.06"/>
+    <polygon class="cls-1" points="441 27 445.07 36.95 441 34.59 436.94 36.95 441 27"/>
+  </g>
+  <text class="cls-2" transform="translate(427.66 58.5)"><tspan x="0" y="0">fragments</tspan></text>
+</svg>

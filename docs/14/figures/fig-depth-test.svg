@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 400" width="740" height="400" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="arr-y"  markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#d97706"/>
+    </marker>
+    <marker id="arr-b"  markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-g"  markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#16a34a"/>
+    </marker>
+    <marker id="arr-r"  markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+    <filter id="drop2" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000025"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="740" height="400" fill="#f1f5f9"/>
+
+  <!-- Panel titles -->
+  <rect x="10" y="10" width="350" height="36" rx="6" fill="#dcfce7"/>
+  <text x="185" y="33" text-anchor="middle" fill="#15803d" font-size="15" font-weight="700">Case 1: Surface Point is LIT</text>
+
+  <rect x="380" y="10" width="350" height="36" rx="6" fill="#fee2e2"/>
+  <text x="555" y="33" text-anchor="middle" fill="#b91c1c" font-size="15" font-weight="700">Case 2: Surface Point is IN SHADOW</text>
+
+  <!-- Divider -->
+  <line x1="370" y1="0" x2="370" y2="400" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+  <!-- ══════════ LEFT PANEL — LIT ══════════ -->
+
+  <!-- Light source -->
+  <circle cx="290" cy="85" r="20" fill="#fbbf24" filter="url(#drop2)"/>
+  <g stroke="#d97706" stroke-width="2" stroke-linecap="round">
+    <line x1="290" y1="58" x2="290" y2="50"/>  <line x1="290" y1="112" x2="290" y2="120"/>
+    <line x1="263" y1="85" x2="255" y2="85"/> <line x1="317" y1="85" x2="325" y2="85"/>
+    <line x1="271" y1="66" x2="265" y2="60"/>  <line x1="309" y1="66" x2="315" y2="60"/>
+  </g>
+  <text x="290" y="140" text-anchor="middle" fill="#92400e" font-size="12" font-weight="700">Light</text>
+
+  <!-- The single object (close box) -->
+  <rect x="140" y="230" width="80" height="70" rx="3" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2" filter="url(#drop2)"/>
+  <text x="180" y="271" text-anchor="middle" fill="#1e3a8a" font-size="13" font-weight="700">Object</text>
+
+  <!-- Light ray from light to top of object (hits the surface the camera also sees) -->
+  <!-- The surface point P is at the top face, ~180,230 -->
+  <line x1="286" y1="104" x2="182" y2="228" stroke="#d97706" stroke-width="2.5" marker-end="url(#arr-y)"/>
+  <!-- depth label along the ray -->
+  <text x="250" y="172" text-anchor="middle" fill="#92400e" font-size="11" font-style="italic" transform="rotate(-47,250,172)">d_map = 8.4</text>
+
+  <!-- Camera on the left -->
+  <rect x="30" y="248" width="40" height="28" rx="4" fill="#7c3aed"/>
+  <circle cx="50" cy="262" r="10" fill="#a78bfa"/>
+  <circle cx="50" cy="262" r="5" fill="#4c1d95"/>
+  <text x="50" y="294" text-anchor="middle" fill="#5b21b6" font-size="12" font-weight="700">Camera</text>
+
+  <!-- Camera ray to the same surface point -->
+  <line x1="70" y1="262" x2="138" y2="249" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b)"/>
+
+  <!-- Surface point P (top-left of object) -->
+  <circle cx="180" cy="230" r="6" fill="#d97706"/>
+  <text x="172" y="225" text-anchor="end" fill="#475569" font-size="11" font-style="italic">P</text>
+
+  <!-- Shadow map lookup -->
+  <rect x="80" y="328" width="200" height="52" rx="5" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#drop2)"/>
+  <text x="180" y="347" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Shadow map lookup at P:</text>
+  <text x="180" y="363" text-anchor="middle" fill="#334155" font-size="11">d_map = 8.4  |  d_surface = 8.4</text>
+  <text x="180" y="376" text-anchor="middle" fill="#15803d" font-size="12" font-weight="700">d_surface ≈ d_map  →  LIT ✓</text>
+
+  <!-- Green check verdict -->
+  <circle cx="185" cy="200" r="22" fill="#16a34a" filter="url(#drop2)"/>
+  <text x="185" y="207" text-anchor="middle" fill="white" font-size="22" font-weight="900">✓</text>
+
+  <!-- ══════════ RIGHT PANEL — IN SHADOW ══════════ -->
+
+  <!-- Light source -->
+  <circle cx="660" cy="85" r="20" fill="#fbbf24" filter="url(#drop2)"/>
+  <g stroke="#d97706" stroke-width="2" stroke-linecap="round">
+    <line x1="660" y1="58" x2="660" y2="50"/>  <line x1="660" y1="112" x2="660" y2="120"/>
+    <line x1="633" y1="85" x2="625" y2="85"/> <line x1="687" y1="85" x2="695" y2="85"/>
+    <line x1="641" y1="66" x2="635" y2="60"/>  <line x1="679" y1="66" x2="685" y2="60"/>
+  </g>
+  <text x="660" y="140" text-anchor="middle" fill="#92400e" font-size="12" font-weight="700">Light</text>
+
+  <!-- Object A: the BLOCKER (closer to the light) -->
+  <rect x="570" y="200" width="70" height="70" rx="3" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2" filter="url(#drop2)"/>
+  <text x="605" y="238" text-anchor="middle" fill="#1e3a8a" font-size="12" font-weight="700">Blocker</text>
+  <text x="605" y="254" text-anchor="middle" fill="#1d4ed8" font-size="11">(close)</text>
+
+  <!-- Object B: the SHADOWED surface (farther) -->
+  <rect x="430" y="230" width="70" height="70" rx="3" fill="#e2e8f0" stroke="#64748b" stroke-width="2" filter="url(#drop2)"/>
+  <text x="465" y="268" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">Surface</text>
+  <text x="465" y="284" text-anchor="middle" fill="#64748b" font-size="11">(far)</text>
+
+  <!-- Light ray hits Blocker (solid) -->
+  <line x1="656" y1="104" x2="607" y2="198" stroke="#d97706" stroke-width="2.5" marker-end="url(#arr-y)"/>
+  <!-- depth at blocker -->
+  <text x="650" y="162" text-anchor="end" fill="#92400e" font-size="11" font-style="italic" transform="rotate(-63,650,162)">d_map = 5.1</text>
+
+  <!-- Blocked ray toward Object B (dashed, doesn't reach) -->
+  <line x1="574" y1="210" x2="500" y2="240" stroke="#d97706" stroke-width="1.8" stroke-dasharray="6,4" opacity="0.5"/>
+
+  <!-- X block indicator -->
+  <circle cx="570" cy="210" r="7" fill="#ef4444" opacity="0.9"/>
+  <line x1="565" y1="205" x2="575" y2="215" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="575" y1="205" x2="565" y2="215" stroke="white" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Camera on the left of right panel -->
+  <rect x="392" y="248" width="40" height="28" rx="4" fill="#7c3aed"/>
+  <circle cx="412" cy="262" r="10" fill="#a78bfa"/>
+  <circle cx="412" cy="262" r="5" fill="#4c1d95"/>
+  <text x="412" y="294" text-anchor="middle" fill="#5b21b6" font-size="12" font-weight="700">Camera</text>
+
+  <!-- Camera ray to surface point Q (top face of Object B) -->
+  <!-- Q is at ~465, 230 -->
+  <line x1="432" y1="258" x2="462" y2="232" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b)"/>
+
+  <!-- Surface point Q -->
+  <circle cx="465" cy="230" r="6" fill="#475569"/>
+  <text x="458" y="225" text-anchor="end" fill="#475569" font-size="11" font-style="italic">Q</text>
+
+  <!-- Shadow map lookup box -->
+  <rect x="385" y="328" width="235" height="60" rx="5" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#drop2)"/>
+  <text x="502" y="347" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Shadow map lookup at Q:</text>
+  <text x="502" y="363" text-anchor="middle" fill="#334155" font-size="11">d_map = 5.1  |  d_surface = 9.7</text>
+  <text x="502" y="379" text-anchor="middle" fill="#b91c1c" font-size="12" font-weight="700">d_surface &gt; d_map  →  IN SHADOW ✗</text>
+
+  <!-- Red X verdict -->
+  <circle cx="462" cy="200" r="22" fill="#dc2626" filter="url(#drop2)"/>
+  <text x="462" y="207" text-anchor="middle" fill="white" font-size="22" font-weight="900">✗</text>
+
+  <!-- Annotation: "something else is closer" -->
+  <rect x="498" y="168" width="160" height="28" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="578" y="186" text-anchor="middle" fill="#b91c1c" font-size="11">Blocker is closer to the light</text>
+</svg>

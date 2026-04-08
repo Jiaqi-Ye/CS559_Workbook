@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 7: Handling Occlusion</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The solidity of objects is one of the strongest cues for 3D perception. We cannot see through most objects: objects closer to the viewpoint occlude those behind them.</p>
+<p>With rasterization, multiple objects can potentially cover a pixel. We need some mechanism for deciding which one gets to choose the color of the pixel. In 2D, we typically let the last object drawn cover over earlier objects. However, this doesn&rsquo;t work in 3D, where we want the object in front to give the color, and we may not know which object is in front ahead of time (because it depends on viewpoint).</p>
+<p>In practice: the hardware uses the Z-Buffer algorithm. The Painter&rsquo;s Algorithm is useful to understand, and is often handy for simple software implementations. While you may not implement the Z-Buffer algorithm (unless you are designing hardware), it is important to understand its quirks.</p>
+<h2 id="the-painters-algorithm">The Painter&rsquo;s Algorithm</h2>
+<p>The painter&rsquo;s algorithm is a simple way to achieve occlusion. We paint the objects in the back first. Then, when we paint the closer objects, they cover over the objects in the back. This is just like how painters (especially those who work in non-translucent media) work.</p>
+<p>The key to the painter&rsquo;s algorithm is that we need to collect all of the triangles so that we can sort them in order of distance back to front. You should notice that there are some catches in this:</p>
+<ol>
+<li>We need to collect all the triangles before doing any drawing.</li>
+<li>The triangles need to be sortable: we need to be able to determine which one is closer. If the triangles overlap in depth (or intersect), there may be a problem.</li>
+<li>We need to sort the list of triangles. While sorting is fast (generally <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>), in graphics anything worse than linear is considered slow.</li>
+<li>The triangles must be drawn in order. We cannot draw them in parallel. The objects in back must be drawn first.</li>
+<li>It can be wasteful: we draw the objects in back, even if another object will cover them. We call this problem <strong>overdraw</strong>, when the same pixel is drawn (over-written) many times, even though only the final color will be seen.</li>
+</ol>
+<p>The painter&rsquo;s algorithm violates the independence assumption that we like to have for efficient rasterization. However, it is very easy to implement, so it is often preferred for simple situations where performance isn&rsquo;t critical. The demo in the last workbook where I made a spinning cube using the Canvas 2D API used the painter&rsquo;s algorithm.</p>
+<p>The inability to deal with situations where the triangles have no clear ordering is problematic. It cannot handle cases where two triangles intersect: one of them must be drawn first, and it will cover over the other one - even when that one is in front in places. To handle intersecting triangles, painter&rsquo;s algorithm implementations often cut the triangles into pieces, which adds complexity.</p>
+<h2 id="the-z-buffer-algorithm">The Z-Buffer Algorithm</h2>
+<p>The Z-Buffer algorithm was designed to preserve the independence assumption of rasterization. Or, to be more precise, the independence assumption (and the performance benefits it provides) were made possible because of the invention of the Z-Buffer algorithm.</p>
+<p>The Z-Buffer is generally credited to Ed Catmull, the Turing Award-winning computer scientist who was the founder of Pixar, and inventor of many other important things in computer graphics. However, another famous computer graphics researcher (Wolfgang Strasser) developed a similar idea around the same time in Europe.</p>
+<p>The key idea behind the Z-Buffer algorithm is that it makes the occlusion decision on a per-pixel basis by storing extra information along with the resulting pixel colors. This contrasts with the Painter&rsquo;s Algorithm, which makes decisions on a per-object basis.</p>
+<p>The Z-Buffer extends the image that is being drawn to store depth information in addition to color information for each pixel in the resulting image. When a pixel is &ldquo;filled&rdquo; by writing a color into its memory location, the writing process also stores the depth information (the Z-value) associated with the point providing the color. The trick is that as part of writing the pixel, the drawing method first does a test to decide if the new color/depth value is closer than the one that is already there. This decision is made for every pixel write that the rasterizer does.</p>
+<p>To describe the process in more detail:</p>
+<ol>
+<li>The image has memory for the color for each pixel, but also a depth value per pixel.</li>
+<li>When the image is initialized (i.e., cleared before drawing), the &ldquo;maximally far&rdquo; value is written to all pixels. Note that because we typically look down the Z-axis, the maximally far in front value is a large negative number.</li>
+<li>During the drawing process, the rasterization algorithm computes the color and the depth for each fragment. If it was not concerned about occlusion, this color would be written to memory.</li>
+<li>For each fragment, the &ldquo;write color to memory&rdquo; step is replaced with a read/test/write step:
+<ol>
+<li>The existing Z-value is read from the image.</li>
+<li>If the existing value is closer than the new value, the fragment is rejected.</li>
+<li>If the fragment is not rejected, its color and Z-value are written into memory.</li>
+</ol>
+</li>
+</ol>
+<p>Notice that the Z-Buffer algorithm is (almost always) order independent. It doesn&rsquo;t matter what order the triangles are drawn in, or that the fragments are generated. If the closer one is first, it gets stored in memory, and later, farther fragments are rejected. If the farther fragment is first, it can be over-written later by a fragment with a closer Z-value.</p>
+<p>The Z-Buffer addresses most of the problems with the Painter&rsquo;s Algorithm:</p>
+<ol>
+<li>We do not need to know the triangles beforehand: they can be generated on the fly, and processed in any order. This makes the Z-Buffer practical for immediate mode systems.</li>
+<li>The algorithm can handle overlapping and intersecting triangles. There is a potential problem in how ties are handled, but these only matter on a pixel-by-pixel basis (we will discuss this in a moment).</li>
+<li>We do not need to sort the triangles. There is no <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> sorting step.</li>
+<li>There is no order dependency; the fragments can come in any order. Parallelism is possible.</li>
+<li>There is still the potential for overdraw.</li>
+</ol>
+<p>The biggest cost of the Z-Buffer is that it is memory intensive. It replaces a simple writing of a color with a read/test/write cycle of both color and depth. In the old days, it required &ldquo;graphics&rdquo; memory for both color and depth.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Z-Buffer History</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>It might seem hard to believe, but the high cost of memory was actually a problem in early graphics systems. Having enough memory to store an entire image was expensive - especially because the memory required to do graphics (it had to be &ldquo;read out&rdquo; to the display while also being accessed by the computer) had to be special &ldquo;fast&rdquo; memory (that was higher performance than the memory used for main memory).</p>
+<p>In the 1990s, early consumer graphics hardware had to deal with the fact that graphics memory was too expensive to provide a Z-Buffer.</p>
+<p>Connected to this: because the graphics memory was expensive, Z-Buffers in early graphics hardware had low bit depth - usually 16 bits, and sometimes less. Also, because floating point computations were expensive, these early machines had integer Z-Buffers. The low precision of using 16-bit integers for depth values made the Z-Fighting problems (described in the next section) even worse.</p>
+
+    </div>
+</details>
+</div>
+<h3 id="a-small-detail">A Small Detail&hellip;</h3>
+<p>Z-Buffers usually store <em>1/z</em> rather than Z itself.</p>
+<p>Remember from our discussion of the perspective transformation that it provides <em>1/z</em> as its values. While a modern graphics system could take the reciprocal, there is no reason to: the ordering is preserved.</p>
+<p>The reciprocal of depth turns out to be useful for other things. <em>1/z</em> is linear in screen space, and therefore can be interpolated (for example, to get perspective-correct texture coordinates).</p>
+<h2 id="z-buffer-problems">Z-Buffer Problems</h2>
+<p>The Z-Buffer is a key ingredient in enabling rasterization as a strategy for graphics, which in turn led to graphics hardware and interactive graphics applications.</p>
+<p>However, the Z-Buffer does have some problems. These are all cases where, in some settings, there are (relatively minor) breaks in the independence assumption.</p>
+<h3 id="z-fighting">Z-Fighting</h3>
+<p>The depth test causes the nearest fragment to appear. But what happens if there is a tie (two fragments have the same depth)? In this case, the two fragments will &ldquo;fight&rdquo; to decide which one appears.</p>
+<p>In practice, ties are handled by setting the comparison operator: do we include or exclude equality? If we make the comparison operator &ldquo;&gt;=&rdquo;, then the newer fragment replaces the older (equal fragment); if the operator is &ldquo;&gt;&rdquo; then the first fragment is kept. Notice that this creates an order dependence.</p>
+<p>To combat Z-fighting, we need to avoid triangles that are close to being co-planar. Triangles that are truly coplanar are very problematic: they will violate the independence assumption, so the &ldquo;winner&rdquo; of the Z-fight will depend on the ordering (which is tricky, since the order the program draws the triangles may not be the order that the parallel hardware ultimately draws them). Also, small imprecisions in the depth computations may cause one triangle to be in front of the other sometimes, but not others.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/07/z-fighting-demo.html" class="boxtitlelink">z-fighting-demo.html</a><span> | </span><a href="../../docs/07/z-fighting-demo.js" class="boxtitlelink">z-fighting-demo.js</a><iframe
+        title="z-fighting-demo.html"
+        src="../../docs/07/z-fighting-demo.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>In the old days, when there was limited resolution for the Z-Buffer, Z-fighting was a bigger problem. Rounding errors and imprecision would cause things that were close to have the same value, and z-fight. As things moved, small errors would compound and cause things to alternate unpredictably between the different elements.</p>
+<p>From the demo, you can see that even a small amount of offset can cure Z-fighting problems. In the old days, we needed to use more offset to combat the low resolution of the Z-Buffer, and these larger offsets would sometimes make objects &ldquo;float&rdquo; when they were supposed to look coplanar.</p>
+<p>In order to make the offset less visible, we can make it in the screen space Z direction. APIs offer a &ldquo;polygon offset&rdquo; parameter (this is part of three.js&rsquo;s materials) that displace objects slightly in a screen space direction.</p>
+<p>There are many techniques that help avoid Z-Fighting issues. Some are built into three.js. For example, the &ldquo;logarithmic Z-Buffer&rdquo; technique applies logarithmic scaling to the depth values. There is a performance cost, so this is not the default.</p>
+<h3 id="semi--transparency">(Semi-) Transparency</h3>
+<p>The Z-Buffer assumes that the closer object occludes the farther one. If we want to make a transparent object we need to draw the farther object first so that the transparent object doesn&rsquo;t block the thing behind it.</p>
+<p>Transparent objects are typically drawn by blending them with the existing contents of the frame buffer (the pixel colors from other objects). They need to be drawn last: both because the existing colors need to be there, but also for the depth test (the transparent object will occlude the objects behind it if it is drawn first).</p>
+<p>Transparent objects need to violate the independence assumption. However, often it is sufficient to draw all the &ldquo;regular&rdquo; objects first, and then draw all of the transparent objects.</p>
+<h3 id="performance-issues">Performance Issues</h3>
+<p>The Z-Buffer algorithm has a performance cost.</p>
+<p>The algorithm requires all fragments to be computed. even if they will be discarded or overwritten. For scenes where many triangles cover the same pixel this can be very wasteful.</p>
+<p>We will discuss avoiding overdraw waste more in the future. But a short answer for now: the simplicity of the Z-Buffer and rasterization approach means it is often better to be efficient (because things are simple) and wasteful, than to give up the efficiency to avoid waste.</p>
+<p>There is a quirk of performance that is unique to the Z-Buffer, and represents a violation of the independence assumption. The number of memory writes depends on the triangle ordering. Consider a pixel that is covered by two triangles: if the front triangle is drawn first, it puts its depth value into the buffer, and the farther triangle is rejected; if the farther triangle is drawn first, both triangles will write to memory. The memory writes themselves are rarely a performance bottleneck. However, the memory write must complete before another fragment can read it (to perform its own test).</p>
+<p>Looking ahead, the wastefulness of computing fragments that will never be seen, particularly when they involve complex and expensive lighting calculations, will turn out to be one of the keys to achieving high-performance interactive graphics.</p>
+<h2 id="summary-occlusion-methods">Summary: Occlusion Methods</h2>
+<p>Rasterization approaches require some algorithm so that closer objects occlude farther objects. The Painter&rsquo;s Algorithm provides a simple mechanism. The Z-Buffer algorithm is the method used in practice for most interactive graphics. Understanding its quirks allows us to work around its limitations.</p>
+<a href="../../docs/08/" class="Next__Page">Next: Page &nbsp;8&nbsp;-&nbsp;The Pipeline</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Selected"> 7: Handling Occlusion </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p07",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

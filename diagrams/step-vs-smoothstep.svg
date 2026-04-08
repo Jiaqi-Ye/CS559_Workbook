@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 382.5 139.5">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: #231f20;
+        font-family: MyriadPro-Regular, 'Myriad Pro';
+        font-size: 12px;
+      }
+
+      .cls-4 {
+        letter-spacing: 0em;
+      }
+
+      .cls-5 {
+        letter-spacing: 0em;
+      }
+
+      .cls-6 {
+        letter-spacing: 0em;
+      }
+
+      .cls-7 {
+        letter-spacing: 0em;
+      }
+
+      .cls-8 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-2 {
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <polyline class="cls-1" points="162 112.5 18 112.5 90 112.5"/>
+  <line class="cls-1" x1="90" y1="31.5" x2="90" y2="121.5"/>
+  <text class="cls-3" transform="translate(77.25 135)"><tspan x="0" y="0">edge</tspan></text>
+  <text class="cls-3" transform="translate(5.92 117)"><tspan x="0" y="0">0</tspan></text>
+  <text class="cls-3" transform="translate(5.92 45)"><tspan x="0" y="0">1</tspan></text>
+  <polyline class="cls-1" points="90 40.5 162 40.5 18 40.5"/>
+  <line class="cls-2" x1="18" y1="112.5" x2="90" y2="112.5"/>
+  <line class="cls-2" x1="90" y1="40.5" x2="162" y2="40.5"/>
+  <polyline class="cls-1" points="378 112.5 234 112.5 306 112.5"/>
+  <line class="cls-1" x1="279" y1="31.5" x2="279" y2="121.5"/>
+  <text class="cls-3" transform="translate(263.17 135)"><tspan x="0" y="0">edge1</tspan></text>
+  <line class="cls-1" x1="333" y1="31.5" x2="333" y2="121.5"/>
+  <text class="cls-3" transform="translate(317.17 135)"><tspan x="0" y="0">edge2</tspan></text>
+  <text class="cls-3" transform="translate(221.92 117)"><tspan x="0" y="0">0</tspan></text>
+  <text class="cls-3" transform="translate(221.92 45)"><tspan x="0" y="0">1</tspan></text>
+  <polyline class="cls-1" points="306 40.5 378 40.5 234 40.5"/>
+  <path class="cls-2" d="M234,112.5h45c27,0,27-72,54-72h45"/>
+  <text class="cls-3" transform="translate(59.15 22.5)"><tspan x="0" y="0">s</tspan><tspan class="cls-7" x="4.75" y="0">t</tspan><tspan class="cls-5" x="8.65" y="0">ep(edg</tspan><tspan class="cls-8" x="44.39" y="0">e</tspan><tspan x="50.26" y="0">,x)</tspan></text>
+  <text class="cls-3" transform="translate(235.65 22.5)"><tspan x="0" y="0">smooths</tspan><tspan class="cls-6" x="43.32" y="0">t</tspan><tspan class="cls-4" x="47.22" y="0">ep(edge1,edge2,x)</tspan></text>
+</svg>

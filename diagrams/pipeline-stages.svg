@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 531 45">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: ArialMT, Arial;
+        font-size: 9px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: #231f20;
+      }
+
+      .cls-3 {
+        letter-spacing: 0em;
+      }
+
+      .cls-4 {
+        letter-spacing: 0em;
+      }
+
+      .cls-5 {
+        fill: #fff;
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-6 {
+        letter-spacing: -.11em;
+      }
+
+      .cls-7 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-8 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-9 {
+        letter-spacing: -.04em;
+      }
+    </style>
+  </defs>
+  <rect class="cls-5" x="4.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-1" transform="translate(18.49 25.5)"><tspan x="0" y="0">Application</tspan></text>
+  <rect class="cls-5" x="94.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <rect class="cls-5" x="184.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-1" transform="translate(204.41 21)"><tspan class="cls-9" x="0" y="0">T</tspan><tspan x="5.16" y="0">riangle</tspan><tspan x="-6.17" y="10.8">Processing</tspan></text>
+  <text class="cls-1" transform="translate(117.74 21)"><tspan class="cls-8" x="0" y="0">V</tspan><tspan x="5.51" y="0">ertex</tspan><tspan x="-9.5" y="10.8">Processing</tspan></text>
+  <rect class="cls-5" x="274.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-1" transform="translate(284.24 25.5)"><tspan x="0" y="0">Rasterization</tspan></text>
+  <rect class="cls-5" x="364.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-1" transform="translate(381.24 21)"><tspan x="0" y="0">Fragment</tspan><tspan x="-3" y="10.8">Processing</tspan></text>
+  <rect class="cls-5" x="454.5" y="4.5" width="72" height="36" rx="16.06" ry="16.06"/>
+  <text class="cls-1" transform="translate(461.82 25.5)"><tspan class="cls-6" x="0" y="0">T</tspan><tspan class="cls-3" x="4.5" y="0">est and </tspan><tspan class="cls-7" x="36.52" y="0">W</tspan><tspan class="cls-4" x="44.85" y="0">rite</tspan></text>
+  <polygon class="cls-2" points="76.5 18 76.5 27 85.5 27 85.5 31.5 94.5 22.5 85.5 13.5 85.5 18 76.5 18"/>
+  <polygon class="cls-2" points="166.5 18 166.5 27 175.5 27 175.5 31.5 184.5 22.5 175.5 13.5 175.5 18 166.5 18"/>
+  <polygon class="cls-2" points="256.5 18 256.5 27 265.5 27 265.5 31.5 274.5 22.5 265.5 13.5 265.5 18 256.5 18"/>
+  <polygon class="cls-2" points="346.5 18 346.5 27 355.5 27 355.5 31.5 364.5 22.5 355.5 13.5 355.5 18 346.5 18"/>
+  <polygon class="cls-2" points="436.5 18 436.5 27 445.5 27 445.5 31.5 454.5 22.5 445.5 13.5 445.5 18 436.5 18"/>
+</svg>

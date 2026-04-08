@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 22: Lighting in Shaders</h1>
+		</header>
+		<div class="content post__content clearfix"><p>The first thing we usually need to do in a shader is compute lighting. The simple shaders from page 2 didn&rsquo;t have lighting (so all sides of the cube looked the same).</p>
+<p>We&rsquo;ve discussed the equations for a simple lighting model (Phong).
+You can find the shader code for this all over the web.
+It&rsquo;s built into three.js.
+But for now, we&rsquo;ll implement the simple version as an example.</p>
+<p>If you recall, in order to compute lighting at a point, we need to know:</p>
+<ol>
+<li>The local geometry (mainly the normal vector - we usually don&rsquo;t need the position)</li>
+<li>Information about the surface property (such as its color)</li>
+<li>Information about the lights (color, intensity, direction)</li>
+<li>Information about the camera (so we have the eye direction for specular computations)</li>
+</ol>
+<p>The geometry (#1) is different for every point - we&rsquo;ll need to pass it to the shader as a varying variable.</p>
+<p>Information about the surface is constant for the object; it goes into uniform variables. We could pass per-vertex colors, or do a texture lookup (in which case the texture is a uniform - but we&rsquo;ll get to that later).</p>
+<p>Information about the lights is constant for the scene; we can either pass it as a uniform variable or hard-code it into the shaders.</p>
+<p>Observe that we are performing the lighting calculation (computing the color) in the fragment shader, which means we are doing it per pixel (or fragment). This means a lot of lighting calculations. That&rsquo;s OK, because the graphics hardware is fast. However, we could have computed the lighting per-vertex, which would have given a color per-vertex. That color would be interpolated to give colors for each pixel. In per-pixel (or per-fragment) lighting, we interpolate the normal vector and compute the color on each pixel. We also might have per-vertex colors that we interpolate and use as part of the lighting calculation.</p>
+<h2 id="simple-lighting">Simple Lighting</h2>
+
+<p>Let&rsquo;s try a simple example. We&rsquo;ll make a purely diffuse surface lit by a single directional light source. The lighting equation is:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6153em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">n</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2079em;vertical-align:-0.25em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0197em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>where c is the resulting light color, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is the surface color, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0197em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is the light color, <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">n</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> is the unit normal vector, and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9579em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> is the unit light vector (the direction the light comes from).</p>
+<p>This is quite simple in code. To make it even simpler, I will assume that <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0197em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is white.</p>
+<p>In the vertex shader, we can do everything as we have been, except that now we have to pass the normal vector. There is one catch: the normal vectors are in the object&rsquo;s local coordinate system. Just as we transform the object&rsquo;s positions by the &ldquo;model&rdquo; matrix to get it into the &ldquo;world&rdquo; coordinates, we need to provide a similar transformation to the normals. It turns out that if you transform an object by a matrix M, you have to transform its normals by a different matrix N (which is the inverse-transpose of M). Remember, the normals are transformed by a different matrix than the points. THREE provides the normal matrices for us.</p>
+<p>So, when we transform the vertex to get its final position, we also transform the normals using the <code>normalMatrix</code> that THREE gives us. There is one slight catch: notice that we transform the position by <code>modelViewMatrix</code> because we need to know where the vertex is going to end up in view coordinates (we need both the modeling matrix and the viewing matrix). The <code>normalMatrix</code> in THREE is similar: it tells us what direction the normal will be pointing in view (not world) coordinates. This is documented in the <a href="https://threejs.org/docs/#api/en/renderers/webgl/WebGLProgram" target="_blank"><code>WebGlProgram</code></a> page.</p>
+<p>So, our vertex program (which is in <a href="../../for_students/06-22-01.vs" class="box-file box-vs" data-tag="10-04-01" data-type="vs">06-22-01.vs</a>
+ - with comments) looks like:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">v_normal</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">v_position</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// compute the position in view space</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">vec4</span> <span style="color:#111">pos</span> <span style="color:#f92672">=</span> <span style="color:#111">(</span><span style="color:#111">modelViewMatrix</span> <span style="color:#f92672">*</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">position</span><span style="color:#111">,</span><span style="color:#ae81ff">1.0</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// the main output of the shader (the vertex position)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_Position</span> <span style="color:#f92672">=</span> <span style="color:#111">projectionMatrix</span> <span style="color:#f92672">*</span> <span style="color:#111">pos</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// pass position to fragment shader</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">v_position</span> <span style="color:#f92672">=</span> <span style="color:#111">pos</span><span style="color:#111">.</span><span style="color:#111">xyz</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// compute the view-space normal and pass it to fragment shader</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">v_normal</span> <span style="color:#f92672">=</span> <span style="color:#111">normalMatrix</span> <span style="color:#f92672">*</span> <span style="color:#111">normal</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Again, notice how we need to declare a varying variable, and that we have to compute the transformed normal (which is transformed the same way the object is). Also notice that the normal is not transformed by the projection: we don&rsquo;t want the lighting affected by perspective.</p>
+<p>The action happens in the fragment shader (<a href="../../for_students/06-22-01.fs" class="box-file box-fs" data-tag="10-04-01" data-type="fs">06-22-01.fs</a>
+), which computes the lighting equation.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">v_normal</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// note that this is in VIEW COORDINATES</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">lightDir</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">baseColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">.8</span><span style="color:#111">,</span><span style="color:#ae81ff">.4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// we need to renormalize the normal since it was interpolated</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">vec3</span> <span style="color:#111">nhat</span> <span style="color:#f92672">=</span> <span style="color:#111">normalize</span><span style="color:#111">(</span><span style="color:#111">v_normal</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// deal with two sided lighting</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// light comes from above and below (use clamp rather than abs to get one sided)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">light</span> <span style="color:#f92672">=</span> <span style="color:#111">abs</span><span style="color:#111">(</span><span style="color:#111">dot</span><span style="color:#111">(</span><span style="color:#111">nhat</span><span style="color:#111">,</span> <span style="color:#111">lightDir</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// brighten the base color</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">light</span> <span style="color:#f92672">*</span> <span style="color:#111">baseColor</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>Let&rsquo;s discuss this part by part.</p>
+<p>First, we declare some &ldquo;global&rdquo; variables. We declare the varying vector <code>v_normal</code> to receive normal information from the vertex shader. (Note that we choose to omit <code>v_position</code>, which isn&rsquo;t used by this fragment shader.) We also declare two constants, the light direction vector <code>lightDir</code> and the surface color <code>baseColor</code> - these correspond to <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9579em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> in the equation.</p>
+<p>In the shader itself, the first thing we do is compute <code>nhat</code> (which is <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">n</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span>). We need to renormalize the vector: because the fragment normal is computed by linear interpolation of the vertex normals, it may no longer be unit length (even if the vertex normals were unit length).</p>
+<p>Then we compute the dot product - just as in the equation. One slight deviation: we take the absolute value of this, so if the normal is facing inward I still get the same lighting. This makes sure things work for two-sided lighting.</p>
+<p>Finally, we use this brightness amount to change the color.</p>
+<p>There is a hidden trick here: the normal vector is in the view (or camera coordinate) system. The z-axis is perpendicular to the image plane (basically, pointing towards the camera). If you look at the results, you&rsquo;ll see that it is as if the light is where the camera is. Notice how the light on the sphere is brightest at the part that points towards the camera. You should also notice that although this is diffuse lighting, it changes as the camera moves (because the light is moving with the camera).</p>
+
+<div id="box-06-22-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-22-01</span>&nbsp;
+    <input type="checkbox" id="check-06-22-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-22-01.html class="boxtitlelink">06-22-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-22-01.js" class="boxtitlelink">06-22-01.js</a>
+    <iframe
+        title="10-04-01"
+        src="../../for_students/06-22-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-22-01"
+    ></iframe>
+</div>
+<p>
+<a href="../../for_students/06-22-01.js" class="box-html" data-tag="10-04-01">06-22-01.js</a>
+ (<a href="../../for_students/06-22-01.html" class="box-html" data-tag="10-04-01">06-22-01.html</a>) is similar to the previous examples, but, make sure you understand the shaders <a href="../../for_students/06-22-01.vs" class="box-file box-vs" data-tag="10-04-01" data-type="vs">06-22-01.vs</a>
+ and <a href="../../for_students/06-22-01.fs" class="box-file box-fs" data-tag="10-04-01" data-type="fs">06-22-01.fs</a>
+ before going on.</p>
+<h2 id="light-parameters-and-camera-coordinates">Light Parameters and Camera Coordinates</h2>
+<p>Usually, we like to think about lights in &ldquo;world coordinates&rdquo;, not coordinates that move with the camera. So the previous example is inconvenient. Previously the light was attached to the camera. If we wanted to have the light defined in the world (for example, we would like to have the light coming from straight above - (0,1,0) - as if it were the sun at noon, or a light in the ceiling), we&rsquo;re stuck.</p>
+<p>It turns out this is a common problem. In many graphics systems, there is no notion of the &ldquo;world coordinates&rdquo; - there are just camera coordinates. All other coordinate systems are up to the programmer. The fact that we have &ldquo;world coordinates&rdquo; is our own convention.</p>
+<p>There are a few things we could do; here are two general approaches:</p>
+<ol>
+<li>We could compute the normals in world coordinates. Unfortunately, while THREE gives us <code>normalMatrix</code> which is based on <code>modelViewMatrix</code>, it has no equivalent pre-defined uniform for the normal of the <code>modelMatrix</code>. We have to compute it ourselves, and make our own uniform variable.</li>
+<li>We could transform the lights into view coordinates by transforming them by the viewing matrix. This is actually what THREE (and most graphics systems) do.</li>
+</ol>
+<p>Let&rsquo;s try both approaches and make a light from vertically above (with the same diffuse material).</p>
+
+<p>In 
+<a href="../../for_students/06-22-02.js" class="box-html" data-tag="10-04-02a">06-22-02.js</a>
+ (<a href="../../for_students/06-22-02.html" class="box-html" data-tag="10-04-02a">06-22-02.html</a>), we&rsquo;ll try approach #2 first: transforming the lights. The simplest thing to do would be to apply the view transformation in the fragment shader, re-writing it as:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">v_normal</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// note that this is in WORLD COORDINATES</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">lightDirWorld</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">0</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">const</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">baseColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span><span style="color:#ae81ff">.8</span><span style="color:#111">,</span><span style="color:#ae81ff">.4</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// we need to renormalize the normal since it was interpolated</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">vec3</span> <span style="color:#111">nhat</span> <span style="color:#f92672">=</span> <span style="color:#111">normalize</span><span style="color:#111">(</span><span style="color:#111">v_normal</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// get the lighting vector in the view coordinates</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// warning: this is REALLY wasteful!</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">vec3</span> <span style="color:#111">lightDir</span> <span style="color:#f92672">=</span> <span style="color:#111">normalize</span><span style="color:#111">(</span><span style="color:#111">viewMatrix</span> <span style="color:#f92672">*</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">lightDirWorld</span><span style="color:#111">,</span> <span style="color:#ae81ff">0</span><span style="color:#111">)).</span><span style="color:#111">xyz</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// deal with two sided lighting</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">light</span> <span style="color:#f92672">=</span> <span style="color:#111">abs</span><span style="color:#111">(</span><span style="color:#111">dot</span><span style="color:#111">(</span><span style="color:#111">nhat</span><span style="color:#111">,</span> <span style="color:#111">lightDir</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// brighten the base color</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">light</span> <span style="color:#f92672">*</span> <span style="color:#111">baseColor</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>This works (note how the light comes from above, so the sides of the cube are dark):</p>
+
+<div id="box-06-22-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-22-02</span>&nbsp;
+    <input type="checkbox" id="check-06-22-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-22-02.html class="boxtitlelink">06-22-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-22-02.js" class="boxtitlelink">06-22-02.js</a>
+    <iframe
+        title="10-04-02a"
+        src="../../for_students/06-22-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-22-02"
+    ></iframe>
+</div>
+<p>Notice that because I am doing &ldquo;two-sided&rdquo; lighting (with that <code>abs</code>), the light comes both from above and below (the top and bottom of the objects are lit).</p>
+<p>The downside is this is really inefficient. We are doing a matrix multiply to change the light direction once for every fragment. That&rsquo;s a lot of work - that we don&rsquo;t need to be doing. We could have transformed the light position once and made it a uniform.</p>
+<p>The alternative would be to make the light direction a uniform variable. The problem with this is that when we create uniform variables, we don&rsquo;t know what the camera will be (or have the view matrix). For THREE&rsquo;s built-in lights, this is implemented in the render loop so that the appropriate light directions are computed just before rendering when the view matrix is known. THREE provides mechanisms for performing these kinds of &ldquo;pre-rendering&rdquo; computations, but we won&rsquo;t discuss them. An in-between hack would be to perform the multiplication in the vertex shader, so it happens 3 times per triangle (rather than for each pixel).</p>
+<p>We could use a similar strategy to define our own &ldquo;model matrix adjoint&rdquo; uniform; we would need to recompute it every time the model matrix changed. Again, THREE has ways to do this, but we aren&rsquo;t going to take time to learn about them.</p>
+<p>But here&rsquo;s a hack you can use: usually, the modeling matrices are just rotations, translations and uniform scales. For the normals, we can ignore the translation. For the rotation, remember that (1) is the inverse transpose and (2) the transpose of a rotation is the inverse. So, for rotations, the normal matrix is the matrix itself. The only issue is the uniform scale - which does change the length of the vectors, but since we have to normalize them anyway, it doesn&rsquo;t matter.</p>
+<p>
+
+<div id="box-06-22-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-22-03</span>&nbsp;
+    <input type="checkbox" id="check-06-22-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-22-03.html class="boxtitlelink">06-22-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-22-03.js" class="boxtitlelink">06-22-03.js</a>
+    <iframe
+        title="10-04-02b"
+        src="../../for_students/06-22-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-22-03"
+    ></iframe>
+</div></p>
+<p>You can look at <a href="../../for_students/06-22-03.html" class="box-html" data-tag="10-04-02b">06-22-03.html</a> (and its associated <a href="../../for_students/06-22-03.vs" class="box-file box-vs" data-tag="10-04-02b" data-type="vs">06-22-03.vs</a>
+ and <a href="../../for_students/06-22-03.fs" class="box-file box-fs" data-tag="10-04-02b" data-type="fs">06-22-03.fs</a>
+) to see that the code is different, but the result looks the same.</p>
+<p>Actually, to make sure it&rsquo;s different, edit <a href="../../for_students/06-22-03.fs" class="box-file box-fs" data-tag="10-04-02b" data-type="fs">06-22-03.fs</a>
+ (1) change the direction of the lighting so the sides of the square aren&rsquo;t totally dark, and (2) change the lighting equation so it is &ldquo;1 sided&rdquo; (so only the sphere and at most three sides of the cube that face the light will be lit - the back will be dark). Because lighting is in world space, you can move the camera to the back side to check.</p>
+<h2 id="specular-lighting">Specular Lighting</h2>
+<p>
+
+
+
+
+
+
+
+</p>
+<p>Specular lighting is a little trickier - we need to account for the camera. Once again, THREE provides the camera position. But it is even easier than that: in view coordinates, the camera is the origin, so we know where it is! Computing the view direction is easy.</p>
+<p>We were going to ask you to write this yourself - the equation is in the lectures and readings. But, a very kind TA from a previous year wrote it for you. We changed it to do everything in view coordinates.</p>
+<p>The shaders are in <a href="../../for_students/06-22-04.vs" class="box-file box-vs" data-tag="10-04-03" data-type="vs">06-22-04.vs</a>
+ and <a href="../../for_students/06-22-04.fs" class="box-file box-fs" data-tag="10-04-03" data-type="fs">06-22-04.fs</a>
+; the box is set up by 
+<a href="../../for_students/06-22-04.js" class="box-html" data-tag="10-04-03">06-22-04.js</a>
+ (<a href="../../for_students/06-22-04.html" class="box-html" data-tag="10-04-03">06-22-04.html</a>).</p>
+
+<div id="box-06-22-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-22-04</span>&nbsp;
+    <input type="checkbox" id="check-06-22-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">rubric<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span ><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span style="color: yellow;"><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-22-04.html class="boxtitlelink">06-22-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-22-04.js" class="boxtitlelink">06-22-04.js</a>
+    <iframe
+        title="10-04-03"
+        src="../../for_students/06-22-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-22-04"
+    ></iframe>
+    <div class="box-rubric-container">
+        <table class="frame-rubric-table">
+            <thead><tr>
+                <td></td>
+                <td><span class="boxframekind tooltip-trigger">Kind<span class="tooltip-box" style="text-align:left">
+Kind of rubric items:<br/>
+<b>standard</b> - expected from all students<br/>
+<b>advanced</b> - used to get a better grade<br/>
+<b>creative</b> - an opportunity to do something creative<br/>
+<b>optional</b> - not required, but encouraged
+</span>
+</span></span></td>
+                <td>Description</td>
+            </tr></thead>
+        <tbody><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-22-04-0"></td>
+                <td>standard</td>
+                <td>Add diffuse shading.</td>
+            </tr><tr>
+                <td><input type="checkbox" class="sitekey" id="check-06-22-04-1"></td>
+                <td>standard</td>
+                <td>Change the specular highlight to white.</td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+<p>But this only has specular! The object is generally dark. Make two simple changes to <a href="../../for_students/06-22-04.fs" class="box-file box-fs" data-tag="10-04-03" data-type="fs">06-22-04.fs</a>
+ to show that you understand it:</p>
+<ol>
+<li>
+<p>Add some diffuse lighting, so the object has a specular (highlight) and general diffuse lighting. Remember, you add these together. Be sure to &ldquo;clamp&rdquo; the total color so it doesn&rsquo;t exceed 1.0.</p>
+</li>
+<li>
+<p>Change the specular color to white - so the object has yellow diffuse reflection, and white specular. This will make it look more like plastic than metal.</p>
+</li>
+</ol>
+<p>Then, in the HTML file, explain how we know that this is correct (1 sentence is OK) - tell us what a mix of specular and diffuse should look like, and how we can tell it really is combining the two.</p>
+<h2 id="summary-lighting-in-shaders">Summary: Lighting in Shaders</h2>
+<p>Short version: In the future, we&rsquo;ll let THREE take care of it. We might want to do a little simple lighting to add to our more interesting shaders (next).</p>
+<p>On <a href="../../docs/23/" class="Next__Page">Next: Page &nbsp;23&nbsp;-&nbsp;Procedural Textures</a> we&rsquo;ll try something more interesting.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Selected"> 22: Lighting in Shaders </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p22",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

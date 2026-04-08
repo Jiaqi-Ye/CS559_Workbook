@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 360" width="750" height="360" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="arr-y2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#d97706"/>
+    </marker>
+    <marker id="arr-yS" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#d97706" opacity="0.55"/>
+    </marker>
+    <filter id="drp" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <rect width="750" height="360" fill="#f1f5f9"/>
+
+  <!-- Panel dividers -->
+  <line x1="250" y1="0" x2="250" y2="360" stroke="#cbd5e1" stroke-width="1.5"/>
+  <line x1="500" y1="0" x2="500" y2="360" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- ══════════ PANEL 1: SPOTLIGHT ══════════ -->
+  <rect x="0" y="0" width="250" height="32" fill="#e0f2fe"/>
+  <text x="125" y="22" text-anchor="middle" fill="#0369a1" font-size="14" font-weight="700">Spotlight</text>
+
+  <!-- Sun dot at top, representing spotlight -->
+  <circle cx="125" cy="72" r="16" fill="#fbbf24" filter="url(#drp)"/>
+  <text x="125" y="77" text-anchor="middle" fill="#78350f" font-size="10" font-weight="700">✦</text>
+
+  <!-- Cone boundary lines -->
+  <line x1="125" y1="88" x2="62" y2="238" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="125" y1="88" x2="188" y2="238" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Cone fill (semi-transparent) -->
+  <polygon points="125,88 62,238 188,238" fill="#fef9c3" opacity="0.5"/>
+
+  <!-- A few light rays inside the cone -->
+  <line x1="125" y1="88" x2="125" y2="236" stroke="#d97706" stroke-width="1.8" marker-end="url(#arr-y2)"/>
+  <line x1="125" y1="88" x2="93"  y2="236" stroke="#d97706" stroke-width="1.2" marker-end="url(#arr-yS)"/>
+  <line x1="125" y1="88" x2="157" y2="236" stroke="#d97706" stroke-width="1.2" marker-end="url(#arr-yS)"/>
+
+  <!-- Shadow map plane at the base of the cone -->
+  <rect x="58" y="236" width="134" height="20" rx="3"
+        fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.8" filter="url(#drp)"/>
+  <text x="125" y="251" text-anchor="middle" fill="#1e3a8a" font-size="11" font-weight="600">shadow map</text>
+
+  <!-- Ground / floor -->
+  <rect x="5" y="256" width="240" height="14" rx="2" fill="#e2e8f0" stroke="#94a3b8"/>
+  <text x="125" y="267" text-anchor="middle" fill="#64748b" font-size="10">scene floor</text>
+
+  <!-- Angle arc -->
+  <path d="M 125 88  A 50 50 0 0 0 96 135" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+  <path d="M 125 88  A 50 50 0 0 1 154 135" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="125" y="148" text-anchor="middle" fill="#92400e" font-size="11" font-style="italic">angle</text>
+
+  <!-- Description -->
+  <rect x="8" y="286" width="236" height="64" rx="5" fill="white" opacity="0.85"/>
+  <text x="124" y="303" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Single perspective frustum</text>
+  <text x="124" y="320" text-anchor="middle" fill="#475569" font-size="10">Covers the cone of the spotlight.</text>
+  <text x="124" y="334" text-anchor="middle" fill="#475569" font-size="10">Easiest to use — fits naturally.</text>
+  <text x="124" y="348" text-anchor="middle" fill="#16a34a" font-size="11" font-weight="700">✓ Best choice for shadows</text>
+
+  <!-- ══════════ PANEL 2: DIRECTIONAL ══════════ -->
+  <rect x="250" y="0" width="250" height="32" fill="#f0fdf4"/>
+  <text x="375" y="22" text-anchor="middle" fill="#15803d" font-size="14" font-weight="700">Directional Light</text>
+
+  <!-- Sun off to the side (top-right) -->
+  <circle cx="474" cy="68" r="14" fill="#fbbf24" opacity="0.85"/>
+  <g stroke="#d97706" stroke-width="1.5" stroke-linecap="round">
+    <line x1="474" y1="48" x2="474" y2="42"/>
+    <line x1="474" y1="88" x2="474" y2="94"/>
+    <line x1="454" y1="68" x2="448" y2="68"/>
+    <line x1="494" y1="68" x2="500" y2="68"/>
+    <line x1="460" y1="54" x2="455" y2="49"/>
+    <line x1="488" y1="82" x2="493" y2="87"/>
+  </g>
+  <text x="474" y="108" text-anchor="middle" fill="#92400e" font-size="10">sun / dir.</text>
+
+  <!-- Parallel rays (angled downward-left) -->
+  <g stroke="#d97706" stroke-width="1.8" marker-end="url(#arr-y2)">
+    <line x1="279" y1="82" x2="279" y2="190"/>
+    <line x1="305" y1="70" x2="305" y2="190"/>
+    <line x1="331" y1="58" x2="331" y2="190"/>
+    <line x1="357" y1="48" x2="357" y2="190"/>
+    <line x1="383" y1="48" x2="383" y2="190"/>
+    <line x1="409" y1="48" x2="409" y2="190"/>
+    <line x1="435" y1="58" x2="435" y2="190"/>
+    <line x1="461" y1="70" x2="461" y2="190"/>
+  </g>
+  <text x="370" y="82" text-anchor="middle" fill="#92400e" font-size="11" font-style="italic">parallel rays</text>
+
+  <!-- Shadow map rectangle (orthographic coverage area) -->
+  <rect x="268" y="190" width="204" height="24" rx="3"
+        fill="#dcfce7" stroke="#15803d" stroke-width="2" filter="url(#drp)"/>
+  <text x="370" y="206" text-anchor="middle" fill="#14532d" font-size="11" font-weight="600">shadow map (ortho)</text>
+
+  <!-- coverage arrows on sides -->
+  <line x1="258" y1="202" x2="264" y2="202" stroke="#15803d" stroke-width="1.5"/>
+  <line x1="476" y1="202" x2="482" y2="202" stroke="#15803d" stroke-width="1.5"/>
+  <line x1="258" y1="197" x2="258" y2="207" stroke="#15803d" stroke-width="2"/>
+  <line x1="482" y1="197" x2="482" y2="207" stroke="#15803d" stroke-width="2"/>
+  <text x="370" y="230" text-anchor="middle" fill="#15803d" font-size="10" font-style="italic">coverage area must be chosen</text>
+
+  <!-- Ground -->
+  <rect x="255" y="214" width="240" height="14" rx="2" fill="#e2e8f0" stroke="#94a3b8"/>
+
+  <!-- Description -->
+  <rect x="258" y="240" width="236" height="110" rx="5" fill="white" opacity="0.85"/>
+  <text x="376" y="258" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Orthographic projection</text>
+  <text x="376" y="275" text-anchor="middle" fill="#475569" font-size="10">No position — only a direction.</text>
+  <text x="376" y="290" text-anchor="middle" fill="#475569" font-size="10">You must define a rect. coverage area.</text>
+  <text x="376" y="306" text-anchor="middle" fill="#475569" font-size="10">Too large → low resolution. </text>
+  <text x="376" y="321" text-anchor="middle" fill="#475569" font-size="10">Too small → shadows cut off.</text>
+  <text x="376" y="338" text-anchor="middle" fill="#ca8a04" font-size="11" font-weight="700">⚠ Needs careful setup</text>
+
+  <!-- ══════════ PANEL 3: POINT LIGHT ══════════ -->
+  <rect x="500" y="0" width="250" height="32" fill="#fef3c7"/>
+  <text x="625" y="22" text-anchor="middle" fill="#d97706" font-size="14" font-weight="700">Point Light</text>
+
+  <!-- Central point light -->
+  <circle cx="625" cy="120" r="14" fill="#fbbf24" filter="url(#drp)"/>
+  <circle cx="625" cy="120" r="6"  fill="#fef9c3"/>
+
+  <!-- Rays in 8 directions -->
+  <g stroke="#d97706" stroke-width="1.8" marker-end="url(#arr-y2)">
+    <line x1="625" y1="106" x2="625" y2="68"/>    <!-- up -->
+    <line x1="625" y1="134" x2="625" y2="172"/>   <!-- down -->
+    <line x1="611" y1="120" x2="573" y2="120"/>   <!-- left -->
+    <line x1="639" y1="120" x2="677" y2="120"/>   <!-- right -->
+    <line x1="615" y1="110" x2="589" y2="84"/>    <!-- up-left -->
+    <line x1="635" y1="110" x2="661" y2="84"/>    <!-- up-right -->
+    <line x1="615" y1="130" x2="589" y2="156"/>   <!-- down-left -->
+    <line x1="635" y1="130" x2="661" y2="156"/>   <!-- down-right -->
+  </g>
+
+  <!-- Cube map illustration: 6 small rectangles around the light -->
+  <!-- Top face -->
+  <rect x="602" y="50" width="46" height="16" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="625" y="62" text-anchor="middle" fill="#1e3a8a" font-size="9">top</text>
+  <!-- Bottom face -->
+  <rect x="602" y="174" width="46" height="16" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="625" y="186" text-anchor="middle" fill="#1e3a8a" font-size="9">bottom</text>
+  <!-- Left face -->
+  <rect x="530" y="108" width="40" height="24" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="550" y="124" text-anchor="middle" fill="#1e3a8a" font-size="9">left</text>
+  <!-- Right face -->
+  <rect x="680" y="108" width="40" height="24" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="700" y="124" text-anchor="middle" fill="#1e3a8a" font-size="9">right</text>
+  <!-- Front face -->
+  <rect x="541" y="66" width="40" height="18" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="561" y="79" text-anchor="middle" fill="#1e3a8a" font-size="9">front</text>
+  <!-- Back face -->
+  <rect x="669" y="152" width="40" height="18" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="689" y="165" text-anchor="middle" fill="#1e3a8a" font-size="9">back</text>
+
+  <!-- "= cube map" bracket label -->
+  <rect x="509" y="206" width="232" height="20" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="625" y="220" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">6 shadow maps  →  cube map</text>
+
+  <!-- Description -->
+  <rect x="508" y="236" width="236" height="110" rx="5" fill="white" opacity="0.85"/>
+  <text x="626" y="254" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Radiates in all directions</text>
+  <text x="626" y="271" text-anchor="middle" fill="#475569" font-size="10">Need 6 shadow maps — one per</text>
+  <text x="626" y="285" text-anchor="middle" fill="#475569" font-size="10">face of a cube around the light.</text>
+  <text x="626" y="300" text-anchor="middle" fill="#475569" font-size="10">6× the memory and render cost.</text>
+  <text x="626" y="316" text-anchor="middle" fill="#475569" font-size="10">Use sparingly in real-time.</text>
+  <text x="626" y="334" text-anchor="middle" fill="#b91c1c" font-size="11" font-weight="700">✗ Most expensive option</text>
+</svg>

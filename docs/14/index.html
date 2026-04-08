@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 14: How Shadow Maps Work</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Shadow maps are one of the most elegant techniques in real-time graphics: they solve a hard problem (shadows) by cleverly reusing the machinery we already have for drawing pictures. This page explains how they work and why they work.</p>
+<p>Shadow maps are built into Three.js. However, if you don&rsquo;t understand how they work, you will not be able to use them effectively. There are some quirks in how they work that have real ramifications for how we use them. Plus, it&rsquo;s a really cool idea. And, they are yet another thing invented by Lance Williams (who also invented mipmaps).</p>
+<p>The local lighting assumption means that lighting computations cannot depend on other objects - only the one being lit. To account for other objects, we put information about them into a texture map. A <strong>shadow map</strong> is a kind of texture map that is associated with a light source - not an object. The map contains a picture of what the light source &ldquo;sees.&rdquo; The texture coordinates for a given point are determined by where in the texture the point appears.</p>
+<p>Shadow maps are different from other kinds of maps. They are pictures made from cameras positioned at the light sources. We don&rsquo;t use them for colors (or surface properties), we use them for depth testing (to see if the camera at the light source can see each point in the scene). The lookups are depth tests that turn light on and off. The video lecture that discusses this is:</p>
+<div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0;"><a href="https://mediaspace.wisc.edu/media/559-22-18E%20Lecture%2018E-%20Advanced%20Textures%20Shadow%20Maps%20-was-19-5/1_38m6irmn" target="_blank" rel="noopener">2023 Video: Lecture 19D</a>
+        Lecture 19D: Shadow Maps&nbsp; | &nbsp;<a href="https://cs559.github.io/LectureNotesPDFs/2023/Texture/18E-Texture-was19-5-texture-shadows-post.pdf" target="_blank" rel="noopener">Slides</a></div>
+<p>Here is a written explanation based on that lecture.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">AI Disclosure</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>This page was created by giving Claude the transcript and slides from the lecture. I heavily edited the rough draft. Most of its diagrams were completely useless, so I drew new ones. However, it did make some cool demos.</p>
+<p>I do give it credit for reminding me that the bias issue is a big deal. I had skipped it in lecture. It didn&rsquo;t explain the concept well, but it did remind me that shadow acne is a thing.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="why-shadows-matter">Why Shadows Matter</h2>
+<p>Without shadows, a scene can look strangely flat and unreal — objects seem to float above the ground, and it is hard to judge spatial relationships. A shadow tells you where something is, and also where the light is. They are a critical visual cue.</p>
+<p>There are many ways to compute shadows. Ray tracing, for example, can compute them naturally: for every visible surface point, fire a ray toward the light and see if anything blocks it. But ray tracing is expensive. Shadow maps are the standard real-time solution because they map perfectly onto how GPUs draw pictures.</p>
+<blockquote>
+<p><strong>Note:</strong> Shadow maps are only one way to do shadows. Other techniques (shadow volumes, ray tracing, screen-space ambient occlusion, voxel cone tracing) exist and each has trade-offs. The details of the best approach also change as GPU hardware evolves. But the shadow map idea is foundational and still widely used.</p>
+</blockquote>
+<h2 id="the-core-idea-can-the-light-see-the-object">The Core Idea: Can the Light See the Object?</h2>
+<p>We already know how to answer the question &ldquo;can the camera see this point?&rdquo; — that is exactly what the rendering pipeline does. When we draw a scene, the renderer figures out which objects are visible to the camera and what color each pixel should be.</p>
+<p>The key insight for shadow maps is: <strong>apply the same question to the light source</strong>.</p>
+<p>If the light can &ldquo;see&rdquo; a surface point, that point is illuminated. If something else is in the way — if the light&rsquo;s view of that point is blocked — then the point is in shadow.</p>
+<p>So we put a virtual camera at the light source, look outward from the light, and ask: what does the light see?</p>
+<figure class="" style="width: 640px;  ">
+    <a href="../../docs/14/shadow-map.svg">
+        <img src="../../docs/14/shadow-map.svg" alt="shadow-map.svg" />
+    </a><figcaption><p>Schematic of Shadow Map Process. In a first rendering pass, an image is drawn from the light source. The <strong>shadow map</strong> stores what the light source sees, although it stores depth not color. In the drawing pass, each drawn point checks its lighting by determining where it would appear in the shadow map. If the point is what is visible (the depths match), then the point is lit; otherwise, a different object is blocking the light source and the point is in shadow.&nbsp;</p></figcaption>
+</figure>
+
+<p>Importantly: the shadow map image is just a picture taken from the light source&rsquo;s viewpoint. It can use exactly the same drawing mechanism that we use to draw for the regular image. We just use a different camera (placed at the light source), and ignore the colors (but keep the Z-buffer).</p>
+<h2 id="the-two-pass-algorithm">The Two-Pass Algorithm</h2>
+<p>Shadow mapping works in two rendering passes.</p>
+<h3 id="pass-1--render-the-shadow-map">Pass 1 — Render the Shadow Map</h3>
+<p>Place a virtual camera at the light source, pointed in the direction the light shines. Render the scene from this viewpoint. The result is a texture — an image of what the light sees. This is the <strong>shadow map</strong>.</p>
+<p>What does the shadow map store? Not color. What we care about is depth: for each pixel in the shadow map, how far away is the closest surface the light can see? This is stored as a depth value, just like the depth buffer that the regular renderer uses. The shadow map is, in essence, the <strong>depth buffer from the light&rsquo;s point of view</strong>.</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/14/shadows-vis.html" class="boxtitlelink">shadows-vis.html</a><iframe
+        title="shadows-vis.html"
+        src="../../docs/14/shadows-vis.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The Shadow Map Visualizer shows exactly this: the left panel is the normal camera view with shadows rendered, and the right panel is the same scene rendered from the spotlight&rsquo;s position, with a depth shader applied (white = close to the light, black = far). As the light rotates, you can watch the two views update together and see how the shadow map drives the shading in the camera view.</p>
+<h3 id="pass-2--render-the-regular-picture">Pass 2 — Render the Regular Picture</h3>
+<p>Now draw the scene from the regular camera. For each surface point that the camera sees, we need to decide: is this point in shadow or not?</p>
+<p>The test works like this:</p>
+<ol>
+<li>Take the 3D position of the surface point.</li>
+<li>Transform that position into the light&rsquo;s coordinate system — in other words, figure out where this point would appear in the shadow map.</li>
+<li>Look up the depth stored in that shadow map pixel.</li>
+<li>Compare: is the depth of this surface point (as seen from the light) the <strong>same</strong> as the depth stored in the shadow map?</li>
+</ol>
+<p>If yes: the light can see this point, and the point is <strong>lit</strong>.</p>
+<p>If no (specifically, if the surface point is <em>farther</em> from the light than what the shadow map records): something closer to the light was recorded in the shadow map — something is blocking the light. The point is in <strong>shadow</strong>.</p>
+<figure class="" style="width: 740px;  ">
+    <a href="../../docs/14/figures/fig-depth-test.svg">
+        <img src="../../docs/14/figures/fig-depth-test.svg" alt="figures/fig-depth-test.svg" />
+    </a><figcaption><p>The shadow map depth test applied to two surface points. Left (green ✓): the shadow map records depth d_map = 8.4 for that light direction, and the surface is also at depth 8.4 — they match, so the point is lit. Right (red ✗): the shadow map records d_map = 5.1 (the blocker object), but the surface being tested is at depth 9.7 — since the surface is farther than what the shadow map recorded, something is in the way, and the point is in shadow. Figure by Claude.&nbsp;</p></figcaption>
+</figure>
+
+<p>This is called the <strong>shadow map test</strong> or <strong>shadow test</strong>. Here is the idea summarized as pseudocode:</p>
+<pre tabindex="0"><code>for each pixel P in the camera image:
+    find the 3D point X that P sees
+    project X into the light&#39;s coordinate system (get u,v)
+    look up the shadow map at (u, v) → get stored depth d_map
+    if d_surface ≈ d_map:
+        X is lit
+    else:  // d_surface &gt; d_map
+        X is in shadow
+</code></pre><h1 id="demo-seeing-shadow-maps-in-action">Demo: Seeing Shadow Maps in Action</h1>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/14/shadow-demo.html" class="boxtitlelink">shadow-demo.html</a><span> | </span><a href="../../docs/14/shadow-demo.js" class="boxtitlelink">shadow-demo.js</a><iframe
+        title="shadow-demo.html"
+        src="../../docs/14/shadow-demo.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The demo shows a scene with shadow mapping. You can control the lighting type and direction. You can also control the resolution of the shadow map.</p>
+<p>Notice how the shadows get blocky and fuzzy when the shadow map has insufficient resolution. We&rsquo;ll return to this in a bit&hellip;</p>
+<h2 id="some-important-details">Some important Details</h2>
+<h3 id="why-depth-not-color">Why Depth, Not Color?</h3>
+<p>You might wonder: why compare depths rather than colors? If the shadow map stores the color of what the light sees, couldn&rsquo;t we just check whether the colors match?</p>
+<p>No — this breaks immediately if two different objects happen to have the same color, or if the same object has a uniform color. Depth is a much more reliable identifier of a surface point: it is continuous, unique (two surfaces at different depths will have different depth values), and exactly what the depth buffer gives us for free.</p>
+<h3 id="depth-precision">Depth Precision</h3>
+<p>Depth comparison sounds simple, but in practice there is a numerical problem. The depth of a surface point, computed from the regular camera, and the depth stored in the shadow map were computed using different transformations and different floating-point arithmetic. The two values will almost never be exactly equal, even for a point that is clearly lit.</p>
+<p>This problem is even worse if the resolution of the shadow map is low (the pixels are big). Many (valid) surface points might map to the same pixel.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/14/shadowcompare.svg">
+        <img src="../../docs/14/shadowcompare.svg" alt="shadowcompare.svg" />
+    </a><figcaption><p>Many points can map to the same shadow map texel.&nbsp;</p></figcaption>
+</figure>
+
+<p>This problem can lead to an ugly effect where spots on an object can be in (or out) of shadow based on how their pixels are grouped into the shadow map. This effect is sometimes called <strong>shadow acne</strong> because it causes splotches.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/14/acne.svg">
+        <img src="../../docs/14/acne.svg" alt="acne.svg" />
+    </a>
+</figure>
+
+<p>These problems mean a naive depth test (<code>d_surface == d_map</code>) will fail constantly. We need a better depth test to cure them.
+The typical fix is to add a small <strong>bias</strong>: instead of asking &ldquo;are the depths equal?&rdquo;, we ask &ldquo;is the surface depth close enough to the shadow map depth?&rdquo; — formally, <code>d_surface &lt; d_map + bias</code>.</p>
+<p>If the bias is too small, the surface incorrectly shadows itself in a blotchy pattern called <strong>shadow acne</strong> (or <strong>self-shadowing artifacts</strong>). If the bias is too large, objects appear to float above their shadows — a different artifact called <strong>peter panning</strong>. Getting the bias right is a classic shadow map tuning problem.</p>
+<p>We tried to make a demo to show this effect, but, it doesn&rsquo;t show up very well. I believe that three.js is doing some mitigation strategies under the hood. In order to intentionally make the problem bad enough to see, other artifaces (such as the blockiness of low-res shadow maps) become more of a problem. For an excellent tutorial on the topic see <a href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#shadow-acne">the shadow Acne tutorial</a> that is part of a broader tutorial on Shadow Mapping (and OpenGL more generally).</p>
+<p>There are also more sophisticated solutions, like <strong>slope-scale bias</strong> (adapting the bias based on the angle of the surface relative to the light). These are refinements on the basic idea of adjusting bias.</p>
+<h2 id="shadow-map-resolution">Shadow Map Resolution</h2>
+<p>The shadow map is a texture, and like all textures, it has a finite resolution. This matters because the shadow map has to cover everything the light can see. If the shadow map is small, or if the light covers a large area, each shadow map pixel covers a large region of the scene — and shadow edges will look blocky and aliased.</p>
+<p>How large the shadow map needs to be depends on the type of light.</p>
+<figure class="" style="width: 750px;  ">
+    <a href="../../docs/14/figures/fig-light-types.svg">
+        <img src="../../docs/14/figures/fig-light-types.svg" alt="figures/fig-light-types.svg" />
+    </a><figcaption><p>Shadow maps and light types. A spotlight (left) covers a cone with a single perspective frustum — the easiest and most natural fit. A directional light (center) uses an orthographic projection over a chosen rectangular area; the coverage must be set carefully. A point light (right) radiates in all directions and requires six shadow maps arranged into a cube map, one per face — the most expensive option. Figure by Claude.&nbsp;</p></figcaption>
+</figure>
+
+<h3 id="spotlights-the-easy-case">Spotlights (the easy case)</h3>
+<p>A spotlight illuminates a cone. The shadow map is just one perspective image taken from the spotlight — the same projection you&rsquo;d use for a camera with the same field of view. This is the most natural fit for shadow maps, and why THREE.js (and most real-time engines) prefer spotlights when you want shadows.</p>
+<h3 id="directional-lights-like-sunlight">Directional Lights (like sunlight)</h3>
+<p>A directional light has no position — it just has a direction, and all rays are parallel. The shadow map uses an <strong>orthographic projection</strong> (no perspective foreshortening) over a chosen rectangular area of the world. The tricky part is choosing the right area: too small, and distant objects lose their shadows; too large, and the shadow map&rsquo;s resolution is wasted on empty space far from the camera. Many production engines use <strong>cascaded shadow maps</strong> — multiple shadow maps at different scales, covering near, mid, and far distances — to get good resolution everywhere.</p>
+<h3 id="point-lights-the-expensive-case">Point Lights (the expensive case)</h3>
+<p>A point light shines in all directions. To capture everything it can see, you need a shadow map for every direction: in practice, six shadow maps forming a cube map (one for each face of a cube surrounding the light). This is expensive and more complex to set up, which is why point lights with shadows are used sparingly.</p>
+<h2 id="soft-shadows">Soft Shadows</h2>
+<p>When there is insufficient resolution in the shadow map, the shadows look blocky and fuzzy (go back to the demo above and try it). But these artifacts (forms of aliasing, and the effects of anti-aliasing to combat them) are artifacts: they are not actually modeling the nice shadows we see in the real world.</p>
+<p><strong>Soft shadows</strong> are a phenomenon that happens in the real world. The alternative, hard or harsh shadows, is generally not desirable. Photographers and lighting designers use special lights (large light sources, bounce umbrellas, etc.) to avoid harsh shadows. The problem can be worse in computer graphics because of the way we do lighting. It is also hard to address in the standard computer graphics pipeline.</p>
+<p>When a light source is small (in the limit, just a point), the boundary between shadow and non-shadow is severe. This causes very distinct, harsh shadows. However, if the light source is large (it has area), the transition is more gradual.</p>
+<p>Here is a diagram showing the difference:</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/14/softshadows.svg">
+        <img src="../../docs/14/softshadows.svg" alt="softshadows.svg" />
+    </a><figcaption><p>With a point light source, any target point can either see the light source or not, causing a hard cutoff for the shadow. With an area light source, some points can see some of the light source, causing a gradual transition from shadowed to unshadowed.&nbsp;</p></figcaption>
+</figure>
+
+<p>Shadow maps do not support soft shadows directly. The most common trick to fake soft shadows is to simulate an area light source as a collection of point sources (usually spot lights). However, this requires a different shadow map for each light source, and becomes expensive quickly.</p>
+<h2 id="hack-lighting">Hack Lighting</h2>
+<p>Shadow maps — along with environment maps, normal maps, and the other texture techniques in this series — are sometimes called &ldquo;hacks.&rdquo; That might seem like an insult, but it is a precise description: they are not physically correct solutions to the lighting problem. They approximate the right answer in ways that can fail under the right (or wrong) circumstances.</p>
+<p>The reason we use them is that they run efficiently on graphics hardware. The GPU is designed to render triangles, apply texture lookups, and run shading programs on millions of pixels simultaneously. Shadow maps play to exactly these strengths: render some geometry, store the result in a texture, look it up later. This is what the GPU does best.</p>
+<p>Could we do shadows more correctly? Yes — ray tracing computes exact shadows with no bias artifacts, no resolution limits, and correct soft-shadow penumbrae from area lights. And indeed, modern real-time ray tracing hardware (NVIDIA RTX, for example) is starting to make ray-traced shadows practical. But shadow maps remain the workhorse for real-time rendering because they are fast, controllable, and well-understood.</p>
+<p>This is the broader lesson: the &ldquo;texture hacks&rdquo; we&rsquo;ve seen — normal maps, environment maps, shadow maps, ambient occlusion maps — are all clever uses of the GPU&rsquo;s core strength (fast texture lookups) to approximate expensive physical phenomena. That is not a bad thing. It is good engineering.</p>
+<h2 id="summary">Summary</h2>
+<p>Shadow maps implement shadows through two rendering passes:</p>
+<ol>
+<li><strong>Shadow map pass:</strong> render the scene from the light&rsquo;s viewpoint and store a depth image (the shadow map).</li>
+<li><strong>Camera pass:</strong> render the scene from the camera&rsquo;s viewpoint; for each visible surface point, test its depth against the shadow map to decide if it is lit or in shadow.</li>
+</ol>
+<p>The depth test is the heart of the algorithm: a surface is in shadow if something closer to the light was recorded at the same shadow-map location. The main practical challenges are depth precision (bias tuning), shadow map resolution, and handling different light types. THREE.js wraps all of this up with four properties: <code>renderer.shadowMap.enabled</code>, <code>light.castShadow</code>, <code>object.castShadow</code>, and <code>object.receiveShadow</code>.</p>
+<p>Continue to the exercise on the <a href="../../docs/15/" class="Next__Page">Next: Page &nbsp;15&nbsp;-&nbsp;Shadow Maps in Three.js</a> page, where we will make use of the shadow map implementation in THREE.js.</p>
+<a href="../../docs/15/" class="Next__Page">Next: Page &nbsp;15&nbsp;-&nbsp;Shadow Maps in Three.js</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Selected"> 14: How Shadow Maps Work </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p14",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

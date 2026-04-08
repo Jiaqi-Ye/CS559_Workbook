@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 1: Recap: Appearance by Shading and Texturing</h1>
+		</header>
+		<div class="content post__content clearfix"><p>So far, we&rsquo;ve been using three.js to do 3D graphics programming.</p>
+<p>This includes:</p>
+<ol>
+<li>Using transformations for the camera and objects to place objects in the world and figure out where they appear on the screen.</li>
+<li>Using collections of triangles (meshes) to create shapes.</li>
+<li>Using lights and materials to create surfaces that respond to lighting.</li>
+<li>Using texture maps to alter the appearance of objects, to make detailed colors, small geometric effects (bump maps), and some other effects.</li>
+<li>Using environment maps (a kind of texture) to create backgrounds and reflections.</li>
+</ol>
+<p>Three took care of implementing all of this on top of the low-level API.</p>
+<h2 id="low-level-apis-and-threejs">Low-Level APIs and Three.js</h2>
+<p>Up until now, we used the &ldquo;legacy mode&rdquo; of three.js which is built on top of the WebGL low-level API. However, most web browsers support the more modern WebGPU API. And three.js is moving in that direction. So we should move that way too.</p>
+<p>First, we should test that WebGPU works:</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/01/webgpu-support-test.html" class="boxtitlelink">webgpu-support-test.html</a><iframe
+        title="webgpu-support-test.html"
+        src="../../docs/01/webgpu-support-test.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>If WebGPU does not work, you may want to update your web browser. For class, we will do everything with three.js which <em>should</em> be able to work around not having WebGPU.</p>
+<p>We will need to use WebGL when we do GLSL programming later in the workbook. Otherwise, prefer to use the WebGPU backend (with WebGL fallback) when using three.js. This has become the default for workbooks (but we just switched for this workbook).</p>
+<p>The class software framework has an option to switch. When you create the <code>GrWorld</code> object, you can specify <code>webgpu:true</code> (which is the default), or <code>webgpu:false</code> to force it to use WebGL. In the process of implementing this, we had to make another change: the constructor needs to be an <code>async</code> function (to create a WebGPU renderer); therefore, we cannot use the &ldquo;standard&rdquo; JavaScript constructor. Instead, we use a class function as the constructor:</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">world</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">await</span> <span style="color:#75af00">GrWorld</span><span style="color:#111">.</span><span style="color:#00a8c8">new</span><span style="color:#111">({</span> <span style="color:#75af00">webgpu</span><span style="color:#f92672">:</span> <span style="color:#00a8c8">false</span> <span style="color:#111">});</span></span></span></code></pre></div>
+<p>We&rsquo;ll come back to this when we do shader programming.</p>
+<h2 id="what-does-this-have-to-do-with-the-hardware">What does this have to do with the hardware?</h2>
+<p>In working with three, we use a very specific set of abstractions:</p>
+<ol>
+<li>Transformations</li>
+<li>Triangles, with information tied to vertices</li>
+<li>Lights and materials that use a local lighting model</li>
+<li>Textures as the preferred way to create detail</li>
+<li>Environment maps as the way to get reflections and backgrounds</li>
+</ol>
+<p>These choices are dictated to us because of the way that graphics hardware works. It was designed to support this set of abstractions very well.</p>
+<a href="../../docs/02/" class="Next__Page">Next: Page &nbsp;2&nbsp;-&nbsp;Practice: Cars</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Selected"> 1: Recap: Appearance by Shading and Texturing </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p01",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

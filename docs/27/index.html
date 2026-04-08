@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 27: Image-Based Textures</h1>
+		</header>
+		<div class="content post__content clearfix"><h2 id="image-based-textures-and-shaders">Image-Based Textures and Shaders</h2>
+<p>Shaders can look up values (usually colors) in images. This is how we implement traditional texture mapping.</p>
+<p>First, we need to put the image file into a uniform variable. More specifically, we need not only an image, but also all the machinery that can read values from it. For example, we might use a mip-map. The GLSL data type is called a <code>sampler2D</code>.</p>
+<p>Setting up a <code>sampler2D</code> from the host side is complicated. Fortunately, THREE does it for us. All we need to do is create a Texture and assign it to a uniform variable.</p>
+<p>Then, in our shader program we refer to this <code>sampler2D</code> uniform using the <code>texture2D</code> function, which looks up a position in the texture.</p>
+<p>Here&rsquo;s a simple example (image © UW-Madison):</p>
+<p>
+
+
+<div id="box-06-27-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-27-01</span>&nbsp;
+    <input type="checkbox" id="check-06-27-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-27-01.html class="boxtitlelink">06-27-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-27-01.js" class="boxtitlelink">06-27-01.js</a>
+    <iframe
+        title="10-08-01"
+        src="../../for_students/06-27-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-27-01"
+    ></iframe>
+</div></p>
+<p>You can look at 
+<a href="../../for_students/06-27-01.js" class="box-html" data-tag="10-08-01">06-27-01.js</a>
+ (<a href="../../for_students/06-27-01.html" class="box-html" data-tag="10-08-01">06-27-01.html</a>) and the shaders <a href="../../for_students/06-27-01.vs" class="box-file box-vs" data-tag="10-08-01" data-type="vs">06-27-01.vs</a>
+ and <a href="../../for_students/06-27-01.fs" class="box-file box-fs" data-tag="10-08-01" data-type="fs">06-27-01.fs</a>
+ to see how it works. Notice how the uniform is set up in the JS file and then accessed in the fragment shader.</p>
+<h2 id="a-more-complex-example">A More Complex Example</h2>
+<p>In this example, we&rsquo;ll make a planet. We&rsquo;ll have a texture with blue (ocean) and green (land) and we&rsquo;ll put it on a sphere.</p>
+<p>Then, we&rsquo;ll add mountains - we&rsquo;ll use the green brightness as a height, and use that to displace the vertices of the sphere. We&rsquo;ll have to do this in the vertex shader.</p>
+<p>
+
+
+<div id="box-06-27-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-27-02</span>&nbsp;
+    <input type="checkbox" id="check-06-27-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-27-02.html class="boxtitlelink">06-27-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-27-02.js" class="boxtitlelink">06-27-02.js</a>
+    <iframe
+        title="10-08-02"
+        src="../../for_students/06-27-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-27-02"
+    ></iframe>
+</div></p>
+<p>The interesting part of this is the vertex shader <a href="../../for_students/06-27-02.vs" class="box-file box-vs" data-tag="10-08-02" data-type="vs">06-27-02.vs</a>
+. Note how I look up values in the texture and use the amount of green to move the vertices in the normal direction.</p>
+<p>This is the opposite of a normal map: there is no lighting, but we are really moving the geometry. It is a displacement map.</p>
+<p>You can also look at 
+<a href="../../for_students/06-27-02.js" class="box-html" data-tag="10-08-02">06-27-02.js</a>
+ (<a href="../../for_students/06-27-02.html" class="box-html" data-tag="10-08-02">06-27-02.html</a>) and <a href="../../for_students/06-27-02.fs" class="box-file box-fs" data-tag="10-08-02" data-type="fs">06-27-02.fs</a>
+ - but these are pretty much the same as prior examples.</p>
+<h2 id="procedural-displacement-map">Procedural Displacement Map</h2>
+
+<p>Displacement maps don&rsquo;t have to come from a texture. Just like a texture, the displacement itself can be procedural. 
+<a href="../../for_students/06-27-03.js" class="box-html" data-tag="10-08-03">06-27-03.js</a>
+ (<a href="../../for_students/06-27-03.html" class="box-html" data-tag="10-08-03">06-27-03.html</a>) combines a procedural texture like you saw on page 5 with a displacement map. Notice that there&rsquo;s no reason we have to display the texture as a color on the object - we could have one texture for the object color, and another for the displacement.</p>
+<p>The &ldquo;disp&rdquo; parameter is how much the dots move the vertices away from the sphere. If you look at the shader (recommended), notice how we move the position in the direction of the normal.</p>
+
+<div id="box-06-27-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-27-03</span>&nbsp;
+    <input type="checkbox" id="check-06-27-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-27-03.html class="boxtitlelink">06-27-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-27-03.js" class="boxtitlelink">06-27-03.js</a>
+    <iframe
+        title="10-08-03"
+        src="../../for_students/06-27-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-27-03"
+    ></iframe>
+</div>
+<p>Because we are moving vertices, the quality of the displacement map depends on the number of vertices. The &ldquo;segs&rdquo; slider changes the number of segments on the sphere (basically, the sphere is a segs x segs grid of triangles). Notice how the shape becomes better defined with more segments.</p>
+<p>Aliasing is a problem with the vertex shader: because we only compute the displacement at a vertex, if the value changes quickly, we might miss something. It could be an entire dot that looks flat because there are no vertices in it. Or, if there are lots of vertices, we might see unusual patterns around sharp edges. Blurring the edges of the dots makes this less of a problem.</p>
+<p>Note: when you change the nsegs slider, we change the triangles of the sphere. In general, we try to avoid this in real programs (because it requires creating new attribute buffers that must be allocated, computed, sent to the graphics hardware, &hellip;) For this special case, it&rsquo;s OK - it&rsquo;s a simple program with one sphere. But in a &ldquo;real program&rdquo; we want to avoid changing buffers within a draw loop.</p>
+<h2 id="summary-textures-in-shaders">Summary: Textures in Shaders</h2>
+<p>Now that we&rsquo;ve seen how to use textures in shaders, we have all the main pieces. Now it&rsquo;s time to make some shaders on <a href="../../docs/28/" class="Next__Page">Next: Page &nbsp;28&nbsp;-&nbsp;GLSL Exercises 1</a>.</p>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Selected"> 27: Image-Based Textures </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p27",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

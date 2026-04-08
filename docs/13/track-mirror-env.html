@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Environment Map Track Demo</title>
+    <link rel="stylesheet" href="/libs/CS559/style559.css" />
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #div1 {
+        width: 100%;
+        min-height: 70vh;
+      }
+
+      .controls {
+        width: 650px;
+        max-width: 95vw;
+        margin: 0.5rem auto 0.25rem auto;
+        padding: 0 0.5rem;
+      }
+
+      .controls button {
+        font-size: 1rem;
+        padding: 0.45rem 0.75rem;
+      }
+
+      .meta {
+        margin: 0.5rem auto 1rem auto;
+        max-width: 70ch;
+        padding: 0 1rem;
+        font-size: 0.9rem;
+        color: #2a2a2a;
+      }
+    </style>
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+        "three/": "https://unpkg.com/three@0.180.0/",
+        "CS559/": "/libs/CS559/",
+        "CS559-Framework/": "/libs/CS559-Framework/",
+        "three/webgpu": "https://unpkg.com/three@0.180.0/build/three.webgpu.js",
+        "three/tsl": "https://unpkg.com/three@0.180.0/build/three.tsl.js"
+    }
+}
+    </script>
+  </head>
+  <body>
+    <div id="div1"></div>
+    <div class="controls">
+      <button id="toggleEnv" type="button">Switch To Dynamic Environment Map</button>
+    </div>
+    <p class="meta">
+      Implemented by GitHub Copilot using GPT-5.3-Codex. Directed by Prof. Gleicher.
+      Toggle compares static EXR environment reflection vs per-frame dynamic cube-map reflection.
+    </p>
+    <script src="./track-mirror-env.js" type="module"></script>
+  </body>
+</html>

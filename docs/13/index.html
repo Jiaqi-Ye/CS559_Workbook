@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 13: Dynamic Environment Maps</h1>
+		</header>
+		<div class="content post__content clearfix"><p>A particularly useful kind of texture is an <strong>environment map</strong> - we used these for backgrounds, lighting, and reflections.</p>
+<p>Using traditional environment maps for reflections has the problem that it only captures the static background in the environment map: it does not have the objects in the scene. The solution, of course, is to use the dynamic texture idea: we take a picture of the world and use it as the environment map. We need to use a special &ldquo;360&rdquo; camera to take a surround picture. And, of course, three.js makes this convenient: it provides a special <code>CubeCamera</code> that takes 6 pictures, one in each direction. You can make a <code>CubeCamera</code> to take a picture of the scene, and use its <code>renderTarget</code> as an environment map.</p>
+<p>A dynamic environment map is cool: by taking the picture where an object is, you can create reflections (or lighting) based on what the object actually sees - not what was pre-loaded in the texture map. And, they are really easy because they are practically built into THREE.</p>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../docs/13/track-mirror-env.html" class="boxtitlelink">track-mirror-env.html</a><span> | </span><a href="../../docs/13/track-mirror-env.js" class="boxtitlelink">track-mirror-env.js</a><iframe
+        title="track-mirror-env.html"
+        src="../../docs/13/track-mirror-env.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>In this demo, cars drive around a circular track and a mirrored sphere sits in the center.
+The button below the canvas switches between:</p>
+<ul>
+<li>a static reflection from the EXR map (the environment map is loaded from a single &ldquo;EXR&rdquo; file - this is the standard high-dynamic range image format used for environment maps), and</li>
+<li>a dynamic reflection using a per-frame <code>CubeCamera</code> update.</li>
+</ul>
+<p>Notice how the static environment map is missing the green disc and brown base (of the sphere), and the cars. Once we have a dynamic environment map, these objects can be seen in the reflection.</p>
+<p>So, we can have a mirror that actually reflects what&rsquo;s going on in the scene. There are some limitations: for example, it is an environment map, so all reflections are from the single eye point of the camera. And, we had to draw the scene seven times (one for each face of the cube map, one for the final image).</p>
+<p>In principle, you could create a dynamic environment map for each object that sees what the object would really see. In practice, this becomes a performance problem quickly. Therefore, the reflections are often made from &ldquo;the center of the room.&rdquo;</p>
+<p>Here is a second version that makes each car&rsquo;s upper box reflective and switches between:</p>
+<ul>
+<li>one shared dynamic environment map centered at the mirror sphere, and</li>
+<li>per-car dynamic environment maps centered on each car&rsquo;s upper box.</li>
+</ul>
+
+
+
+
+<div class="wb-side-by-side" style="display: flex; gap: 1rem; flex-wrap: nowrap; justify-content: flex-start; align-items: flex-start;">
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/13/one-map.png">
+        <img src="../../docs/13/one-map.png" alt="one-map.png" />
+    </a><figcaption><p>One environment map at center (inside spehere). Notice that the cars get the reflection of what is around the sphere (green).&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/13/per-car-maps-fixed.png">
+        <img src="../../docs/13/per-car-maps-fixed.png" alt="per-car-maps-fixed.png" />
+    </a><figcaption><p>Per car environment maps. Notice that the cars reflect their bodies in their windows.&nbsp;</p></figcaption>
+</figure>
+
+</div>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Where is the demo of this?</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>I wrote the demo that switched between the per-scene and per-object maps. However, I am not providing it because (1) it doesn&rsquo;t perform well, unless you have a GPU with a lot of memory bandwidth; and (2) I was unable to get switching to work correctly without some bug.</p>
+<p>My inability to debug this is instructive: I asked AIs for help (both Claude and Codex). I had both of them re-write their own new versions. I even had Claude write a version that did not use the class software infrastructure.</p>
+<p>The AIs tried some very fancy schemes to avoid the problem, but they ended up making things worse. However, some of the experiments exposed some issues in the WebGL renderer for three.js. But switching renderers caused different problems, &hellip;</p>
+<p>The &ldquo;right&rdquo; fix involves improving the class software framework, and using three.js features that only work for WebGPU.</p>
+<p>So the cautionary tale: using multiple dynamic environment maps is uncommon enough that it is not well supported in three.js. And it certainly does not work easily within the class software framework.</p>
+
+    </div>
+</details>
+</div>
+<p>Per-object dynamic environment maps are expensive: we need to render a cube map (each of which requires drawing the scene 6 times) for each environment map. They usually are not worth the effort. It would be very difficult to implement multiple environment maps within the class software framework.</p>
+<h2 id="dynamic-environment-maps">Dynamic Environment Maps</h2>
+<p>As you might expect, three.js makes it really easy to make dynamic environments as textures. It is just like the previous example: we make a camera, render the image it sees, and use this as a texture. For an environment map, three.js provides a special <code>CubeCamera</code> that takes 6 pictures, one in each direction. You can make a <code>CubeCamera</code> to take a picture of the scene, and use its <code>renderTarget</code> as an environment map.</p>
+<p>A dynamic environment map is cool: by taking the picture where an object is, you can create reflections (or lighting) based on what the object actually sees - not what was pre-loaded in the texture map. And, they are really easy because they are practically built into THREE.</p>
+<p>There are a bunch of steps, all simple:</p>
+<ol>
+<li>You need to create the <code>CubeCamera</code> at the beginning (for example, when you create the object). (In the current version of THREE, you need to create the &ldquo;render target&rdquo; - the texture map where the camera puts the image it takes)</li>
+<li>You need to attach the <code>CubeCamera</code>&rsquo;s &ldquo;render target&rdquo; as the environment map of the texture.</li>
+<li>At the appropriate time, you need to have the <code>CubeCamera</code> do an <code>update</code> - which is basically, take the picture of the world and put it into the environment map.</li>
+</ol>
+<p>There is a little bit of a catch using the class software framework: you need to take a picture with the &ldquo;environment camera&rdquo; before you use the picture that it takes. If you have a separate environment map for each object, you can do this in the object&rsquo;s stepWorld function (which is called before drawing). Or, you can do this using a callback in the animation loop (useful if you use the same map for multiple objects).</p>
+<p>There are a couple of other potential problems. One problem is that a camera cannot take a picture of itself (for example, if it is looking at itself in a mirror). If a camera takes a picture of an object that uses a texture that is that camera&rsquo;s render target, there is a &ldquo;feedback loop&rdquo; (the camera is looking at itself in the mirror). This generates an error message. It isn&rsquo;t disastrous, but usually we take steps to avoid it (for example, not rendering the objects that use the texture map that we are creating) - you can see examples in the framework demo code. The screen example above uses &ldquo;render layers&rdquo; (a newer feature in three.js).</p>
+<p>There are two older demos on <a href="https://cs559.github.io/559Tutorials/textures/dynamic-environment-maps/">this page</a>. There are two examples: one makes a single map at the center of the scene, the other creates a map at the center of each reflective object.</p>
+<h2 id="a-final-note">A Final Note</h2>
+<p>These kinds of multi-pass things involve all kinds of &ldquo;under-the-hood&rdquo; details that can be painful to make work. Trying to get the graphics hardware to draw pictures into the right forms so it can be re-used in other ways can be tricky. Fortunately, THREE takes care of that for us. You don&rsquo;t need to know the details like how it manages memory to make sure the output of one thing can be the input of another. But you do need to understand <em>conceptually</em> how using this idea of making multiple pictures allows us to achieve effects such as shadows and reflections.</p>
+<p>Making multiple dynamic environment maps work within the class software framework turns out to be problematic with the current version of three.js. Rather than asking you to use it, we will provide better support in the future.</p>
+<p>The main takeaway you should have though: we use dynamic environment maps as a way to get reflections of objects within the scene. These reflections come at a cost: we are subject to the environment map assumptions (they are only correct for the one point where the map was taken from), and they come at a performance cost (they require multiple extra rendering passes - one for each face of the environment map cube).</p>
+<a href="../../docs/14/" class="Next__Page">Next: Page &nbsp;14&nbsp;-&nbsp;How Shadow Maps Work</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Selected"> 13: Dynamic Environment Maps </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p13",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

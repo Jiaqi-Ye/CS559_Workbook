@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dots Shader Languages</title>
+    <link rel="stylesheet" href="/libs/CS559/style559.css" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background: linear-gradient(160deg, #f2f4f7 0%, #e7edf5 100%);
+      }
+
+      .demo-wrap {
+        width: 650px;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 8px 0;
+        font-size: 1.3rem;
+      }
+
+      p {
+        margin: 0 0 12px 0;
+      }
+
+      .controls {
+        margin: 0 0 12px 0;
+        padding: 10px;
+        border: 1px solid #ccd5e0;
+        border-radius: 10px;
+        background: #ffffff;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .panel {
+        background: #ffffff;
+        border: 1px solid #ccd5e0;
+        border-radius: 10px;
+        padding: 10px;
+      }
+
+      .panel h2 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #0f141a;
+        border-radius: 6px;
+      }
+
+      .note {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #334155;
+      }
+
+      @media (max-width: 560px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo-wrap">
+    <h1>Same Dot Texture, Three Shader Languages</h1>
+    <p>
+      Each panel renders the same UV-based procedural dot pattern on the same plane and sphere.
+      One slider set controls all three pipelines.
+    </p>
+
+    <div id="controls" class="controls"></div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>GLSL</h2>
+        <canvas id="glsl-canvas"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2>WGSL</h2>
+        <canvas id="wgsl-canvas"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2>Three Shading (TSL)</h2>
+        <canvas id="tsl-canvas"></canvas>
+      </section>
+    </div>
+
+    <div class="note">
+      Implemented by GitHub Copilot (GPT-5.3-Codex), directed by workbook author request.
+    </div>
+    </div>
+
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/webgpu": "https://unpkg.com/three@0.180.0/build/three.webgpu.js",
+        "three/tsl": "https://unpkg.com/three@0.180.0/build/three.tsl.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/",
+        "three/": "https://unpkg.com/three@0.180.0/",
+        "CS559/": "/libs/CS559/",
+        "CS559-Framework/": "/libs/CS559-Framework/"
+    }
+}
+</script>
+    <script src="./dots-languages.js" type="module" defer></script>
+  </body>
+</html>

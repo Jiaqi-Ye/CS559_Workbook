@@ -1,0 +1,860 @@
+/** choose san-serif or serif for the "main font" **/
+/* global setting - everything gets some defaults */
+html {
+  font-family: Cambria, Georgia, serif;
+  background: lightgray; }
+
+/* make the body */
+body {
+  padding-bottom: 33vh; }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Calibri, Helvetica, sans-serif; }
+
+/* the div surrounding the body parts - float the sidebar next to the content*/
+.container {
+  background: white;
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  min-width: 600px;
+  padding-bottom: 4rem;
+  margin: 25px auto;
+  box-shadow: 0 0 10px rgba(50, 50, 50, 0.17);
+  display: flex;
+  flex-wrap: wrap-reverse;
+  align-items: flex-end; }
+
+/* this is the main body text */
+.maincolumn {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 600px;
+  margin: 10px;
+  margin-left: 60px;
+  margin-top: 60px;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  min-width: 0; }
+  .maincolumn li {
+    padding-top: .1rem;
+    padding-bottom: .1rem; }
+  .maincolumn li.rubric_item {
+    padding-top: 0rem;
+    padding-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.2; }
+  .maincolumn h1 {
+    font-size: 2rem; }
+  .maincolumn h2 {
+    font-size: 1.6rem; }
+  .maincolumn h3 {
+    font-size: 1.3rem; }
+  .maincolumn h4 {
+    font-size: 1.125rem; }
+  .maincolumn h5 {
+    font-size: 1.125rem; }
+  .maincolumn h6 {
+    font-size: 1.125rem; }
+
+.sidebar {
+  border: 2px grey solid;
+  border-radius: 5px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 200px;
+  margin: 10px;
+  margin-top: 80px;
+  padding: 5px;
+  font-size: .75rem;
+  font-family: "Helvetica Narrow", sans-serif; }
+
+/* make the sidebar menu bulletless */
+.Side__List {
+  margin: 0;
+  list-style-type: none;
+  padding-left: 0; }
+
+.Side__Item {
+  margin-left: 0;
+  padding: 4px 4px 4px 1rem; }
+
+.Side__Item a {
+  text-decoration: none; }
+
+.Side__Selected {
+  background-color: darkred;
+  color: white; }
+
+/* make the notes on the side look better */
+.Side__Note {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  background-color: lightgrey;
+  font-size: 120%;
+  padding: 4px 4px 4px; }
+
+.sidebar h2 {
+  margin: 0; }
+
+/* in general, underlined links look terrible, so avoid them */
+a:link {
+  text-decoration: none;
+  font-weight: 700; }
+
+a:hover {
+  color: darkred; }
+
+/* make the "for students" links look better 
+   (avoid underlines since they usually have dots in them
+   */
+.for_students {
+  text-decoration: none;
+  font-weight: 700;
+  font-family: monospace; }
+
+/* when we want 2 column side by side things for comparison */
+.leftright {
+  display: flex;
+  flex-direction: row; }
+  .leftright .left {
+    width: 50%;
+    margin-right: 5px; }
+
+.right {
+  width: 50%;
+  margin-left: 5px; }
+
+.highlight pre,
+.highlight code {
+  font-size: 1rem;
+  font-family: consolas, monaco, monospace;
+  overflow: scroll; }
+
+/************************************************************************/
+/* Making the exercises look right... */
+/** We always like to put borders around Canvas and SVG */
+canvas {
+  border: 2px solid black; }
+
+svg {
+  border: 2px solid black; }
+
+/** put each example into a box */
+.examplebox {
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 0px 10px 0px 10px;
+  margin: 15px 5px 15px 5px; }
+
+/** make the summaries a little different */
+.sumbox {
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 0px 10px 0px 10px;
+  margin: 15px 5px 15px 5px; }
+
+/** simple box for text */
+.simplebox {
+  border: 2px solid black;
+  padding: 5px 5px 5px 5px;
+  margin: 5px 5px 5px 5px;
+  width: 500px; }
+
+.halfbox {
+  border: 2px solid black;
+  padding: 5px 5px 5px 5px;
+  margin: 5px 5px 5px 5px;
+  width: 45%; }
+
+/** a warning box */
+.warnbox {
+  border: 2px solid darkgoldenrod;
+  background-color: #F0E59f;
+  padding: 10px;
+  margin: 10px;
+  width: 80%; }
+
+/** basic button style so things aren't too ugly */
+/* for playing with the buttons */
+.basicbutton {
+  width: 100px;
+  height: 30px;
+  border-radius: 5px;
+  border: 2px solid black;
+  margin: 8px;
+  background-color: lightgrey; }
+
+.basicbutton:hover {
+  border: 4px solid black; }
+
+.basicbutton:active {
+  color: white;
+  background-color: darkgray; }
+
+/** very plain tables */
+table {
+  border-collapse: collapse; }
+
+table,
+th,
+td {
+  border: 1px solid black; }
+
+th,
+td {
+  padding: 3px; }
+
+li {
+  margin-bottom: 10px; }
+
+/*********************************************/
+/* stuff for expand (adapted from book) */
+.book-expand {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.15rem;
+  overflow: hidden; }
+  .book-expand .book-expand-head {
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    cursor: pointer; }
+  .book-expand .book-expand-content {
+    display: none;
+    padding: 1rem; }
+  .book-expand input[type="checkbox"]:checked + .book-expand-content {
+    display: block; }
+
+.expand__button {
+  color: darkred;
+  font-style: italic; }
+
+.dimbox {
+  background-color: #ffd;
+  border: 1px solid #bbd;
+  margin: 10pt;
+  padding: 6pt; }
+
+.workbook-todo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding: 1rem;
+  background-color: #f9d;
+  margin-bottom: 1rem;
+  font-size: 120%;
+  font-family: 'Courier New', Courier, monospace; }
+
+.workbook-todo > strong,
+.workbook-todo > div {
+  display: inline-block; }
+
+.workbook-future {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding: 1rem;
+  background-color: #9fd;
+  margin-bottom: 1rem;
+  font-size: 120%;
+  font-family: 'Courier New', Courier, monospace; }
+
+.workbook-future > strong,
+.workbook-future > div {
+  display: inline-block; }
+
+.page-rubric-container {
+  margin: 1rem 0rem 1rem 0rem;
+  padding: 1rem;
+  border: 1px solid darkslategray;
+  background-color: #F0E59f; }
+
+.box-rubric-container {
+  font-family: Calibri, Helvetica, sans-serif;
+  margin: 0rem 0rem 0rem 0rem;
+  padding: 0rem 1rem .5rem 1rem; }
+
+.box-rubric-container td {
+  padding: 5px 10px 5px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid slategray; }
+
+.page-rubric-grid {
+  border: 1px solid slategray;
+  display: grid;
+  grid-template-columns: auto auto 1fr; }
+
+.page-rubric-grid div {
+  border: 1px solid darkslategray; }
+
+.page-rubric-grid-header {
+  padding-top: 0.5rem;
+  grid-column: 1 / span 4;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+  font-weight: 600; }
+
+.page-rubric-grid-box {
+  grid-column: 1;
+  padding: 0.25rem 0.5rem 0.25rem 1.5rem;
+  text-align: left; }
+
+.page-rubric-grid-points {
+  grid-column: 2;
+  padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+  text-align: left; }
+
+.page-rubric-grid-bonus {
+  grid-column: 3;
+  padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+  text-align: left; }
+
+.page-rubric-grid-desc {
+  grid-column: 4;
+  padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+  text-align: left; }
+
+.rubric-box-regular {
+  background-color: #f0f0f0; }
+
+.rubric-box-bonus {
+  background-color: #e7ffff; }
+
+.multifigure {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; }
+
+.multifigure > figure {
+  margin: 1rem; }
+
+.wb-side-by-side {
+  display: flex; }
+
+.wb-side-by-side > * {
+  margin: 0;
+  flex: 0 0 auto; }
+
+.wb-side-by-side > figure,
+.wb-side-by-side > p > figure {
+  margin: 0; }
+
+.wb-side-by-side > p {
+  margin: 0; }
+
+.includebox {
+  overflow: hidden;
+  border: 1px solid gray;
+  margin: .5rem 0px 0px 0px;
+  padding: 0px 0px 0px 0px; }
+
+.expandbox {
+  border-radius: 5px;
+  background-color: #F0F0C0;
+  border: 2px solid black;
+  padding: 5px; }
+
+.next_end {
+  background-color: #ffd;
+  border: 1px solid #bbd;
+  margin: 10pt;
+  padding: 6pt; }
+
+/*********************************************/
+/* from Gemini for json file status */
+.status-box {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 10px;
+  font-family: sans-serif; }
+
+.status-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb; }
+
+.status-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba; }
+
+.status-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb; }
+
+/************************************************************************/
+.boxtitlelink {
+  font-family: "Courier New", Courier, monospace; }
+
+.boxframename {
+  font-family: Calibri, Helvetica, sans-serif;
+  font-weight: bold;
+  color: black; }
+
+.boxframekind {
+  font-family: Calibri, Helvetica, sans-serif;
+  font-weight: normal;
+  color: black; }
+
+.boxlink {
+  font-family: "Courier New", Courier, monospace; }
+
+/************************************************************************/
+/* Gemini's idea for doing tooltips */
+/* 1. The Trigger Text */
+.tooltip-trigger {
+  position: relative;
+  /* Establishes the anchor point */
+  cursor: help;
+  /* Visual cue that it's interactive */
+  text-decoration: underline dotted;
+  /* Optional styling */ }
+
+/* 2. The Tooltip Box (Hidden by default) */
+.tooltip-box {
+  visibility: hidden;
+  /* Hides it without removing from DOM */
+  opacity: 0;
+  transition: opacity 0.3s;
+  /* Smooth fade-in */
+  /* Positioning */
+  position: absolute;
+  bottom: 125%;
+  /* Moves it above the text */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Centers it perfectly */
+  /* Sizing & Formatting */
+  width: 200px;
+  /* Controls wrapping for multi-line */
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 400;
+  /* Reset weight if parent is bold */
+  text-align: center;
+  z-index: 10;
+  /* Ensures it sits on top of other content */ }
+
+/* 3. The Arrow (Optional) */
+.tooltip-box::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent; }
+
+/* 4. The Reveal */
+.tooltip-trigger:hover .tooltip-box {
+  visibility: visible;
+  opacity: 1; }
+
+/***********************************************/
+/* this is for the NetID validation - from Gemini */
+/* Default state */
+.netid-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s; }
+
+/* When the input is focused */
+.netid-input:focus {
+  border-color: #2196F3; }
+
+/* INVALID state (Only shows after user has typed something) */
+.netid-input:invalid:not(:placeholder-shown) {
+  border-color: #e53935;
+  /* Red */
+  background-color: #ffebee; }
+
+/* VALID state */
+.netid-input:valid:not(:placeholder-shown) {
+  border-color: #43A047;
+  /* Green */ }
+
+/* Error message styling */
+.netid-error-msg {
+  color: #e53935;
+  font-size: 12px;
+  display: none;
+  /* Hidden by default */
+  margin-top: 5px; }
+
+/* Show error message when input is invalid */
+.netid-input:invalid:not(:placeholder-shown) + .error-msg {
+  display: block; }
+
+/**************************************/
+/* for the inline canvas shortcode */
+.inline-canvas-div {
+  display: inline-block;
+  border: 1px solid black;
+  border-radius: 10px;
+  margin: 1rem;
+  padding: 1rem; }
+
+.inline-js-div {
+  display: inline-block; }
+
+.inline-canvas-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-family: Calibri, Helvetica, sans-serif; }
+
+/************************************/
+/** for the transform Demos */
+.trdemo-box {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+  background-color: #f9f9f9; }
+
+.trdemo-controls {
+  margin-top: 10px; }
+
+.trdemo-control-group {
+  margin-bottom: 10px; }
+
+/* Vertical Slider styles for canvas shortcode */
+.canvas-slider-container {
+  gap: 10px; }
+
+.canvas-slider-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 10px; }
+
+.canvas-slider-controls label,
+.canvas-slider-controls span {
+  font-family: sans-serif; }
+
+.canvas-slider-input-container {
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center; }
+
+input.canvas-slider[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+  /* Firefox styles */ }
+  input.canvas-slider[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #555;
+    margin-top: -6px;
+    cursor: pointer; }
+  input.canvas-slider[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px; }
+  input.canvas-slider[type=range]::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #555;
+    border: none;
+    cursor: pointer; }
+  input.canvas-slider[type=range]::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px; }
+
+/***********************************************/
+.math-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1em 0;
+  width: 100%; }
+
+.math-content {
+  flex-grow: 1;
+  text-align: center;
+  /* Centers the math */
+  overflow-x: auto;
+  /* Scrollbars for long equations */ }
+
+.math-number {
+  flex-shrink: 0;
+  margin-left: 10px;
+  font-weight: bold;
+  color: #555; }
+
+figcaption {
+  font-size: 0.8em;
+  font-family: Calibri, Helvetica, sans-serif; }
+
+/* Ensure figures don't overflow their container */
+figure img {
+  max-width: 100%;
+  height: auto; }
+
+/******************************************/
+/** Curve Demos **/
+.curvedemo-root {
+  --demo-width: 660px;
+  --demo-bg: #f4f4f9;
+  --demo-panel-bg: #ffffff;
+  --demo-text: #333333;
+  --demo-muted: #666666;
+  --demo-border: #dddddd;
+  --demo-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --demo-radius: 12px;
+  --demo-accent: #333333;
+  --demo-blue: #007bff;
+  --demo-red: #dc3545;
+  margin: 0;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--demo-bg);
+  color: var(--demo-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+.curvedemo-root.curvedemo-embed {
+  background: transparent;
+  padding: 0; }
+
+.curvedemo-root,
+.curvedemo-root * {
+  box-sizing: border-box; }
+
+.curvedemo-title {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 1.5rem; }
+
+.curvedemo-container {
+  width: var(--demo-width);
+  background: var(--demo-panel-bg);
+  border-radius: var(--demo-radius);
+  box-shadow: var(--demo-shadow);
+  overflow: hidden; }
+
+.curvedemo-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-bottom: 1px solid #eeeeee;
+  border-left: 1px solid var(--demo-border);
+  border-right: 1px solid var(--demo-border);
+  border-top: 1px solid var(--demo-border);
+  background: #ffffff;
+  cursor: crosshair;
+  touch-action: none; }
+
+.curvedemo-canvas.grid {
+  background-color: #fcfcfc;
+  background-image: linear-gradient(#eeeeee 1px, transparent 1px), linear-gradient(90deg, #eeeeee 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: -1px -1px; }
+
+.curvedemo-panel {
+  padding: 16px; }
+
+.curvedemo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between; }
+
+.curvedemo-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px; }
+
+.curvedemo-span-2 {
+  grid-column: span 2; }
+
+.curvedemo-controls-stack {
+  display: grid;
+  gap: 12px; }
+
+.curvedemo-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap; }
+
+.curvedemo-button-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: nowrap; }
+
+.curvedemo-range {
+  width: 100%;
+  cursor: pointer; }
+
+.curvedemo-button {
+  padding: 8px 16px;
+  background: var(--demo-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px; }
+
+.curvedemo-button-spaced {
+  margin-bottom: 8px; }
+
+.curvedemo-button:hover {
+  background: #555555; }
+
+.curvedemo-select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #cccccc; }
+
+.curvedemo-label {
+  font-size: 14px;
+  user-select: none; }
+
+.curvedemo-instructions {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--demo-muted);
+  text-align: center; }
+
+.curvedemo-note {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--demo-muted); }
+
+.curvedemo-legend {
+  font-size: 0.9rem;
+  color: var(--demo-muted); }
+
+.curvedemo-checkbox-list label {
+  display: block;
+  margin: 4px 0;
+  cursor: pointer; }
+
+.curvedemo-right {
+  margin-left: auto;
+  text-align: right; }
+
+.curvedemo-center {
+  text-align: center; }
+
+.curvedemo-scheme {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #dddddd;
+  background: #f7f7f7; }
+
+.curvedemo-scheme.blue {
+  background: #eef2ff;
+  border-color: #ccd5ff; }
+
+.curvedemo-scheme.red {
+  background: #fff0f0;
+  border-color: #ffccd5; }
+
+.curvedemo-color-blue {
+  color: var(--demo-blue);
+  font-weight: 600; }
+
+.curvedemo-color-red {
+  color: var(--demo-red);
+  font-weight: 600; }
+
+.curvedemo-muted {
+  color: var(--demo-muted); }
+
+.curvedemo-status {
+  font-family: monospace;
+  color: var(--demo-muted);
+  font-size: 0.85rem;
+  text-align: right; }
+
+/******************************/
+/* for video and young's demo link boxes */
+.resourcelink {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0; }
+
+/* Force the bold weight onto KaTeX elements */
+.katex .mathbf,
+.katex .boldsymbol,
+.katex .amsbsy {
+  font-weight: 900 !important;
+  -webkit-font-smoothing: antialiased; }
+
+/* 1. Hide the raw MathML (removes the warning and the unstyled math) */
+.katex .katex-mathml {
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0;
+  border: 0;
+  height: 1px;
+  width: 1px;
+  overflow: hidden; }
+
+/* 2. Ensure the HTML layer is visible and uses your Bold settings */
+.katex .katex-html {
+  display: inline-block;
+  /* or inline-block depending on your layout */ }
+
+/* Remove borders/backgrounds from KaTeX SVG elements (fixes the square root box) */
+.katex svg {
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important; }
+
+/* Safety measure: Ensure paths inside SVGs don't get unwanted strokes */
+.katex path {
+  stroke: none !important; }
+
+/** print nicely - suggested by suggested by Codex implemented printing **/
+@media print {
+  nav, .sidebar, .footer, .edit-page-link, .search-bar, .first-visit-warning {
+    display: none !important; }
+  html, body {
+    background: white !important; }
+  .container {
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+    padding-bottom: 0 !important; }
+  .maincolumn {
+    margin: 0 !important;
+    flex: none !important;
+    width: 100% !important; }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-weight: normal;
+    font-size: 90%; }
+  h1, h2, h3 {
+    break-after: avoid-page; }
+  pre, code, table, figure, img, svg, canvas {
+    break-inside: avoid-page; } }

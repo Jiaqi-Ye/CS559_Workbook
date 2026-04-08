@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 26: Procedural Texture Examples</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Here are some examples where I write some procedural textures. They are intentionally simple. The goal is to be instructive, not necessarily the most visually appealing.</p>
+<h1 id="example-1---stripes">Example 1 - Stripes</h1>
+<p>This is a demonstration of making a simple stripe shader. I start with a simple solid-colored stripes (with parameters) and then add anti-aliasing.</p>
+<p>Not much commentary for now (I believe it is discussed in this video lecture).</p>
+<p>The same vertex shader is used in all versions.</p>
+<h2 id="step-1---most-basic-stripes">Step 1 - Most Basic Stripes</h2>
+<p>Just to get something going, I made the simplest version.</p>
+<p>The only thing of note: I use uniform parameters to pass the two different colors, the number of stripes, and the &ldquo;width&rdquo; of the stripe (the percentage of the stripe that each color has).</p>
+<p>There is no anti-aliasing yet.</p>
+<p>
+
+</p>
+<div id="stripes1"></div>
+<script src="./1-stripes-simple.js" type="module" defer></script>
+<p>You can see this on a <a href="./1-stripes-simple.html">clean html page</a>,
+see the <a href="./1-stripes-simple.js">js source</a>, <a href="./stripes.vs">vertex shader</a>, and <a href="./1-stripes-simple.fs">fragment shader</a>.</p>
+<h2 id="step-2---anti-aliasing">Step 2 - Anti-Aliasing</h2>
+<p>Here is a first cut at anti-aliasing.</p>
+<p>In the 0-1 range of the texture parameter, there is a &ldquo;hard edge&rdquo; that we need to blur. In this version, I am only blurring that edge: the other edge occurs at the &ldquo;wrap around&rdquo; (when we go back from 1 to 0 at the edge of the pattern). I&rsquo;ll deal with that later.</p>
+<p>For this demo, I am setting the amount of blur with the slider. If the blur is negative, I compute the amount using <code>fwidth</code> (which is why you might make the blur negative). If you make blur positive, you can blur things too much.</p>
+<p>
+
+</p>
+<div id="stripes2"></div>
+<script src="./2-stripes-aa.js" type="module" defer></script>
+<p>You can see this on a <a href="./2-stripes-aa.html">clean html page</a>,
+see the <a href="./2-stripes-aa.js">js source</a>, <a href="./stripes.vs">vertex shader</a>, and <a href="./2-stripes-aa.fs">fragment shader</a>.</p>
+<h2 id="step-3---two-sided-anti-aliasing">Step 3 - Two Sided Anti-Aliasing</h2>
+<p>It is much easier to anti-alias both sides of the stripe if they occur within the parameter range (rather than dealing with the wrap around). So this version of the shader puts each stripe at the middle of the parameter range, and checks for the edges of the stripes by distance to the middle.</p>
+<p>
+
+</p>
+<div id="stripes3"></div>
+<script src="./3-stripes-twoside.js" type="module" defer></script>
+<p>You can see this on a <a href="./3-stripes-twoside.html">clean html page</a>,
+see the <a href="./3-stripes-twoside.js">js source</a>, <a href="./stripes.vs">vertex shader</a>, and <a href="./3-stripes-twoside.fs">fragment shader</a>.</p>
+<h1 id="example-2---simple-wood">Example 2 - Simple Wood</h1>
+<p>This is a slightly more complex shader example. It doesn&rsquo;t look great, but gives you a little more sense of the process. I&rsquo;ll make the world&rsquo;s simplest procedural wood grain.</p>
+<!-- more -->
+<p>In a Q&amp;A session for the 2023 class, the students asked me to make a procedural shader for wood. I sketched out the idea, but I didn&rsquo;t actually write the code. (no time to live-code, and I wasn&rsquo;t set up for it).</p>
+<p>So&hellip;</p>
+<p>I am going to make a procedural wood shader. I am not going to &ldquo;stream it&rdquo; (run the screen recorder) since I don&rsquo;t know if I will get to do it in one sitting. But I will take notes and explain what I am doing here.</p>
+<p>Before I start, I need a plan&hellip; here is my plan</p>
+<ol start="0">
+<li>start with the stripe shader (start at zero, since this really isn&rsquo;t a step)</li>
+<li>convert stripes into concentric circles, change the colors</li>
+<li>add noise to the concentric circles (make sure I have good noise functions), tweak to make look good</li>
+<li>change things to do 3D textures - this may be complicated since I need to assign 3D textures to my objects. it might be best just to use local coordinate positions</li>
+<li>tweak to make look better</li>
+</ol>
+<p>The goal here is to do this quickly - and have something vaguely wood-like - not necessarily to make great wood. And to let you see the artistic process - kind of guessing at what effects I want to see, trying to make them, and then tweaking them.</p>
+<p>If you just want to see the &ldquo;final&rdquo; result&hellip; <a href="./W3A-wood.html">Wood3A</a></p>
+<p>Here goes&hellip;</p>
+<h2 id="step-1---convert-the-stripes-to-circles">Step 1 - Convert the stripes to circles</h2>
+<p>We&rsquo;ll build off the previous stripes demo.</p>
+<p>I&rsquo;ll copy these to W1.</p>
+<p>Now the changes&hellip;</p>
+<ol>
+<li>The file name for the vertex shader is hard-coded - I&rsquo;ll change that so it&rsquo;s easier not to forget. (in JS file)</li>
+<li>let me pick some brown colors to start&hellip; <a href="https://louisem.com/421101/brown-hex-codes">https://louisem.com/421101/brown-hex-codes</a> seems helpful. The colors are in the js file, so I just changed those.</li>
+<li>For the concentric circles, we need to change U,V so that 0,0 is the center (invent new variables nu,nv)</li>
+<li>compute the distance to the center</li>
+<li>basically, use that as the U value for stripes.</li>
+</ol>
+
+<div id="wood1"></div>
+<script src="W1-wood.js" type="module" defer></script>
+<p>If you&rsquo;re following along, you can see the <a href="../../docs/26/W1-wood.vs" class="for_students">Vertex Shader</a>
+ and the <a href="../../docs/26/W1-wood.fs" class="for_students">Fragment Shader</a>
+.</p>
+<h2 id="step-2-add-noise-so-it-isnt-so-round">Step 2: Add noise so it isn&rsquo;t so round&hellip;</h2>
+<p>I&rsquo;ll need a noise function, but I also will need something for the noise to depend on. For that, I&rsquo;ll use the angle (so the radius varies as we go around).</p>
+<p>I&rsquo;ll compute the angle (using the 2 argument atan function - very handy).</p>
+<p>The tricky part is to decide what effects I want (what to vary).</p>
+<h3 id="part-2a---some-effects">Part 2A - some effects</h3>
+<p>Some things:</p>
+<ol>
+<li>I want the thickness of the stripes to vary.</li>
+<li>I want the radius as we go around (so it isn&rsquo;t a perfect circle)</li>
+</ol>
+<p>I made effects for both of these, to start, I didn&rsquo;t use noise - I used a sine wave to make it work uniformly, and allow me to control frequency and amount.</p>
+<p>While this doesn&rsquo;t look like wood, it does let me check that things work and begin to understand what the parameters do. This is W2A.</p>
+
+<div id="wood2a"></div>
+<script src="W2A-wood.js" type="module" defer></script>
+<p>If you&rsquo;re following along, you can see the <a href="../../docs/26/W2A-wood.vs" class="for_students">Vertex Shader</a>
+ and the <a href="../../docs/26/W2A-wood.fs" class="for_students">Fragment Shader</a>
+.</p>
+<h2 id="part-2b---tweaking">Part 2B - tweaking</h2>
+<p>One thing to note: we do need to make the different rings be different - but this may start to happen as we add randomness. So, let&rsquo;s get a random function.</p>
+<p>I used &ldquo;fract sine noise&rdquo; in lecture&hellip; and I notice the book of shaders uses it as well. <a href="https://thebookofshaders.com/10/">https://thebookofshaders.com/10/</a> - so I&rsquo;ll try this since it&rsquo;s easy.</p>
+<p>This actually looked surprisingly good for a first guess. One thing that went wrong is that each ring had its changes in thickness in the same place, so I made each ring different by adding a bit of the radius in with the angle.</p>
+<p>A little bit of parameter tweaking, and I got the look I wanted. OK, you can see that lack of smoothness in the noise function. (you can comment out the cubic function from the noise to see what happens differently)</p>
+<p>I got lucky in the parameter values - probably I would have needed to put the parameters on sliders to experiment with different values until it looked good.</p>
+
+<div id="wood2b"></div>
+<script src="W2B-wood.js" type="module" defer></script>
+<p>If you&rsquo;re following along, you can see the <a href="../../docs/26/W2B-wood.vs" class="for_students">Vertex Shader</a>
+ and the <a href="../../docs/26/W2B-wood.fs" class="for_students">Fragment Shader</a>
+.</p>
+<h1 id="step-3---3d-textures">Step 3 - 3D Textures</h1>
+<p>We are using the surface &ldquo;texture coordinates.&rdquo; In reality, wood is solid - as you move through the &ldquo;tree&rdquo; you get different parts of the texture.</p>
+<p>For the plane, this looks OK, but for the sphere, it kind of looks like stretchy wrapping paper got pulled over the surface.</p>
+<p>What I should probably do is use a 3D texture coordinate. But, then I would need to figure out how to assign texture coordinates to the THREE.js built ins.</p>
+<p>So, instead, I will use the local X,Y,Z of the object as the texture coordinates.</p>
+<p>The change: v_uv becomes a 3-vector, and the vertex shader passes the local position. I actually made it a 4-vector (since in a moment, you&rsquo;ll see that I will use it in a matrix multiply).</p>
+<p>This works - two obvious differences: the center is in a different place (remember, UV goes 0-1, the positions can do anything - with these objects 0,0 is the center), and the scale is different (again, the positions can be arbitrary, they don&rsquo;t go from 0,1).</p>
+<p>So, I am going to do a non-obvious thing: I am going to make a uniform variable that is a transformation matrix that I can use to change things from &ldquo;position&rdquo; (local coordinates) to &ldquo;wood coordinates&rdquo;.</p>
+<p>I&rsquo;ll also change things so X,Y=0 is the center (which would fix the immediate problem).</p>
+<p>Note that I make a uniform mat4 for the transformation. This is easy in the vertex shader; the JS side (computing an appropriate matrix) is the tricky part.</p>
+<p>I put the parameters of the transformation (translation, rotation and scale) on sliders.</p>
+<p>The way to think about this: We are carving the object out of a solid block of wood. The transformation positions the object in the block of wood so it can pick up the appropriate colorings.</p>
+<p>For the plane - it doesn&rsquo;t look too different, but the sphere looks much better. And you can experiment with moving the object around within the &ldquo;tree&rdquo; to pull out different pieces of the texture.</p>
+
+<div id="wood3"></div>
+<script src="W3A-wood.js" type="module" defer></script>
+<p>If you&rsquo;re following along, you can see the <a href="../../docs/26/W3A-wood.vs" class="for_students">Vertex Shader</a>
+ and the <a href="../../docs/26/W3A-wood.fs" class="for_students">Fragment Shader</a>
+.</p>
+<h2 id="step-4---tweak">Step 4 - Tweak</h2>
+<p>OK, I don&rsquo;t have time to tweak this to make it look better, but hopefully, you got the main ideas.</p>
+<p>I started with the simple patterns (concentric rings), added some noise (so it stopped looking so synthetic and boring), and then played with it a little.</p>
+<p>Hopefully, you can see the concept of the solid texture (I define a color for positions in space, based on my knowledge of how a tree grows). I can now change the parameters to get different &ldquo;cuts&rdquo; of wood (I can saw things to get the core of the tree, or the side, or parallel to the grain, or &hellip;), and I can change the ring structure to make different woods.</p>
+<p>Some things that should happen&hellip;</p>
+<ol>
+<li>Every slice (the Z coordinate) is the same - I should add randomness in that direction.</li>
+<li>You can see artifacts of the noise function - I should use a better one, rather than making one up.</li>
+<li>I should experiment with the parameters to figure out how to make it look better.</li>
+<li>I should clean up the code to make it more efficient (if I was making a lot of wood).</li>
+<li>I should do some kind of random seeding so that each piece of wood could be slightly different.</li>
+<li>I should clean the code up so it makes sense to someone who reads it - right now, the comments and variable names are still from the stripe demos!</li>
+</ol>
+<p>I could keep going, but this was just to do something quick&hellip;</p>
+<h1 id="some-practical-aspects">Some Practical Aspects</h1>
+<p>If you notice, the wood textures are really dark. This is because when three.js updated its lighting model, it changed how it handles color.</p>
+<p>But it exposes a different problem: these shaders don&rsquo;t use any of three.js&rsquo;s fancy lighting. We would want all the cool lighting - shadow maps, physically based materials and lighting, maybe some shiny reflections if we make highly polished wood. How do we get that?</p>
+<p>The short answer: not with WebGL. We need to do something that better integrates into how three.js works.</p>
+<a href="../../docs/27/" class="Next__Page">Next: Page &nbsp;27&nbsp;-&nbsp;Image-Based Textures</a>
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Selected"> 26: Procedural Texture Examples </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p26",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "//": "CS559 three.js target revision: r180",
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2022",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "checkJs": true,
+    "paths": {
+      "three": ["./libs/types/three/src/Three.d.ts"],
+      "three/tsl": ["./libs/types/three/src/Three.TSL.d.ts"],
+      "three/webgpu": ["./libs/types/three/src/Three.WebGPU.Nodes.d.ts"],
+      "three/src/*": ["./libs/types/three/src/*"],
+      "three/examples/jsm/controls/OrbitControls.js": ["./libs/types/three/OrbitControls.d.ts"],
+      "CS559/*": ["./libs/CS559/*"],
+      "CS559-Framework/*": ["./libs/CS559-Framework/*"]
+    }
+  }
+}

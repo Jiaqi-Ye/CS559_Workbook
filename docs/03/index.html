@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 3: Some Foundations</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Over the next few pages, we will explore one of the most fundamental challenges in computer graphics: how we handle the fact that we are trying to fit a potentially infinitely complex world into a finite number of pixels.</p>
+<p>This topic is not theoretical: the discrete nature of pixels causes real problems and limitations. When we create a discrete representation of the world, we lose information. We often refer to the problem as <strong>aliasing</strong>, although that term technically refers to a specific problem.</p>
+<p>The real world is continuous. Time is continuous. Between any two events (e.g. measurements) there are more times. Space is continuous. Between any two positions, there are more positions. Objects can be infinitely small (OK, not really - there are limits of particle physics, but for practical purposes &hellip;).</p>
+<p>Computers are discrete: because we use binary, we really can only represent integers. Because we (usually) use fixed-size discrete representations, we can only approximate continuous phenomena.
+Displays are discrete: we have a finite set of pixels that we get to control.</p>
+<p>This problem is fundamental. And limiting. Because the real world is continuous, the amount of information it might take to represent any piece of it is infinite. If you take any fixed set of measurements, you might miss something that happened &ldquo;in between&rdquo; those measurements. This happens in 1D (for example, in making measurements of sound). And it happens in 2D - we have a finite set of color measurements, so we cannot represent the infinite complexity that could have possibly happened, even in the small part of the world that we are looking at.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Learning this more formally</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>The mathematical field that studies this is image processing or signal processing. Often, this is taught in a very formal way that focuses on the math and proofs, rather than the intuitions and practical ramifications.</p>
+<p>For doing computer graphics, I think the intuitions are actually the most important part, so I will focus on them. I think it is easiest to convey the intuitions with some simplified examples (I&rsquo;ve tried many different ways over the past 30 years).</p>
+<p>If you have taken an image or signal processing class, you will hopefully see the connections.</p>
+<p>I find the theory behind this to be really elegant and interesting. However, I think it is best to get the intuitions first. Even in a simplified way.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="a-simple-way-to-think-about-it-information-loss">A Simple Way to Think About It: Information Loss</h2>
+<p>Here is a picture of some sunflowers that I used as a texture map in a previous demonstration. Because I needed the image to be small to fit in the workbook, I only gave you a small version (64x64 pixels).</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/03/sonnenblumenfeld-square64.jpg">
+        <img src="../../docs/03/sonnenblumenfeld-square64.jpg" alt="sonnenblumenfeld-square64.jpg" />
+    </a>
+</figure>
+
+<p>Here&rsquo;s a bigger version. It is 256x256. There are 16 times as many numbers, so there is more information.</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/03/sonnenblumenfeld-square256.jpg">
+        <img src="../../docs/03/sonnenblumenfeld-square256.jpg" alt="sonnenblumenfeld-square256.jpg" />
+    </a>
+</figure>
+
+<p>Did you notice the bees? They are barely big enough to be seen (and are not big enough to be seen in the 64x64 image).</p>
+<p>In the bigger version of the image, you can clearly see there are bees - they are now bigger than a pixel, so you can tell that they are insects, not just blotches on the flowers. (click on the image to see it &ldquo;full sized&rdquo;).</p>
+<figure class="" style="width: 300px;  ">
+    <a href="../../docs/03/sonnenblumenfeld-square.jpg">
+        <img src="../../docs/03/sonnenblumenfeld-square.jpg" alt="sonnenblumenfeld-square.jpg" />
+    </a>
+</figure>
+
+<p>Even this doesn&rsquo;t provide enough information. If we had more pixels we could have more information about the bees. The <span class="tooltip-trigger">original image
+    <span class="tooltip-box">
+        The image is available <a href="https://www.publicdomainpictures.net/en/view-image.php?image=305201&picture=sunflower-field-flowers-sky">here</a> and is CC0, however you need to pay for higher resolutions.
+    </span>
+</span>
+  has more pixels.</p>
+<h2 id="the-basic-idea">The basic idea</h2>
+<p>With a fixed number of pixels, we are limited in the amount of information we can represent. We need to be realistic about what we can do with the number of pixels we have, and use them effectively.</p>
+<h2 id="what-is-a-pixel">What is a pixel?</h2>
+<p>A pixel is the measurement of the image at a specific location.</p>
+<p>It is a single value (usually a color, but sometimes we measure brightness or depth) at a specific location. The important thing is that it is at a particular place - it has no area, it is the measurement at exactly one location.</p>
+<p>The technical term for this is a <strong>point sample.</strong></p>
+<p>Because a pixel only measures one location, it can only have one value (the value at that location).</p>
+<p>Often, we have regular grids of pixels. In this case, the pixels are still points - we can have squares between the pixels (or squares around the pixels), but the pixels themselves have no area - they are specific positions.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/03/pixel.svg">
+        <img src="../../docs/03/pixel.svg" alt="pixel.svg" />
+    </a>
+</figure>
+
+<h3 id="why-this-and-not">Why this and not&hellip;</h3>
+<p>This definition of a pixel as a point sample might seem odd. And, when we start to see the fundamental problems of discrete representations, you might wonder &ldquo;wouldn&rsquo;t this be easier if we defined pixels differently?&rdquo;</p>
+<p>The short answer is no. Treating pixels as point samples makes sense mathematically, and allows us to describe all of the other &ldquo;models&rdquo; (or ways of thinking about pixels) in a more rigorous manner. If we choose a different definition, we end up with the same problems, except that it is hard (or impossible) to describe them precisely so we can understand how to address them.</p>
+<p>For example, it is tempting to think of a pixel as a little square. This doesn&rsquo;t solve the information problem (we can only have one color for the entire area); we still lose details of what happened in the square, etc. The problems we will see on the next page (things happening between pixels) get replaced with different versions of the same problem (mis-representing things inside of the square).</p>
+<h2 id="aliasing">Aliasing</h2>
+<p>The fundamental problem of a discrete representation (or many kinds of information reduction): many different continuous (non-reduced) sources get reduced to the same answer.</p>
+<p>When we sample a continuous image, we only get the values at the sample points. There are infinitely many possible things that might have been sampled to produce that result. Those different possible things are <strong>aliases</strong> of each other.</p>
+<p>Here&rsquo;s an example: we have one dark pixel, and 8 light pixels. We know these 9 values, but there are an infinite number of images that might have caused them.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/03/aliases.svg">
+        <img src="../../docs/03/aliases.svg" alt="aliases.svg" />
+    </a>
+</figure>
+
+<p>The problem with aliasing is that if all you have are the samples, you have to guess at which of the possible source images (aliases) might have caused it.</p>
+<p>You might wonder, how does this cause problems in practice? And, once you&rsquo;re convinced it is a problem, what are we going to do about it?</p>
+<p>Aliasing causes all kinds of problems.</p>
+<h2 id="the-famous-problem-jaggies">The Famous Problem: Jaggies</h2>
+<p>If you try to draw a smooth edge, you are likely to get a jagged stair step.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/03/jaggies1.svg">
+        <img src="../../docs/03/jaggies1.svg" alt="jaggies1.svg" />
+    </a>
+</figure>
+
+<p>Notice that the smooth triangle and the blocky thing are aliases of each other: each one would be sampled to the same set of pixels.</p>
+<p>It is tempting to try to come up with an ad hoc solution to this important problem. But, instead, by understanding the fundamental issue (aliasing), we can devise principled solutions.</p>
+<p>While jaggies are ugly by themselves, they tend to lead to other problems. We&rsquo;ll see examples on the next page.</p>
+<p>But, here&rsquo;s a famous one. Let&rsquo;s imagine making stripes. We&rsquo;ll start by taking a square and making 10 stripes. Notice how the patterns of jaggies create other patterns.</p>
+
+
+
+
+<div class="wb-side-by-side" style="display: flex; gap: 1rem; flex-wrap: nowrap; justify-content: flex-start; align-items: flex-start;">
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes10.png">
+        <img src="../../docs/03/stripes10.png" alt="stripes10.png" />
+    </a><figcaption><p>10 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes15.png">
+        <img src="../../docs/03/stripes15.png" alt="stripes15.png" />
+    </a><figcaption><p>15 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes20.png">
+        <img src="../../docs/03/stripes20.png" alt="stripes20.png" />
+    </a><figcaption><p>20 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes25.png">
+        <img src="../../docs/03/stripes25.png" alt="stripes25.png" />
+    </a><figcaption><p>25 stripes&nbsp;</p></figcaption>
+</figure>
+
+</div>
+<p>What&rsquo;s weird is that this effect is difficult to predict or control.
+
+
+
+
+<div class="wb-side-by-side" style="display: flex; gap: 1rem; flex-wrap: nowrap; justify-content: flex-start; align-items: flex-start;">
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes27.png">
+        <img src="../../docs/03/stripes27.png" alt="stripes27.png" />
+    </a><figcaption><p>27 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes28.png">
+        <img src="../../docs/03/stripes28.png" alt="stripes28.png" />
+    </a><figcaption><p>28 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes29.png">
+        <img src="../../docs/03/stripes29.png" alt="stripes29.png" />
+    </a><figcaption><p>29 stripes&nbsp;</p></figcaption>
+</figure>
+<figure class="" style="width: 160px;  ">
+    <a href="../../docs/03/stripes30.png">
+        <img src="../../docs/03/stripes30.png" alt="stripes30.png" />
+    </a><figcaption><p>30 stripes&nbsp;</p></figcaption>
+</figure>
+
+</div></p>
+<p>Similar numbers of stripes can lead to very different patterns.</p>
+<p>Aliasing is a problem not just because it is often ugly, but because it is uncontrollable, unpredictable, and inconsistent. Combatting aliasing is about trying to ensure that things remain consistent.</p>
+<h3 id="checkerboard-downsampling">Checkerboard Downsampling</h3>
+<p>Even simple operations like making an image smaller can produce aliasing. Consider a 1 pixel checkerboard pattern that we want to shrink by a factor of 2. If we simply pick every other pixel (point-sample the downsized grid), the result depends critically on <em>which</em> pixels we pick. Taking the even-numbered pixels gives one result; taking the odd-numbered ones gives a completely different result. Downsampling a checkerboard by picking every other pixel. Whether we start on an even or odd pixel completely changes the result — a failure of consistency.</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../diagrams/checker-downsample.svg">
+        <img src="../../diagrams/checker-downsample.svg" alt="diagrams/checker-downsample.svg" />
+    </a><figcaption><p>1x1 checkerboard reduce size by a factor of two. Picking even or odd pixels gives a very different result. Pre-filtering avoids the problem.&nbsp;</p></figcaption>
+</figure>
+
+<p>This is aliasing in its purest form: the sampling rate is too low to capture the pattern, and the result is unpredictable.</p>
+<p>Note that the desireable result - getting a color that is the average of the colors - is not possible if we downsample first.</p>
+<h3 id="crawlies">Crawlies</h3>
+<p>The inconsistency of aliasing becomes worse during animation: each frame might have different artifacts, and the motion between those artifacts can be very distracting.</p>
+<p>A common form of this is the <strong>crawlies</strong>. Yes, that is a technical term. When an aliased edge moves, the jaggies will move - often differently. Sometimes in a completely different direction. We&rsquo;ll see a vivid demonstration of this soon, but a classic one for now:</p>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/03/s13_a.svg">
+        <img src="../../docs/03/s13_a.svg" alt="s13_a.svg" />
+    </a><figcaption><p>The line moves slightly to the right (from blue to red), but it appears to move down by a lot.&nbsp;</p></figcaption>
+</figure>
+
+<h2 id="summary-the-fundamental-problem">Summary: The Fundamental Problem</h2>
+<p>The discrete representation of pixels is a fundamental problem. It can&rsquo;t be fixed. The solution will be to understand the problem, and be realistic about what we try to do with a limited number of pixels.</p>
+<p>On the next page, we&rsquo;ll introduce the key ideas using a simplified explanation.</p>
+<a href="../../docs/04/" class="Next__Page">Next: Page &nbsp;4&nbsp;-&nbsp;Aliasing</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Selected"> 3: Some Foundations </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p03",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

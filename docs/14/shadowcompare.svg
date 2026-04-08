@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 231.3 76.5">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        font-family: ArialMT, Arial;
+        font-size: 9px;
+      }
+
+      .cls-2 {
+        fill: #3b76bb;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5 {
+        stroke: #231f20;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8 {
+        stroke-miterlimit: 10;
+        stroke-width: .5px;
+      }
+
+      .cls-3 {
+        fill: #58595b;
+      }
+
+      .cls-4, .cls-6, .cls-7 {
+        fill: none;
+      }
+
+      .cls-5 {
+        fill: #d1d3d4;
+      }
+
+      .cls-6, .cls-8 {
+        stroke: #f7941d;
+      }
+
+      .cls-7 {
+        stroke: #f15a29;
+      }
+
+      .cls-9 {
+        fill: #006838;
+      }
+
+      .cls-8 {
+        fill: #f7941d;
+      }
+    </style>
+  </defs>
+  <line class="cls-4" x1="76.5" y1="40.5" x2="10.4" y2="45.88"/>
+  <line class="cls-4" x1="72.52" y1="46.64" x2="9.84" y2="46.82"/>
+  <line class="cls-4" x1="67.81" y1="55.11" x2="9.84" y2="46.82"/>
+  <line class="cls-4" x1="62.92" y1="63.39" x2="9.84" y2="46.82"/>
+  <line class="cls-7" x1="75.48" y1="4.33" x2="72" y2="58.5"/>
+  <line class="cls-6" x1="76.5" y1="58.5" x2="75.48" y2="4.33"/>
+  <line class="cls-7" x1="67.5" y1="58.5" x2="75.48" y2="4.33"/>
+  <line class="cls-7" x1="62.92" y1="64.75" x2="75.48" y2="4.33"/>
+  <polygon class="cls-9" points="81 31.5 58.5 72 99 72 81 31.5"/>
+  <rect class="cls-8" x="72" y="13.5" width="4.5" height="4.5"/>
+  <text class="cls-1" transform="translate(85.5 18)"><tspan x="0" y="0">Many points in 1 shadow map pixel</tspan></text>
+  <g>
+    <rect class="cls-3" x="35.5" y="45" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="35.5" y="49.5" width="4.5" height="4.5"/>
+    <rect class="cls-3" x="35.5" y="54" width="4.5" height="4.5"/>
+    <rect class="cls-5" x="35.5" y="40.5" width="4.5" height="4.5"/>
+  </g>
+  <circle class="cls-2" cx="10.05" cy="45.85" r="4.12"/>
+</svg>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Z-Fighting Decal Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      padding: 8px;
+    }
+
+    #demo {
+      width: 100%;
+      max-width: 650px;
+      border: 1px solid #334155;
+      background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px #00000066;
+    }
+
+    #header {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1f2937;
+      background: #0b1220;
+    }
+
+    #header h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 3px;
+    }
+
+    #header p {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+
+    #main {
+      display: flex;
+      min-height: 420px;
+    }
+
+    #canvas-wrap {
+      flex: 1;
+      position: relative;
+      min-height: 320px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: radial-gradient(circle at 45% 30%, #1f2937, #0b1220);
+    }
+
+    #panel {
+      width: 240px;
+      padding: 10px;
+      border-left: 1px solid #1f2937;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #0b1220;
+    }
+
+    .section {
+      border-top: 1px solid #1f2937;
+      padding-top: 8px;
+    }
+
+    .section:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 11px;
+      color: #cbd5e1;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    #sep-slider {
+      width: 100%;
+      accent-color: #22d3ee;
+    }
+
+    #sep-value {
+      font-family: Menlo, Consolas, monospace;
+      font-size: 13px;
+      color: #67e8f9;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .info {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 10px;
+      color: #a5b4fc;
+      line-height: 1.4;
+    }
+
+    .info strong {
+      color: #e2e8f0;
+    }
+
+    #footer {
+      padding: 8px 12px;
+      border-top: 1px solid #1f2937;
+      font-size: 10px;
+      color: #64748b;
+      background: #0b1220;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 620px) {
+      #main {
+        flex-direction: column;
+      }
+
+      #panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #1f2937;
+      }
+
+      #canvas-wrap {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="demo">
+    <div id="header">
+      <h1>Z-Fighting: Co-Planar Face Decals</h1>
+      <p>
+        Each cube face has a second polygon lying on (or just above) the same depth as the base face.
+        At zero offset, depth-buffer precision causes unstable draw order and shimmering.
+      </p>
+    </div>
+
+    <div id="main">
+      <div id="canvas-wrap">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div id="panel">
+        <div class="section">
+          <div class="section-title">Separation Control</div>
+          <label for="sep-slider">Decal Height Above Face</label>
+          <input id="sep-slider" type="range" min="0" max="0.03" step="0.0001" value="0"/>
+          <div id="sep-value">0.0000</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Try This</div>
+          <div class="info">
+            <strong>1)</strong> Set height to <strong>0.0000</strong> and rotate the cube. The orange decals will flicker against the blue faces.<br/><br/>
+            <strong>2)</strong> Increase separation slowly. A tiny offset should make the decals stable and always visible.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Navigation</div>
+          <div class="info">
+            Left-drag: orbit camera<br/>
+            Scroll: zoom
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      Implemented by GitHub Copilot using GPT-5.3-Codex.<br/>
+      Directed by the CS559 workbook author prompt.
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="z-fighting-demo.js"></script>
+</body>
+</html>

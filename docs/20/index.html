@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 20: Simple Shaders</h1>
+		</header>
+		<div class="content post__content clearfix"><p>Now that we know what shaders are, let&rsquo;s look at some simple ones!</p>
+<p>There are two things that go beyond theory here: (1) the shaders are written in a specific shader language (GLSL), and (2) there are the details of how we set them up and pass information to them from our &ldquo;host program&rdquo; (the JavaScript program we write). Fortunately, three.js will take care of #2, but that means we need to learn about its quirks.</p>
+<h2 id="a-few-practical-issues">A Few Practical Issues</h2>
+<p>Before we even look at the actual shader programs themselves, we need to think about how we&rsquo;ll use them on our web pages in JavaScript programs.</p>
+<p>Here is a first program - it makes a very boring yellow material that we apply to a sphere and a plane.</p>
+<p>
+
+<div id="box-06-20-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-20-01</span>&nbsp;
+    <input type="checkbox" id="check-06-20-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-20-01.html class="boxtitlelink">06-20-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-20-01.js" class="boxtitlelink">06-20-01.js</a>
+    <iframe
+        title="glsl-simplest"
+        src="../../for_students/06-20-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-20-01"
+    ></iframe>
+</div></p>
+<p>The web page is <a href="../../for_students/06-20-01.html" class="box-html" data-tag="glsl-simplest">06-20-01.html</a>. The JavaScript code is in 
+<a href="../../for_students/06-20-01.js" class="box-html" data-tag="glsl-simplest">06-20-01.js</a>
+ - which is pretty standard three.js code (it uses the class framework). The only thing new is that it uses a <code>ShaderMaterial</code> that loads in shaders from the files <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+ and <a href="../../for_students/06-20-01.fs" class="box-file box-fs" data-tag="glsl-simplest" data-type="fs">06-20-01.fs</a>
+. The code actually uses a helper function <code>shaderMaterial</code> from the class framework that does the loading and creates the <code>ShaderMaterial</code> object. Over the course of this page, we will review all of this. The box is replicated below.</p>
+<p>The shaders are written in a programming language called GLSL. As far as the web page and JavaScript are concerned, they are just text (strings). There are many different ways to store these strings. You could just put them as constants in your JavaScript program, or put them on the web page as a hidden block of text that the JavaScript program reads into a variable.</p>
+<p>However, it is good practice to put shaders in separate files (so we can edit them more easily - you may want to use the Visual Studio Code Shader Languages extensions). These files can be read in by the JavaScript program. In this workbook, we will always name our shaders as &ldquo;.vs&rdquo; for vertex shaders and &ldquo;.fs&rdquo; for fragment shaders. The shaders for the first example below are in the files <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+ and <a href="../../for_students/06-20-01.fs" class="box-file box-fs" data-tag="glsl-simplest" data-type="fs">06-20-01.fs</a>
+.</p>
+<p>The CS559 Framework provides support for handling shaders (see the <a href="https://cs559.github.io/CS559-Framework26/module-shaderHelper.html" target="_blank">documentation</a>). It loads the files, puts them into variables, and creates a three.js material from them. A nice feature of the framework is that it is asynchronous - your program can run while the files are read and processed. The Framework makes a simple yellow material for your object while the real textures load. If the material does not load properly, the Framework will instead give a simple red material for your object. This means you have an error and you should check the console. Note: the framework captures errors in loading the shader file. If you have a compiler error, three.js catches it, and you won&rsquo;t see your objects.</p>
+<p>Once JavaScript has the string of the shader programs, it sends them to the GLSL compiler. The GLSL compiler is part of the graphics library (OpenGL). We do not pre-compile the programs - they are compiled on demand. Somewhere in three.js it calls a function <code>compileShader</code> that is part of WebGL.</p>
+<p><strong>A warning</strong>: the GLSL compiler is notoriously bad about error messages. It sometimes stops at the first minor problem (it&rsquo;s gotten a little better). Be sure to check the console for error messages.</p>
+<h2 id="a-first-shader-pair">A First Shader Pair</h2>
+<p>As you know, we always make shaders in pairs - we&rsquo;ll need a vertex shader and a fragment shader.</p>
+<p>Here is the vertex shader (<a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+ has comments in it, and lines 1-5 here are commented out):</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#111">mat4</span> <span style="color:#111">projectionMatrix</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#111">mat4</span> <span style="color:#111">modelViewMatrix</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">attribute</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">position</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec4</span> <span style="color:#111">gl_Position</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_Position</span> <span style="color:#f92672">=</span> <span style="color:#111">projectionMatrix</span> <span style="color:#f92672">*</span> <span style="color:#111">modelViewMatrix</span> <span style="color:#f92672">*</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span> <span style="color:#111">position</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span> <span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Observe that a GLSL shader program (vertex or fragment) always is the <code>main</code> function, with type <code>void</code>. GLSL syntax is very C-like, so if you are a C programmer, this will look familiar.</p>
+<p>GLSL shader programs take their inputs and outputs through &ldquo;global&rdquo; variables. By global, these look like global variables in C, and they are available across the file. You can see 3 variables declared on lines 1-3. (although, also note that those declarations are commented out in the actual file - because three.js adds them for us)</p>
+<p>This program has three input variables (<code>position</code>, <code>projectionMatrix</code>, and <code>modelViewMatrix</code>). These variables are how the host program passes information to the shader. If we were programming in WebGL directly, we would have to define these in our JavaScript program to tell WebGL how to move data from our JavaScript program to the Shader. Fortunately, three.js takes care of this for us.</p>
+<p>In fact, when three.js loads our shader, it adds the declarations at the beginning. We actually leave out lines 1-3 since three.js adds them for us. (this is why they are commented out in <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+)</p>
+<h3 id="errors-in-shader-programs">Errors in Shader Programs</h3>
+<p>This is an opportunity to look at what happens when things go wrong.</p>
+<p>What if we didn&rsquo;t comment out those lines 1-3 above? Since three.js has added code to our program that declares them, those lines would re-declare those variables. The GLSL compiler will complain that we are re-declaring the variables.</p>
+<p>Try this: edit the file <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+ and uncomment the declarations (lines 1-3 of the code above are lines 8-10 of <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+). You should notice that the yellow sphere and plane in the image box (above and below) disappear (you may need to &ldquo;hard reload&rdquo; the page by holding shift when you click refresh). It might be easier to see this if you open the program <a href="../../for_students/06-20-01.html" class="box-html" data-tag="glsl-simplest">06-20-01.html</a> in a separate tab/window. <em>Note: some new versions of the GLSL compiler do not create errors for redundant declarations.</em></p>
+<p>The objects disappeared because their shaders won&rsquo;t run. They generated compiler errors. If you look in the console, you&rsquo;ll see error messages. There are actually a lot of them: we made one error (an error in the shader) and it creates other problems (e.g., there is no valid shader for the object).</p>
+<p>three.js is nice enough to tell us what the compiler&rsquo;s error message is (&ldquo;ERROR: 0:65: &lsquo;modelViewMatrix&rsquo; : redefinition&rdquo;), as well as give us the listing of the bad shader. If you look carefully, you&rsquo;ll see the program is much longer than what we gave it: it includes all of three.js&rsquo;s declarations at the top of the program. Indeed, we can see where three.js has <code>uniform mat4 modelViewMatrix;</code> (on line 15). What was line 1 of the listing above, and line 8 of our shader file is now line 65 of the &ldquo;new&rdquo; shader program that three.js has made.</p>
+<p>Also, notice that you may get the error multiple times. Because of how three.js works, we not only get an error message the first time we compile the program, but also later when we try to use the broken program (once for each object). And, since the box is duplicated twice on this page, that can cause another copy of the error messages.</p>
+<p>You will make errors in your shaders, so learning to find the errors is a useful skill. Here, the error isn&rsquo;t so hard to find - so fix it (comment out those lines that you uncommented).</p>
+<p>But the lesson we interrupted: three.js adds a whole bunch of declarations to your program so that you don&rsquo;t have to. This can actually get confusing.</p>
+<p>If you want to see the list of variables three.js sets up automatically for us, um, we have a problem - three&rsquo;s documentation stopped showing it. We pretty much need to guess. Three is deprecating GLSL support.</p>
+<p>All of the other examples in this workbook will leave out things that three.js declares for us.</p>
+<h3 id="variable-declarations-and-the-vertex-shader">Variable Declarations and the Vertex Shader</h3>
+<p>I included the variable declarations (albeit commented out) this time because I want to introduce how to read them. GLSL is a very strongly typed language: you must declare the type of every variable, and it is strict about type errors. For example, you cannot assign an integer to a float variable without an explicit cast.</p>
+<div class="highlight"><pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#75af00">x</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span><span style="color:#111">;</span>            <span style="color:#75715e">// this is an error - since 7 is an integer
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#75af00">y</span> <span style="color:#f92672">=</span> <span style="color:#111">((</span><span style="color:#00a8c8">float</span><span style="color:#111">)</span> <span style="color:#ae81ff">7</span><span style="color:#111">);</span>  <span style="color:#75715e">// we need an explicit cast
+</span></span></span><span style="display:flex;"><span><span style="color:#00a8c8">float</span> <span style="color:#75af00">z</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">7.0</span><span style="color:#111">;</span>          <span style="color:#75715e">// or we can just use the correct type
+</span></span></span></code></pre></div><p>Notice that the variable declarations (lines 1-5) of the shader specify multiple pieces of information for each. If we look at line 1, reading backwards, we are declaring the variable called <code>projectionMatrix</code> which has the type <code>mat4</code> (a 4x4 matrix). This variable has the <em>qualifier</em> <code>uniform</code> which tells GLSL what type of variable it is. Recall that a <code>uniform</code> variable is one that is constant over the entire group of triangles (which I sometimes call an &ldquo;object&rdquo;). Three will take care of passing the uniforms from our JavaScript program.</p>
+<p>Line 3 declares the <code>attribute</code> position. Remember that attributes are variables that have a value for each vertex. Again, three.js takes care of getting the attribute from JavaScript to GLSL.</p>
+<p>I (and three.js) use the <code>attribute</code> qualifier for attribute variables. Some examples you will find on the web use the qualifier <code>in</code>. We&rsquo;ll explain the reasons and difference below. For class, we will use <code>attribute</code></p>
+<p>The output of this shader program is setting the variable <code>gl_Position</code>. This is a special variable that all vertex shaders must set. It is of type <code>vec4</code> (a homogeneous coordinate). Because it is a built-in variable, we do not need to declare it (and we&rsquo;re not allowed to re-declare it, which is why the declaration is commented out). For this first example, I included the declaration to remind you what the variable is, and that it <span class="tooltip-trigger">acts like
+    <span class="tooltip-box">
+        Technically, it is a built-in output variable. A varying variable is one that is user-defined.
+    </span>
+</span>
+ a <code>varying</code> variable, that is a property of each vertex that is interpolated across the triangle so that it can be used by the fragment shader. (sometimes you will see <code>out</code> in examples - again, see the explanation below)</p>
+<p>This program takes the <code>position</code> of the vertex (which is a point in 3D), converts it to a homogeneous coordinate (adding a 1 for the w component). It then transforms it using the modeling matrix (the object&rsquo;s matrix that positions it in the world), the view matrix (the transformation that puts things in front of the camera), and the projection matrix (that makes things far away be smaller). The program uses <code>modelViewMatrix</code>, however it could have used <code>modelMatrix</code> and <code>viewMatrix</code> and multiplied them together.</p>
+<p>A few things to notice:</p>
+<ol>
+<li>GLSL has nice matrix and vector types. And it can put them together in easy ways (we made a 4-vector by adding a number at the end of a 3-vector).</li>
+<li>GLSL is picky about numbers. <code>1</code> is an integer, <code>1.0</code> is a float. It is a type error to give an integer where a float is required.</li>
+<li>Because three.js wrote them for us, we don&rsquo;t see the <code>attribute</code> declaration for <code>position</code> or the <code>uniform</code> declaration for <code>projectionMatrix</code>, and <code>modelViewMatrix</code>. But be aware that they are there.</li>
+</ol>
+<h3 id="a-note-on-variable-qualifiers">A note on variable qualifiers&hellip;</h3>
+<p>In this workbook (and in class), we will use the qualifier <code>attribute</code> to refer to variables that are passed per-vertex from the main program to the vertex shader, and the <code>varying</code> qualifier to describe the variables that are passed from the vertex shader to the fragment shader. Therefore, a varying variable is the output of a vertex shader and the input of a fragment shader.</p>
+<p>Historically, <code>attribute</code> and <code>varying</code> were the qualifiers used in the GLSL language (and the GLSL ES variant used by WebGL). However, the language introduced a new set of qualifiers: <code>in</code> and <code>out</code>. The idea is that for any shader, its input gets the <code>in</code> qualifier and its output gets the <code>out</code> qualifier. So a varying variable is an <code>out</code> in the vertex shader and the <code>in</code> of the fragment shader.</p>
+<p>I find the old notation easier: it makes clear what connects to what. That&rsquo;s why I continue to use it in this workbook. Unfortunately, <code>attribute</code> and <code>varying</code> have a problem if we have more kinds of shaders than just vertex shaders and fragment shaders. If the output of the vertex shader doesn&rsquo;t go to a fragment shader, what do we call it? For class, this isn&rsquo;t a problem (we won&rsquo;t discuss other kinds of shaders). But in general, they needed a scheme that works for many kinds of shaders.</p>
+<p>The new notation, with <code>in</code> and <code>out</code> qualifiers, is consistent: no matter what the type of shader, we use <code>in</code> for its inputs and <code>out</code> for its outputs.</p>
+<p>In the code you write, you can use either notation. In this workbook, I will use <code>attribute</code> and <code>varying</code>. This is also what is used in three.js.</p>
+<h3 id="the-fragment-shader">The Fragment Shader</h3>
+<p>Now, here is the fragment shader (<a href="../../for_students/06-20-01.fs" class="box-file box-fs" data-tag="glsl-simplest" data-type="fs">06-20-01.fs</a>
+):</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#ae81ff">0.8</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.8</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.4</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This just sets the pixel&rsquo;s color to yellow. It uses the special output variable <code>gl_FragColor</code>.</p>
+<p>Note that in GLSL, colors range from 0-1 (not 0-255, as they do in &ldquo;byte-oriented&rdquo; systems). Also, note that here I wrote &ldquo;1&rdquo; even though I should have written &ldquo;1.0&rdquo; - the <code>vec4</code> (and other <code>vec</code> constructors) are one of the few places where integers can be used where floats are expected.</p>
+<p>To make sure that you can read and edit the shaders, change the yellow color to cyan (blue-green). Yes, we give you points for doing this. Make sure you fixed any errors you put into the program (above) so we see a cyan sphere and plane, not a yellow one.</p>
+<h2 id="using-shader-programs">Using Shader Programs</h2>
+<p>Now that we&rsquo;ve written the shaders, we need to use them in our three.js program. Basically, we need to make a new kind of material that has these two programs as part of it.</p>
+<p>The steps would be:</p>
+<ol>
+<li>Read in the files as text. This must be asynchronous - since it may take time to load the files or fetch them from the web.</li>
+<li>Create a new three.js <code>ShaderMaterial</code> that uses the text as the shader source code. three.js will run the GLSL compiler on each.</li>
+<li>Attach that material to some three.js objects and see our shaders run!</li>
+</ol>
+<p>To simplify steps 1 and 2, the CS559 Framework provides a utility that takes 2 URLS (file paths) and makes a <code>ShaderMaterial</code>. You don&rsquo;t have to use it, but it&rsquo;s convenient and we will use it for all the examples in the workbook.</p>
+<p>There is also a step 2b: check to make sure there were no compilation errors. If there are, you&rsquo;ll see them in the console. If your object doesn&rsquo;t show up as expected, you should check.</p>
+<p>
+<a href="../../for_students/06-20-01.js" class="box-html" data-tag="glsl-simplest">06-20-01.js</a>
+ (<a href="../../for_students/06-20-01.html" class="box-html" data-tag="glsl-simplest">06-20-01.html</a>) is a simple scene that uses the shaders from the previous box.</p>
+
+<div id="box-06-20-01" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-20-01</span>&nbsp;
+    <input type="checkbox" id="check-06-20-01">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-20-01.html class="boxtitlelink">06-20-01.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-20-01.js" class="boxtitlelink">06-20-01.js</a>
+    <iframe
+        title="glsl-simplest"
+        src="../../for_students/06-20-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="400px"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-20-01"
+    ></iframe>
+</div>
+<p>The line of interest is:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">shaderMat</span> <span style="color:#f92672">=</span> <span style="color:#75af00">shaderMaterial</span><span style="color:#111">(</span><span style="color:#d88200">&#34;./shaders/glsl-simplest.vs&#34;</span><span style="color:#111">,</span> <span style="color:#d88200">&#34;./shaders/glsl-simplest.fs&#34;</span><span style="color:#111">,</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">side</span><span style="color:#f92672">:</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">DoubleSide</span><span style="color:#111">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">});</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>But the real action happens in the <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+ and <a href="../../for_students/06-20-01.fs" class="box-file box-fs" data-tag="glsl-simplest" data-type="fs">06-20-01.fs</a>
+ files.</p>
+<p>For points, change the material color in <a href="../../for_students/06-20-01.fs" class="box-file box-fs" data-tag="glsl-simplest" data-type="fs">06-20-01.fs</a>
+ from yellow to something else.</p>
+<p>Make sure you understand all this before going on. Make sure you understand all this, including the shader files, before going on.</p>
+<h2 id="our-own-uniforms">Our Own Uniforms</h2>
+
+<p>In the first shaders, we only used three.js&rsquo;s variables. Now we can add one of our own. We&rsquo;ll still have a simple constant-color shader, but we&rsquo;ll make that &ldquo;constant&rdquo; color be a value that we pass from our program via a uniform variable.</p>
+<p>For shader pair <a href="../../for_students/06-20-02.vs" class="box-file box-vs" data-tag="10-02-02" data-type="vs">06-20-02.vs</a>
+ and <a href="../../for_students/06-20-02.fs" class="box-file box-fs" data-tag="10-02-02" data-type="fs">06-20-02.fs</a>
+ (which we&rsquo;ll use in this box), the vertex shader doesn&rsquo;t change (since it doesn&rsquo;t use the color). We could have used <a href="../../for_students/06-20-01.vs" class="box-file box-vs" data-tag="glsl-simplest" data-type="vs">06-20-01.vs</a>
+, but we&rsquo;ve added different comments.</p>
+<p>The fragment shader <a href="../../for_students/06-20-02.fs" class="box-file box-fs" data-tag="10-02-02" data-type="fs">06-20-02.fs</a>
+ is changed slightly:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">color</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">color</span><span style="color:#111">,</span><span style="color:#ae81ff">1.0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that we had to declare a new variable (<code>color</code>) as a <strong>uniform</strong>. This is like a global variable that we set in our host program. It keeps its value for the set of triangles being drawn (the current three.js object).</p>
+<p>The only thing remaining is to tell three.js to do the &ldquo;host program&rdquo; side of declaring the <code>color</code> variable and setting it to the correct value. We do this by giving the uniforms as a parameter to <code>ShaderMaterial</code>. The <code>shaderMaterial</code> helper function passes parameters through, so in 
+<a href="../../for_students/06-20-02.js" class="box-html" data-tag="10-02-02">06-20-02.js</a>
+ (<a href="../../for_students/06-20-02.html" class="box-html" data-tag="10-02-02">06-20-02.html</a>) we write:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#00a8c8">let</span> <span style="color:#75af00">mat1</span> <span style="color:#f92672">=</span> <span style="color:#75af00">shaderMaterial</span><span style="color:#111">(</span><span style="color:#d88200">&#34;./shaders/10-02-02.vs&#34;</span><span style="color:#111">,</span> <span style="color:#d88200">&#34;./shaders/10-02-02.fs&#34;</span><span style="color:#111">,</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">uniforms</span><span style="color:#f92672">:</span> <span style="color:#111">{</span> <span style="color:#75af00">color</span><span style="color:#f92672">:</span> <span style="color:#111">{</span> <span style="color:#75af00">value</span><span style="color:#f92672">:</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">T</span><span style="color:#111">.</span><span style="color:#75af00">Vector3</span><span style="color:#111">(</span><span style="color:#ae81ff">0.4</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.8</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.8</span><span style="color:#111">)</span> <span style="color:#111">}</span> <span style="color:#111">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">});</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that we pass uniforms as a dictionary (hashmap) of variable names (color) and dictionaries with a value key. This is three.js&rsquo;s format. The value of color is the 3-vector (.4,.8,.8). Three.js takes care of the conversion between a JavaScript (three.js) <code>Vector3</code> and a GLSL <code>vec3</code>. The dictionary of dictionaries is a weird three.js thing - and it is something I get wrong often.</p>
+
+<div id="box-06-20-02" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-20-02</span>&nbsp;
+    <input type="checkbox" id="check-06-20-02">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-20-02.html class="boxtitlelink">06-20-02.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-20-02.js" class="boxtitlelink">06-20-02.js</a>
+    <iframe
+        title="10-02-02"
+        src="../../for_students/06-20-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-20-02"
+    ></iframe>
+</div>
+<p>The example in this box (<a href="../../for_students/06-20-02.html" class="box-html" data-tag="10-02-02">06-20-02.html</a>, 
+<a href="../../for_students/06-20-02.js" class="box-html" data-tag="10-02-02">06-20-02.js</a>
+) has three cubes. One uses the shaders from the previous box (yellow). The next uses this shader with the uniform to make a cyan cube. The third animates the uniform property to make a cube that changes color. Read this code and make sure you understand it before moving on. The shaders are <a href="../../for_students/06-20-02.vs" class="box-file box-vs" data-tag="10-02-02" data-type="vs">06-20-02.vs</a>
+ and <a href="../../for_students/06-20-02.fs" class="box-file box-fs" data-tag="10-02-02" data-type="fs">06-20-02.fs</a>
+.</p>
+<p>When you look at the code, you will notice that in addition to passing the color from JavaScript to GLSL, we also pass a float that is the &ldquo;time.&rdquo; Right now, this isn&rsquo;t used for anything. In the code, we computed the color in JavaScript. We could have taken the time and computed the color from the &ldquo;time&rdquo; uniform within the shader. If you would like some advanced points, re-write the shader so it uses the time variable and causes the color to change accordingly. Change <a href="../../for_students/06-20-02.fs" class="box-file box-fs" data-tag="10-02-02" data-type="fs">06-20-02.fs</a>
+, and have it look different than the original (use different colors). Because the middle cube uses the same shader, its color may be different (but understand why its color stays constant).</p>
+<h2 id="passing-attributes-and-varying">Passing Attributes And Varying</h2>
+<p>In the previous box, we passed a value that was constant for the entire object. In this box, we&rsquo;ll think about vertex properties.</p>
+<p>In GLSL, a property of a vertex is called an <strong>attribute</strong>. Up until now, we&rsquo;ve seen <code>position</code>. Three.js set this up for us.</p>
+<p>Setting up attributes can be tricky because you need to make sure the attributes match up with the vertices you want (this same issue makes texture mapping tricky). If we use the attributes that are built in to three.js, this is done for us. On the other hand, if we make our own BufferGeometry, it&rsquo;s not too hard to match things up. You don&rsquo;t often have to make your own attributes, because three.js has the most common ones built in (position, normal, texture coordinate, per-vertex color). See the <a href="https://threejs.org/docs/#api/en/renderers/webgl/WebGLProgram" target="_blank">documentation</a> for the full list. We&rsquo;ll show you how to use three.js&rsquo;s built-in attributes, and how to make your own.</p>
+<h3 id="utilizing-a-built-in-threejs-attribute">Utilizing a Built-in three.js Attribute</h3>
+<p>Our vertex program has access to all of the attributes and can use them to compute properties it wants to pass along to the fragment shader. So, for example, let us send the texture coordinate to the fragment shader so it can use it to color the fragments. We need to extend the vertex shader slightly so it passes the value along:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec2</span> <span style="color:#111">v_uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// the main output of the shader (the vertex position)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl</span><span style="color:#f92672">*</span><span style="color:#111">Position</span> <span style="color:#f92672">=</span> <span style="color:#111">projectionMatrix</span> <span style="color:#f92672">*</span> <span style="color:#111">modelViewMatrix</span> <span style="color:#f92672">/</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span> <span style="color:#111">position</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span> <span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// pass the texture coordinate as well</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">v_uv</span> <span style="color:#f92672">=</span> <span style="color:#111">uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note how we declare a new <strong>varying</strong> variable (<code>v_uv</code>) to pass information between the vertex shader and the fragment shader, and copy the attribute <code>uv</code> we get from three.js into it. The rasterizer will interpolate the values over the area of the triangle.</p>
+<p>Because it connects to the JavaScript side (to something built in to three.js), three.js declares the attribute <code>uv</code> for us, we don&rsquo;t need to write any JavaScript code to send it over. We&rsquo;re on our own to create the varying variables to communicate between our shaders.</p>
+<p>The fragment shader is similarly modified - declaring the variable it expects to receive, and using it as two components of the color.</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec2</span> <span style="color:#111">v_uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">v_uv</span><span style="color:#111">,</span> <span style="color:#ae81ff">.5</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+<p>These shaders are in <a href="../../for_students/06-20-03.vs" class="box-file box-vs" data-tag="10-02-03" data-type="vs">06-20-03.vs</a>
+ and <a href="../../for_students/06-20-03.fs" class="box-file box-fs" data-tag="10-02-03" data-type="fs">06-20-03.fs</a>
+ (with some extra comments). These are utilized in 
+<a href="../../for_students/06-20-03.js" class="box-html" data-tag="10-02-03">06-20-03.js</a>
+ (<a href="../../for_students/06-20-03.html" class="box-html" data-tag="10-02-03">06-20-03.html</a>). You might notice how the fragment shader uses the UV vector to make a color. It assigns the u value to red and the v value to green by building up the 4-vector from a 2-vector.</p>
+
+<div id="box-06-20-03" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-20-03</span>&nbsp;
+    <input type="checkbox" id="check-06-20-03">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-20-03.html class="boxtitlelink">06-20-03.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-20-03.js" class="boxtitlelink">06-20-03.js</a>
+    <iframe
+        title="10-02-03"
+        src="../../for_students/06-20-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-20-03"
+    ></iframe>
+</div>
+<h3 id="creating-our-own-attribute">Creating Our Own Attribute</h3>
+
+<p>There are some scenarios where you&rsquo;ll want to make your own vertex attribute, to do something other than the built-ins. In the example, in 
+<a href="../../for_students/06-20-04.js" class="box-html" data-tag="10-02-04">06-20-04.js</a>
+ below, a custom attribute <code>dim</code> is created which dims the object (makes it darker). The attribute is set per-vertex in 
+<a href="../../for_students/06-20-04.js" class="box-html" data-tag="10-02-04">06-20-04.js</a>
+, where each vertex alternates between being &ldquo;dimmed&rdquo; and not. In the vertex shader, we just pass <code>dim</code> on to the fragment shader:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">attribute</span> <span style="color:#00a8c8">float</span> <span style="color:#111">dim</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// declare the varying variable that gets passed to the fragment shader</span>
+</span></span><span style="display:flex;"><span> <span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec2</span> <span style="color:#111">v_uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span> <span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">float</span> <span style="color:#111">v_dim</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// the main output of the shader (the vertex position)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_Position</span> <span style="color:#f92672">=</span> <span style="color:#111">projectionMatrix</span> <span style="color:#f92672">*</span> <span style="color:#111">modelViewMatrix</span> <span style="color:#f92672">*</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span> <span style="color:#111">position</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span> <span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// pass the texture coordinate as well</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">v_uv</span> <span style="color:#f92672">=</span> <span style="color:#111">uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// pass the extra attribute</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">v_dim</span> <span style="color:#f92672">=</span> <span style="color:#111">dim</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In the fragment shader, we use <code>dim</code> to change the vertex color (remember it&rsquo;s interpolated, which is why we don&rsquo;t see harsh lines):</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#75715e">// declare the varying variable that gets passed to the fragment shader</span>
+</span></span><span style="display:flex;"><span> <span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec2</span> <span style="color:#111">v_uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span> <span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">float</span> <span style="color:#111">v_dim</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">v_uv</span> <span style="color:#f92672">*</span> <span style="color:#111">v_dim</span><span style="color:#111">,</span> <span style="color:#111">v_dim</span><span style="color:#111">,</span><span style="color:#ae81ff">1</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+<div id="box-06-20-04" style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0;border-radius: 5px;">
+    <span class="boxframename">06-20-04</span>&nbsp;
+    <input type="checkbox" id="check-06-20-04">
+    &nbsp;<span class="boxframekind tooltip-trigger">view<span class="tooltip-box" style="text-align:left">
+Kinds of boxes:<br>
+<span style="color: yellow;"><b>view</b> - look at the box and experiment with it</span><br/>
+<span ><b>examine</b> - look at the code for the box</span><br/>
+<span ><b>edit</b> - change the box's content</span><br/>
+<span ><b>rubric</b> - several steps are suggested in the rubric</span>
+<span ><b>page</b> - form elements on page in rubric</span><br/>
+</span></span>&nbsp;&nbsp;
+        <a href=../../for_students/06-20-04.html class="boxtitlelink">06-20-04.html</a>
+        &nbsp;&nbsp;<a href="../../for_students/06-20-04.js" class="boxtitlelink">06-20-04.js</a>
+    <iframe
+        title="10-02-04"
+        src="../../for_students/06-20-04.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+        id="box-iframe-06-20-04"
+    ></iframe>
+</div>
+<h2 id="summary-the-basics-of-shaders">Summary: The basics of shaders</h2>
+<p>Here we saw some very simple (boring?) shaders. But hopefully, you got the basics of shaders, GLSL and how we fit them into three.js and the CS559 Framework. Make sure you understand how we pass data from JavaScript to our shaders!</p>
+<p>Next, we can try to make some real shaders!</p>
+<a href="../../docs/21/" class="Next__Page">Next: Page &nbsp;21&nbsp;-&nbsp;Shading in Practice</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Selected"> 20: Simple Shaders </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p20",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

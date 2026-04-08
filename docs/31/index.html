@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 31: Texture Tsl Examples</h1>
+		</header>
+		<div class="content post__content clearfix"><p>I think the best way to learn TSL is to try it and look at examples.</p>
+<p>I won&rsquo;t try to write a tutorial about the graph editor <a href="https://www.tsl-graph.xyz/">TSL Graph</a>, but I do recommend experimenting with it.</p>
+<p>Some hints:</p>
+<ol>
+<li>To save your work, use the &ldquo;file&rdquo; menu (at the top of the interface). This will write a <code>.json</code> file that you can load back in.</li>
+<li>To get the JavaScript code, look for the &ldquo;&lt;&gt;&rdquo; icon at the bottom. It shows the code in a modal and you can copy/paste it into your own program.</li>
+<li>Click on a node to &ldquo;inspect it&rdquo; - the lower-right panel allows you to see the list of inputs and outputs and change them. You can turn things on and off to determine what is shown in the interface.</li>
+<li>If you turn on &ldquo;debug mode&rdquo; (a bug icon at the bottom of the screen), the node inspector shows an image of what that node looks like applied to an object.</li>
+</ol>
+<h2 id="new-tsl-ports">New TSL Ports</h2>
+<p>Converting the GLSL shaders is straightforward, so I had CoPilot/Codex convert a few of the examples from the workbook. You can look at the code (each html file has a corresponding js file) to get an idea.</p>
+<div class="dimbox">
+<h2 id="a-warning-about-colors">A Warning About Colors</h2>
+<p>When we move from the WebGL to the WebGPU renderer, three.js switches to a different color model (color space mapping). This makes it easier to do physically correct lighting. However, it means that all of our old colors need to be adjusted. Over the next few pages, you will notice that the WebGL and WebGPU versions of the same demos have slightly different colors.</p>
+<p>These demos use the WebGL colors - I did not adjust the colors to make things match visually.</p>
+
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/1-stripes-simple.html" class="boxtitlelink">1-stripes-simple.html</a><span> | </span><a href="../../docs/31/1-stripes-simple.js" class="boxtitlelink">1-stripes-simple.js</a><iframe
+        title="1-stripes-simple.html"
+        src="../../docs/31/1-stripes-simple.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/2-stripes-aa.html" class="boxtitlelink">2-stripes-aa.html</a><span> | </span><a href="../../docs/31/2-stripes-aa.js" class="boxtitlelink">2-stripes-aa.js</a><iframe
+        title="2-stripes-aa.html"
+        src="../../docs/31/2-stripes-aa.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/3-stripes-twoside.html" class="boxtitlelink">3-stripes-twoside.html</a><span> | </span><a href="../../docs/31/3-stripes-twoside.js" class="boxtitlelink">3-stripes-twoside.js</a><iframe
+        title="3-stripes-twoside.html"
+        src="../../docs/31/3-stripes-twoside.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/w1-wood.html" class="boxtitlelink">W1-wood.html</a><span> | </span><a href="../../docs/31/W1-wood.js" class="boxtitlelink">W1-wood.js</a><iframe
+        title="W1-wood.html"
+        src="../../docs/31/w1-wood.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/w2a-wood.html" class="boxtitlelink">W2A-wood.html</a><span> | </span><a href="../../docs/31/W2A-wood.js" class="boxtitlelink">W2A-wood.js</a><iframe
+        title="W2A-wood.html"
+        src="../../docs/31/w2a-wood.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/w2b-wood.html" class="boxtitlelink">W2B-wood.html</a><span> | </span><a href="../../docs/31/W2B-wood.js" class="boxtitlelink">W2B-wood.js</a><iframe
+        title="W2B-wood.html"
+        src="../../docs/31/w2b-wood.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/w3a-wood.html" class="boxtitlelink">W3A-wood.html</a><span> | </span><a href="../../docs/31/W3A-wood.js" class="boxtitlelink">W3A-wood.js</a><iframe
+        title="W3A-wood.html"
+        src="../../docs/31/w3a-wood.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/10-08-01.html" class="boxtitlelink">10-08-01.html</a><span> | </span><a href="../../docs/31/10-08-01.js" class="boxtitlelink">10-08-01.js</a><iframe
+        title="10-08-01.html"
+        src="../../docs/31/10-08-01.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/10-08-02.html" class="boxtitlelink">10-08-02.html</a><span> | </span><a href="../../docs/31/10-08-02.js" class="boxtitlelink">10-08-02.js</a><iframe
+        title="10-08-02.html"
+        src="../../docs/31/10-08-02.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/31/10-08-03.html" class="boxtitlelink">10-08-03.html</a><span> | </span><a href="../../docs/31/10-08-03.js" class="boxtitlelink">10-08-03.js</a><iframe
+        title="10-08-03.html"
+        src="../../docs/31/10-08-03.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<h2 id="more-tsl">More TSL?</h2>
+<a href="../../docs/32/" class="Next__Page">Next: Page &nbsp;32&nbsp;-&nbsp;TSL Exercise</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Selected"> 31: Texture Tsl Examples </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p31",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

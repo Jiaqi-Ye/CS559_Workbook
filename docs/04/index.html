@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 4: Aliasing</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On this page, we&rsquo;ll try to understand the fundamental problem of discrete representations in a simplified way. When you learn about these ideas in a signal processing class, they usually jump right to fancy math (which is quite elegant, once you understand it). I am going to try to explain it in purely graphics terms first.</p>
+<p>An advantage of this approach is that we can provide effective demos to illustrate the problems.</p>
+<h2 id="a-problem-with-the-point-sample-model">A Problem with the point sample model</h2>
+<p>We defined pixels as point samples. They measure the color at a specific point. That means that we can easily have triangles that are too small and fit &ldquo;in between&rdquo; the pixels.</p>
+<p>Here is an example using three.js. The picture on the left has a bunch of yellow and orange triangles. The orange triangles are positioned so that they cover a pixel. The yellow triangles aren&rsquo;t so lucky.</p>
+<div id="demo1"></div>
+<p>In the middle is the same picture enlarged. The pixels in the left image are dots. You can see the yellow triangles hiding between them. On the right is a &ldquo;zoom&rdquo; on the left image - we&rsquo;ve made it bigger (by replicating the same pixels 5 times). This makes it easier to see what is happening.</p>
+<p>Yes, we really can lose triangles between the pixels.</p>
+<h2 id="problems-in-motion">Problems in motion</h2>
+<p>In this demo, we make the triangles move. Sometimes, they get lucky and cover a pixel. Sometimes, they are hiding between pixels. This causes them to flash. Because the motion is very regular (constant straight line), the pattern is simple.</p>
+<div id="demo2"></div>
+<h2 id="not-just-tiny-triangles">Not just tiny triangles</h2>
+<p>We can have a big triangle and still have problems. Here is a tall skinny triangle: the bottom of it is effectively a triangle that is too small.</p>
+<div id="demo3"></div>
+<p>Notice how the left to right motion of the triangle (clear in the middle view) causes a very visible &ldquo;crawling&rdquo; in a different direction (top to bottom).</p>
+<p>Here is a schematic of what is happening:</p>
+<figure class="" style="width: 500px;  ">
+    <a href="../../docs/04/crawlie-diagram.png">
+        <img src="../../docs/04/crawlie-diagram.png" alt="crawlie-diagram.png" />
+    </a><figcaption><p>The left to right motion of the triangle causes the sampled pixels to crawl upward.&nbsp;</p></figcaption>
+</figure>
+
+<p>This is dramatic when the triangle vanishes, but you could imagine this being the edge of a bigger object.</p>
+<h2 id="even-the-checkerboard">Even the checkerboard</h2>
+<p>Even the checkerboard sampling problem can be viewed this way. Here, we made the checkerboard from triangles. The checkerboard is half a pixel grid. It is slowly moving to the right. Sometimes the pixel centers fall on blue, sometimes on orange.</p>
+<div id="demo4"></div>
+<h2 id="what-can-we-do-about-this">What can we do about this?</h2>
+<p>Having seen the problems, you might ask: can we fix aliasing? Can we clean up those jagged edges and flickering textures after the fact?</p>
+<p>The answer is <strong>no.</strong> Aliasing is a fundamental consequence of discretization. Once you&rsquo;ve taken the samples, the information is gone — you can&rsquo;t tell which of the many aliased possibilities was the original.</p>
+<p>What we <em>can</em> do is <strong>lower our expectations</strong> and then <strong>meet them reliably.</strong> Instead of trying to capture everything (which is impossible), we accept that we&rsquo;ll lose some detail, and we make sure we lose it <em>consistently and predictably</em> rather than in the ugly, unpredictable way that raw aliasing produces.</p>
+<p>Here&rsquo;s a simplified way to think about it: the cause of our problems is small triangles. We simply cannot handle them predictably. Sometimes they show up, sometimes they don&rsquo;t.</p>
+<p>We could just disallow small triangles. We <strong>filter</strong> them out: we remove all triangles that are too small (and therefore likely to cause a problem when we sample them).</p>
+<p>Notice that we must <strong>pre-filter</strong>: that is, we must get rid of potentially bad triangles before they cause problems.</p>
+<p>This is the core insight of anti-aliasing: <strong>it prevents bad aliasing before it happens. It does not fix it afterward.</strong></p>
+<p>It also represents a sacrifice: by losing small triangles, we lose the ability to have small details. But, it means that what we can draw, we can draw reliably and predictably. This again is the key insight of anti-aliasing: we prevent bad problems by making sacrifices.</p>
+<h2 id="beyond-small-triangles-fast-changes">Beyond Small Triangles: Fast Changes</h2>
+<p>The &ldquo;small triangles&rdquo; story is oversimplified.
+Sometimes, the problems aren&rsquo;t small triangles; and sometimes small triangles aren&rsquo;t the problem.</p>
+<p>The real issue isn&rsquo;t just small objects — it is <strong>fast changes.</strong> Any place where the signal changes rapidly relative to the sample spacing is a potential aliasing problem.</p>
+<p>A sharp edge is a fast change: over a very small distance in space, the color value jumps from one thing to another. A thin stripe has two fast changes close together. A high-frequency texture pattern is full of fast changes.</p>
+<p>If things change slowly — gradual gradients, soft transitions — there is not much that can go wrong between sample points. The value at one sample is similar to the value at the next. But if things change quickly, anything could happen in between, and our samples will fail to capture it.</p>
+<p>The pre-filter process needs to get rid of fast changes, which makes things look blurry.</p>
+<p>This idea of fast changes is still an oversimplification. The real answer is that the problems are <strong>high frequencies.</strong> But explaining high-frequencies is best left to a formal signal processing class. And even then, understanding the math in multiple dimensions is hard. To try to capture a few weeks of Electrical Engineering in a paragraph:</p>
+<blockquote>
+<p>In signal processing terms, fast changes correspond to <strong>high frequencies.</strong> The Fourier transform decomposes any signal into sine waves, and fast changes require high-frequency sine waves to represent them. Aliasing occurs when the signal contains frequencies above what the sampling rate can capture (the Nyquist limit). Anti-aliasing, in this framework, is a <strong>low-pass filter</strong>: we remove the high frequencies before sampling so that only slow changes remain.</p>
+</blockquote>
+<figure class="" style="width: 80%;  ">
+    <a href="../../docs/04/sampling-1d-diagram.svg">
+        <img src="../../docs/04/sampling-1d-diagram.svg" alt="sampling-1d-diagram.svg" />
+    </a><figcaption><p>A 1D diagram showing a signal with both slow and fast variations, with sample points marked. Show how the slow parts are captured faithfully but the fast parts are missed or misrepresented. Then show the same signal after low-pass filtering: the slow parts look almost the same, but the fast parts have been smoothed away, and now the samples capture everything that remains.&nbsp;Image created by Claude to summarize a standard signal processing concept.</p></figcaption>
+</figure>
+
+<p>The magic here is that by ensuring that we have pre-filtered (so there are no wiggles, or fast changes), then we know that we can interpret the samples in a simple way.</p>
+<p>Here&rsquo;s yet another way to think about it: Suppose I give you a bunch of samples and ask you to guess what the original signal was. You could guess anything. But, if I promise you &ldquo;the signal has no wiggles between the samples,&rdquo; you know what the correct reconstruction is. I just need to remove any of the extra wiggles before I take the samples.</p>
+<h2 id="summary">Summary</h2>
+<p>The problems of aliasing are real and create visual artifacts that we want to avoid in graphics.</p>
+
+<script src="./aliasing.js" type="module" defer></script>
+<a href="../../docs/05/" class="Next__Page">Next: Page &nbsp;5&nbsp;-&nbsp;Anti Aliasing</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Selected"> 4: Aliasing </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p04",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

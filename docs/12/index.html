@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 12: Multi-Pass Rendering</h1>
+		</header>
+		<div class="content post__content clearfix"><p>On this page, we&rsquo;ll focus on a particular kind of multi-pass rendering: where we draw the scene from some other viewpoint other than the camera&rsquo;s that is ultimately making the picture, store that picture somewhere, and use it (often as a texture) when we make the final picture.</p>
+
+
+<div class="expandbox">
+<details class="myexpand" >
+    <summary class="myexpand-head">The other kind of multi-pass rendering (optional)</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>An <strong>optional</strong> digression&hellip;</p>
+<p>This page talks about &ldquo;a particular kind of multi-pass rendering: where we draw the scene from some other viewpoint other than the camera&rsquo;s&rdquo;. You might wonder about the other kind: where we simply draw things multiple times.</p>
+<p>Redrawing an object multiple times is a trick that is used to create advanced visual effects, to work around the limitations of the hardware, or as an efficiency trick (yes, in some cases, it is faster to draw twice with simple appearances than once with complex ones).</p>
+<p>The problem with teaching these (redrawing) methods is that they change very quickly: they depend a lot on the hardware. The tricks become obsolete when the hardware changes. Most of the tricks we used to teach can now be accomplished in a single pass by writing a shader.</p>
+<p>For example, in the old days, we used redraw multi-pass to combine multiple textures - but now we can do it in the shaders. Similarly, hardware used to be limited to a small number of lights. To simulate more lights we would draw the object multiple times, each time with different lights.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="the-limitations-of-the-rendering-pipeline">The limitations of the rendering pipeline</h2>
+<p>Remember that each triangle must be independent. Therefore, the color of a triangle cannot depend on another triangle. The triangles can&rsquo;t &ldquo;see&rdquo; the other triangles in a scene.</p>
+<p>Imagine that we want to put a picture on the wall of what the scene looks like. We want to determine the colors of that picture from the other objects of the scene (so it&rsquo;s a picture of what is in the scene).</p>
+<p>Here&rsquo;s a simple example (thanks to Co-Pilot/Codex):</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../docs/12/still-life-frozen-picture.html" class="boxtitlelink">still-life-frozen-picture.html</a><span> | </span><a href="../../docs/12/still-life-frozen-picture.js" class="boxtitlelink">still-life-frozen-picture.js</a><iframe
+        title="still-life-frozen-picture.html"
+        src="../../docs/12/still-life-frozen-picture.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>The trick: the picture can&rsquo;t see the other objects. It has a texture map. But how do we get a texture map that is a picture of the other objects?</p>
+<p>The answer is relatively simple: we draw the picture, but rather than putting the resulting pixels on the screen, we put them into a texture map that can be used by other objects. This is called <strong>render to texture.</strong> Notice that this requires two &ldquo;passes&rdquo; (we draw the scene twice). We draw once to draw into the texture. Then we draw a second time to draw to the screen (using that texture we just made). If you look carefully, you&rsquo;ll notice that the picture on the wall in the scene is blank because that picture was made before there was a texture to paint the picture with.</p>
+<p>This example uses the <strong>main camera</strong> to take a picture of a still-life scene exactly once, then places that frozen image into a picture frame on the wall behind the table. If you orbit or pan the camera after startup, the wall picture does not update. The render-to-texture pass runs on the first frame only.</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">Why draw twice?</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>In this special case, we used the same camera to make both pictures. So, in theory we could have drawn once and just copied the pixels into both places.</p>
+<p>For a number of practical reasons, this is tricky to implement. A simple reason: the screen image and the texture image may be different sizes.</p>
+<p>In practice, we usually don&rsquo;t use the same camera for both the &ldquo;main&rdquo; pass and the render-to-texture pass. So, making the special case where we might be able to copy the image rather than drawing twice isn&rsquo;t worthwhile.</p>
+
+    </div>
+</details>
+</div>
+<h2 id="dynamic-texture-maps">Dynamic Texture Maps</h2>
+<p>A problem in that first example is that the texture is static. We compute it at the beginning and use it over and over. We don&rsquo;t need to do this: we could recompute the texture every frame. Yes, that means we draw the frame twice each time (once for each pass), but we generally have enough graphics performance to do this.</p>
+<p>Here&rsquo;s the same still-life setup, but with the wall picture updated every frame from the main camera:</p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../docs/12/still-life-live-picture.html" class="boxtitlelink">still-life-live-picture.html</a><span> | </span><a href="../../docs/12/still-life-live-picture.js" class="boxtitlelink">still-life-live-picture.js</a><iframe
+        title="still-life-live-picture.html"
+        src="../../docs/12/still-life-live-picture.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+
+<p>Now if you move the camera, the wall picture changes as well, because the render-to-texture pass runs every frame.</p>
+<p>If you notice, the picture on the wall in the scene is still black. We are avoiding the &ldquo;recursive&rdquo; drawing (this is called a &ldquo;feedback loop&rdquo;).</p>
+<p>This idea of updating the texture map to match the action in the scene is called a <strong>dynamic texture map</strong>.</p>
+<p>Dynamic texture maps are useful for many things, for example:</p>
+<ul>
+<li>Reflections (we take a picture of what the mirror sees and put that on the mirror, this is kind of a simple form of Environment Map)</li>
+<li>Shadows (we take a picture of what the light sees, and only light those parts)</li>
+<li>Environments (rather than pre-painting an environment map, we render a picture of the world so the correct things show up)</li>
+<li>Picture in Picture effects - you could put a television showing what a camera elsewhere in the scene is pointing at</li>
+</ul>
+<p>From an implementation perspective, these things involve:</p>
+<ol>
+<li>Setting up an additional camera</li>
+<li>Rendering a picture from that camera&rsquo;s viewpoint and storing the picture in a texture. This is called <em>render to texture</em>.</li>
+<li>Using that rendered texture when we ultimately draw the scene.</li>
+</ol>
+<h2 id="another-example">Another Example</h2>
+<p>In this example, we have a camera that flies around in the scene. We use the picture that camera takes as a texture. We show the texture on a big plane - so it&rsquo;s like showing the camera footage on a big TV (or projector screen).</p>
+
+
+<div class="expandbox">
+<details class="myexpand">
+    <summary class="myexpand-head">AI Notes</summary>
+    <div class="markdown-inner myexpand-content">
+      <p>I had Co-Pilot with Codex make this example. It was able to do it in the class framework. Notice, however, that it forgot that the camera sights down the negative Z axis, so the black cone (which I assume is meant to be the lens) points the wrong way. Or maybe it meant that the cone is an arrow pointing in the camera line of sight direction. Either may, the three.js <code>CameraHelper</code> points the right way.</p>
+<p>Co-Pilot also drafted the documentation.</p>
+
+    </div>
+</details>
+</div>
+<p>
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 650px;">
+    <a href="../../docs/12/dynamic-camera-screen.html" class="boxtitlelink">dynamic-camera-screen.html</a><span> | </span><a href="../../docs/12/dynamic-camera-screen.js" class="boxtitlelink">dynamic-camera-screen.js</a><iframe
+        title="dynamic-camera-screen.html"
+        src="../../docs/12/dynamic-camera-screen.html"
+        class="includebox includebox-standard"
+        width="650"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>This demo shows the classic &ldquo;camera to texture&rdquo; multi-pass workflow.</p>
+<p>First, we create a second camera that is attached to a visible moving object in the scene (a camera rig). That camera is <strong>not</strong> the main viewer camera. Instead, it is a capture camera whose job is to make an image we can reuse.</p>
+<p>Second, we create a <code>WebGLRenderTarget</code>, which is an off-screen image buffer. On each frame, we ask the renderer to draw the scene from the capture camera into that render target.</p>
+<p>Third, we use <code>renderTarget.texture</code> as the map of a material on a large square &ldquo;monitor&rdquo; in the world. Because the texture is updated every frame, the monitor becomes a live video feed of what the moving camera sees.</p>
+<p>In pseudocode, the key per-frame operations are:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75af00">renderer</span><span style="color:#111">.</span><span style="color:#75af00">setRenderTarget</span><span style="color:#111">(</span><span style="color:#75af00">renderTarget</span><span style="color:#111">);</span>      <span style="color:#75715e">// draw off-screen
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">renderer</span><span style="color:#111">.</span><span style="color:#75af00">render</span><span style="color:#111">(</span><span style="color:#75af00">scene</span><span style="color:#111">,</span> <span style="color:#75af00">captureCamera</span><span style="color:#111">);</span>       <span style="color:#75715e">// make the camera image
+</span></span></span><span style="display:flex;"><span><span style="color:#75af00">renderer</span><span style="color:#111">.</span><span style="color:#75af00">setRenderTarget</span><span style="color:#111">(</span><span style="color:#75af00">previousTarget</span><span style="color:#111">);</span>    <span style="color:#75715e">// restore normal drawing
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>The most important practical detail is preventing feedback loops.
+If the capture camera can see the monitor surface that is displaying its own render target, it is effectively taking a picture of itself. That can cause recursive artifacts or WebGL warnings.</p>
+<p>To avoid this, the demo places the monitor (and helper visuals) on a different rendering layer from the one the capture camera sees. The main world camera sees both layers, but the capture camera is restricted to the layer without the monitor.</p>
+<p>You can use the same pattern for security-camera effects, mirrors, mini-maps, and other picture-in-picture interfaces.</p>
+<h2 id="summary-dynamic-texture-maps">Summary: Dynamic Texture Maps</h2>
+<p>Dynamic textures give us a &ldquo;hack&rdquo; that lets our objects &ldquo;see&rdquo; each other (have their appearance affected by other objects). The mechanism is simple - we make an extra drawing pass to make a picture of the world in a texture. This has a cost (we need to draw multiple times), but it allows us to use the mechanisms of the rasterization pipeline (drawing, textures) to achieve complicated effects.</p>
+<p>On the next few pages, we&rsquo;ll use it for some useful things.</p>
+<a href="../../docs/13/" class="Next__Page">Next: Page &nbsp;13&nbsp;-&nbsp;Dynamic Environment Maps</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Selected"> 12: Multi-Pass Rendering </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p12",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

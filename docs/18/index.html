@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header"><h1 class="post__title">Page 18: Shading Languages</h1>
+		</header>
+		<div class="content post__content clearfix"><p>We need some language to program shaders in.</p>
+<p>Short version for 2026: In class, we&rsquo;ll focus on using GLSL to learn. But we&rsquo;ll look at TSL (Three Shading Language) a little.</p>
+<p>Understanding the differences in the types of shading languages is useful, so it warrants an explanation.</p>
+<h2 id="the-landscape-of-shading-languages">The Landscape of Shading Languages</h2>
+<p>Prior to 2024, there really wasn&rsquo;t a choice: the WebGL API had a built-in language called GLSL. It was the shading language built into the browser. Therefore it was pretty much the standard.</p>
+<p>After 2025, most web browsers also support a newer API called WebGPU. WebGPU has a different shading language called WGSL.</p>
+<p>These languages are designed for writing shader programs; they map exactly to the way the hardware works. This makes them excellent for learning how shaders work and how to program them. And they are standard: they are supported directly by the web browser. They aren&rsquo;t specific to some particular third-party thing (like three.js, or some commercial game engine).</p>
+<p>However, there is another aspect of shader programming that these languages are bad at: interfacing with the &ldquo;host system.&rdquo; For example, we want to write our own shaders, but we would like them to work well with three.js&rsquo;s cool features, like dynamic environment maps, physically-based lighting, and shadow maps.</p>
+<p>Therefore, systems like three.js or game engines (such as Unity or Unreal) tend not to use standard shading languages. They provide their own language. This has the advantage that the engine can translate the programs into whatever language works best on the target hardware. While GLSL was standard for the web, game consoles and different desktop operating systems often had different languages that worked best.</p>
+<p>These system-specific languages are usually quite different from the &ldquo;standard&rdquo; languages: they focus on helping programmers connect their programs to the graphics pieces provided by the system. This also allows for special programming tools that allow programmers and artists to make shaders by connecting pieces together. We&rsquo;ll come back to talk about these &ldquo;composition&rdquo; tools/systems later.</p>
+<figure class="" style="width: 500px;  ">
+    <a href="../../docs/18/three-graph.png">
+        <img src="../../docs/18/three-graph.png" alt="three-graph.png" />
+    </a><figcaption><p>Composition languages are often connected to graph-based interfaces. TSL has this online graph editor.
+            <a href="https://www.tsl-graph.xyz/">&nbsp;TSL-Graph Editor</a></p></figcaption>
+</figure>
+
+<p>While composition languages (like TSL, the Three Shading Language) are convenient, they may not be as good for learning. And they tend to be specific to a system. <em>Therefore, I think it&rsquo;s best to learn using a &ldquo;traditional&rdquo; shading language first.</em></p>
+<p>However, in the future, these languages are becoming less common and less-well-supported. And the other problems may not apply: in class, we use three.js. And while other systems (such as Unity or Unreal) are different, the basic ideas are the same.</p>
+<p>Unfortunately, it wasn&rsquo;t practical to switch completely to TSL in Spring 2026.</p>
+<h2 id="a-note-on-threejs-in-spring-2026">A Note on Three.js in Spring 2026</h2>
+<p>In early 2026, three.js is in the process of a transition. Its support for a WebGPU backend/renderer is becoming stable enough to be a preferred pathway (rather than the WebGL backend). TSL is now the preferred way to write shaders.</p>
+<p>Unfortunately, both of these developments are too new to be useful in class. When we had to choose, it wasn&rsquo;t clear that WebGPU was ready. And TSL is so new that the documentation is not yet fully developed, and there are few tutorials.</p>
+<p>Conversely, it is clear that WebGL (and GLSL) support is being abandoned. In the future, we&rsquo;ll have to switch.</p>
+<p>Using a mix of shading languages in class is complicated: three.js only supports GLSL using the WebGL renderer; if you want to use TSL, you need to use the WebGPU renderer.</p>
+<p>The other option, using WGSL (the WebGPU shading language) isn&rsquo;t really an option: three.js does not provide good access to it. It translates TSL to WebGPU, but it doesn&rsquo;t provide complete access to WebGPU.</p>
+<div class="dimbox">
+<h2 id="a-warning-about-colors">A Warning About Colors</h2>
+<p>When we move from the WebGL to the WebGPU renderer, three.js switches to a different color model (color space mapping). This makes it easier to do physically correct lighting. However, it means that all of our old colors need to be adjusted. Over the next few pages, you will notice that the WebGL and WebGPU versions of the same demos have slightly different colors.</p>
+
+</div>
+<h2 id="what-will-we-do">What will we do?</h2>
+<p>In class, we will use GLSL to learn the basics of shader programming. We have legacy material, and we can use the three.js WebGL renderer (note: this is not the default for the class framework!).</p>
+<p>However, because many of the tools and resources are deprecated, we won&rsquo;t do as much GLSL programming as we have in the past.</p>
+<p>After learning the basics, we&rsquo;ll look at TSL briefly. It is good enough for experimenting with. And by the time class is over, there will be a new version of three.js and I am pretty sure that TSL will just keep getting better. Like most things in three.js, it is well-thought-out and well-built.</p>
+<h2 id="a-look-at-three-languages">A Look At Three Languages</h2>
+<p>Let&rsquo;s compare the three shading languages:</p>
+<ul>
+<li><strong>GLSL</strong> has a C-like syntax and very explicitly maps to the ideas of shader programming and the hardware. You declare variables to be attributes or varying, etc. The language has many features to make it suited for graphics programming, such as built-in vector math.</li>
+<li><strong>WGSL</strong> is similar to GLSL, except that it uses a Rust-like syntax. I am not a Rust programmer, so it seems pretty alien to me.</li>
+<li><strong>TSL</strong> isn&rsquo;t actually its own language: we write shader programs by connecting JavaScript objects together. We write JavaScript programs that build data structures that represent the programs. At the appropriate time, the three.js runtime converts these to some other shading language.</li>
+</ul>
+<p>Here is the most boring example that I can make to compare. (Actually, Codex wrote these for me)</p>
+<p>
+
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/18/tri-languages.html" class="boxtitlelink">tri-languages.html</a><span> | </span><a href="../../docs/18/tri-languages.js" class="boxtitlelink">tri-languages.js</a><iframe
+        title="tri-languages.html"
+        src="../../docs/18/tri-languages.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>In three.js, only GLSL has &ldquo;standard&rdquo; vertex shaders. When we use WGSL or TSL, the two shaders get mixed into how the material is handled. This is part of the reason it is useful to learn using GLSL.</p>
+<p>We&rsquo;ll explain the GLSL programs on future pages, but I want to show the three different shaders for comparison.</p>
+<p>Here is the GLSL fragment shader:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.93</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.2</span><span style="color:#111">,</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It sets the output variable (<code>gl_FramColor</code>) to yellow. Note the C-like syntax, and how this small shader program communicates to other things by setting variables.</p>
+<p>The WGSL program is quite similar, it just has a Rust-like syntax:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#00a8c8">fn</span> <span style="color:#75af00">triangleYellow</span><span style="color:#111">()</span> -&gt; <span style="color:#75af00">vec3</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">return</span> <span style="color:#111">vec3</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span><span style="color:#111">(</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.93</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.2</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here is the TSL Shader. It is just JavaScript code. We hook the constant value to the color &ldquo;input&rdquo;:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">material</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE_WEBGPU</span><span style="color:#111">.</span><span style="color:#75af00">MeshBasicNodeMaterial</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">material</span><span style="color:#111">.</span><span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">vec3</span><span style="color:#111">(</span><span style="color:#ae81ff">1.0</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.93</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.2</span><span style="color:#111">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This code combines the interface to three.js&rsquo;s material system with the plug-things-together composition paradigm.</p>
+<p>Here is a more complex example. We&rsquo;ll explain the dots (in GLSL) later&hellip;
+
+
+
+<div style="border: 2px solid black; padding: 0px 5px 0px 5px; margin: 0; border-radius: 5px; display: inline-block; min-width: 100%;">
+    <a href="../../docs/18/dots-languages.html" class="boxtitlelink">dots-languages.html</a><span> | </span><a href="../../docs/18/dots-languages.js" class="boxtitlelink">dots-languages.js</a><iframe
+        title="dots-languages.html"
+        src="../../docs/18/dots-languages.html"
+        class="includebox includebox-standard"
+        width="100%"
+        height="570"
+        scrolling="no"
+        frameborder="0"
+    ></iframe>
+</div>
+</p>
+<p>Here are the GLSL and WGSL programs. For now, just notice how similar they are (other than the C vs. Rust style syntax).</p>
+<p>GLSL:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-glsl" data-lang="glsl"><span style="display:flex;"><span><span style="color:#00a8c8">varying</span> <span style="color:#00a8c8">vec2</span> <span style="color:#111">v_uv</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">light</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#00a8c8">vec3</span> <span style="color:#111">dark</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#00a8c8">float</span> <span style="color:#111">dots</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">uniform</span> <span style="color:#00a8c8">float</span> <span style="color:#111">radius</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a8c8">void</span> <span style="color:#111">main</span><span style="color:#111">()</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">x</span> <span style="color:#f92672">=</span> <span style="color:#111">v_uv</span><span style="color:#111">.</span><span style="color:#111">x</span> <span style="color:#f92672">*</span> <span style="color:#111">dots</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">y</span> <span style="color:#f92672">=</span> <span style="color:#111">v_uv</span><span style="color:#111">.</span><span style="color:#111">y</span> <span style="color:#f92672">*</span> <span style="color:#111">dots</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">dx</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">x</span><span style="color:#111">)</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">dy</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">y</span><span style="color:#111">)</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">d</span> <span style="color:#f92672">=</span> <span style="color:#111">sqrt</span><span style="color:#111">(</span><span style="color:#111">dx</span> <span style="color:#f92672">*</span> <span style="color:#111">dx</span> <span style="color:#f92672">+</span> <span style="color:#111">dy</span> <span style="color:#f92672">*</span> <span style="color:#111">dy</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">float</span> <span style="color:#111">dc</span> <span style="color:#f92672">=</span> <span style="color:#111">step</span><span style="color:#111">(</span><span style="color:#111">d</span><span style="color:#111">,</span> <span style="color:#111">radius</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#111">gl_FragColor</span> <span style="color:#f92672">=</span> <span style="color:#00a8c8">vec4</span><span style="color:#111">(</span><span style="color:#111">mix</span><span style="color:#111">(</span><span style="color:#111">light</span><span style="color:#111">,</span> <span style="color:#111">dark</span><span style="color:#111">,</span> <span style="color:#111">dc</span><span style="color:#111">),</span> <span style="color:#ae81ff">1.0</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>WGSL:</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#00a8c8">fn</span> <span style="color:#75af00">dotsColor</span><span style="color:#111">(</span><span style="color:#111">uvIn</span>: <span style="color:#75af00">vec2</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span><span style="color:#111">,</span> <span style="color:#111">dots</span>: <span style="color:#00a8c8">f32</span><span style="color:#111">,</span> <span style="color:#111">radius</span>: <span style="color:#00a8c8">f32</span><span style="color:#111">,</span> 
+</span></span><span style="display:flex;"><span>             <span style="color:#111">light</span>: <span style="color:#75af00">vec3</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span><span style="color:#111">,</span> <span style="color:#111">dark</span>: <span style="color:#75af00">vec3</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span><span style="color:#111">)</span> -&gt; <span style="color:#75af00">vec3</span><span style="color:#f92672">&lt;</span><span style="color:#00a8c8">f32</span><span style="color:#f92672">&gt;</span> <span style="color:#111">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">x</span> <span style="color:#f92672">=</span> <span style="color:#111">uvIn</span><span style="color:#111">.</span><span style="color:#111">x</span> <span style="color:#f92672">*</span> <span style="color:#111">dots</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">y</span> <span style="color:#f92672">=</span> <span style="color:#111">uvIn</span><span style="color:#111">.</span><span style="color:#111">y</span> <span style="color:#f92672">*</span> <span style="color:#111">dots</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">dx</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">x</span><span style="color:#111">)</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">dy</span> <span style="color:#f92672">=</span> <span style="color:#111">fract</span><span style="color:#111">(</span><span style="color:#111">y</span><span style="color:#111">)</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span><span style="color:#111">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">d</span> <span style="color:#f92672">=</span> <span style="color:#111">sqrt</span><span style="color:#111">(</span><span style="color:#111">dx</span> <span style="color:#f92672">*</span> <span style="color:#111">dx</span> <span style="color:#f92672">+</span> <span style="color:#111">dy</span> <span style="color:#f92672">*</span> <span style="color:#111">dy</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">let</span> <span style="color:#111">dc</span> <span style="color:#f92672">=</span> <span style="color:#111">step</span><span style="color:#111">(</span><span style="color:#111">d</span><span style="color:#111">,</span> <span style="color:#111">radius</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a8c8">return</span> <span style="color:#111">mix</span><span style="color:#111">(</span><span style="color:#111">light</span><span style="color:#111">,</span> <span style="color:#111">dark</span><span style="color:#111">,</span> <span style="color:#111">dc</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#111">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The TSL shader is again in JavaScript, and works by &ldquo;wiring together&rdquo; objects. Again, we will explain how this works later: for now, just observe that it&rsquo;s JavaScript and connects objects together. Some of the object creation is hidden (many of the method calls like <code>mul</code>, <code>fract</code> and <code>sub</code> create node objects).</p>
+<div class="highlight"><div style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#272822;background-color:#fafafa;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">dotsU</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uniform</span><span style="color:#111">(</span><span style="color:#75af00">params</span><span style="color:#111">.</span><span style="color:#75af00">dots</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">radiusU</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uniform</span><span style="color:#111">(</span><span style="color:#75af00">params</span><span style="color:#111">.</span><span style="color:#75af00">radius</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">lightU</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uniform</span><span style="color:#111">(</span><span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">Vector3</span><span style="color:#111">(</span><span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">,</span> <span style="color:#ae81ff">1</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">darkU</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uniform</span><span style="color:#111">(</span><span style="color:#00a8c8">new</span> <span style="color:#75af00">THREE</span><span style="color:#111">.</span><span style="color:#75af00">Vector3</span><span style="color:#111">(</span><span style="color:#ae81ff">0.2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.2</span><span style="color:#111">,</span> <span style="color:#ae81ff">0.7</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">uNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uv</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">x</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uNode</span><span style="color:#111">.</span><span style="color:#75af00">x</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dotsU</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">y</span> <span style="color:#f92672">=</span> <span style="color:#75af00">uNode</span><span style="color:#111">.</span><span style="color:#75af00">y</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dotsU</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">dx</span> <span style="color:#f92672">=</span> <span style="color:#75af00">x</span><span style="color:#111">.</span><span style="color:#75af00">fract</span><span style="color:#111">().</span><span style="color:#75af00">sub</span><span style="color:#111">(</span><span style="color:#ae81ff">0.5</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">dy</span> <span style="color:#f92672">=</span> <span style="color:#75af00">y</span><span style="color:#111">.</span><span style="color:#75af00">fract</span><span style="color:#111">().</span><span style="color:#75af00">sub</span><span style="color:#111">(</span><span style="color:#ae81ff">0.5</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">d</span> <span style="color:#f92672">=</span> <span style="color:#75af00">dx</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dx</span><span style="color:#111">).</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">dy</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dy</span><span style="color:#111">)).</span><span style="color:#75af00">sqrt</span><span style="color:#111">();</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dot coverage: 1 inside radius, 0 outside, avoiding step() ordering ambiguity.
+</span></span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">dc</span> <span style="color:#f92672">=</span> <span style="color:#75af00">radiusU</span><span style="color:#111">.</span><span style="color:#75af00">sub</span><span style="color:#111">(</span><span style="color:#75af00">d</span><span style="color:#111">).</span><span style="color:#75af00">sign</span><span style="color:#111">().</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#ae81ff">1.0</span><span style="color:#111">).</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#ae81ff">0.5</span><span style="color:#111">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a8c8">const</span> <span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">lightU</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dc</span><span style="color:#111">.</span><span style="color:#75af00">oneMinus</span><span style="color:#111">()).</span><span style="color:#75af00">add</span><span style="color:#111">(</span><span style="color:#75af00">darkU</span><span style="color:#111">.</span><span style="color:#75af00">mul</span><span style="color:#111">(</span><span style="color:#75af00">dc</span><span style="color:#111">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75af00">material</span><span style="color:#111">.</span><span style="color:#75af00">colorNode</span> <span style="color:#f92672">=</span> <span style="color:#75af00">colorNode</span><span style="color:#111">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="summary">Summary</h2>
+<p>We&rsquo;ve seen some shading languages, and the rationale for what we are going to use in class. Now we can actually learn how to program in them.</p>
+<a href="../../docs/19/" class="Next__Page">Next: Page &nbsp;19&nbsp;-&nbsp;GLSL and three.js</a>
+
+		</div>
+	</article>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Selected"> 18: Shading Languages </li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "p18",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "uint64",
+            solution: false
+        };
+</script><script src="../../js/localstore.js"></script><script src="../../js/check-protocol.js"></script>
+    </body>
+</html>

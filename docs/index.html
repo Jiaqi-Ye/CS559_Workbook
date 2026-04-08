@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- CS559 Workbook Pages - page content &copy; 2026, Michael Gleicher -->
+<!-- This page is part of a Workbook developed for the 
+    CS559 Computer Graphics Class at the University of Wisconsin
+    https://graphics.cs.wisc.edu/Courses/559-sp2026/ -->
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../css/workbook.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        
+        
+        <script type="importmap">
+    {
+  "imports": {
+    "CS559-Framework/": "/libs/CS559-Framework/",
+    "CS559/": "/libs/CS559/",
+    "examples/": "/examples/",
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/": "https://unpkg.com/three@0.180.0/",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+        </script>
+        
+        <script src="../js/resizeIFrames.js"></script>
+    </head>
+    <body>
+        <div class="container container--outer"><div class="maincolumn">
+<main class="main list" role="main">
+	<header class="main__header">
+		<h1 class="main__title">Docs</h1>
+	</header>
+    <ul>
+    
+		<li><a href="../docs/01/">1 -&nbsp;Recap: Appearance by Shading and Texturing</a></li>
+		<li><a href="../docs/02/">2 -&nbsp;Practice: Cars</a></li>
+		<li><a href="../docs/03/">3 -&nbsp;Some Foundations</a></li>
+		<li><a href="../docs/04/">4 -&nbsp;Aliasing</a></li>
+		<li><a href="../docs/05/">5 -&nbsp;Anti Aliasing</a></li>
+		<li><a href="../docs/06/">6 -&nbsp;Rasterization: How we draw</a></li>
+		<li><a href="../docs/07/">7 -&nbsp;Handling Occlusion</a></li>
+		<li><a href="../docs/08/">8 -&nbsp;The Pipeline</a></li>
+		<li><a href="../docs/09/">9 -&nbsp;Graphics Performance</a></li>
+		<li><a href="../docs/1-hacks/10/">10 -&nbsp;Texturing Hacks</a></li>
+		<li><a href="../docs/11/">11 -&nbsp;Using Multiple Maps</a></li>
+		<li><a href="../docs/12/">12 -&nbsp;Multi-Pass Rendering</a></li>
+		<li><a href="../docs/13/">13 -&nbsp;Dynamic Environment Maps</a></li>
+		<li><a href="../docs/14/">14 -&nbsp;How Shadow Maps Work</a></li>
+		<li><a href="../docs/15/">15 -&nbsp;Shadow Maps in Three.js</a></li>
+		<li><a href="../docs/16/">16 -&nbsp;Exercise: Texture Demo</a></li>
+		<li><a href="../docs/17/">17 -&nbsp;Shader Basics</a></li>
+		<li><a href="../docs/18/">18 -&nbsp;Shading Languages</a></li>
+		<li><a href="../docs/19/">19 -&nbsp;GLSL and three.js</a></li>
+		<li><a href="../docs/20/">20 -&nbsp;Simple Shaders</a></li>
+		<li><a href="../docs/21/">21 -&nbsp;Shading in Practice</a></li>
+		<li><a href="../docs/22/">22 -&nbsp;Lighting in Shaders</a></li>
+		<li><a href="../docs/23/">23 -&nbsp;Procedural Textures</a></li>
+		<li><a href="../docs/24/">24 -&nbsp;Aliasing</a></li>
+		<li><a href="../docs/25/">25 -&nbsp;Noise</a></li>
+		<li><a href="../docs/26/">26 -&nbsp;Procedural Texture Examples</a></li>
+		<li><a href="../docs/27/">27 -&nbsp;Image-Based Textures</a></li>
+		<li><a href="../docs/28/">28 -&nbsp;GLSL Exercises 1</a></li>
+		<li><a href="../docs/29/">29 -&nbsp;GLSL Exercises 2</a></li>
+		<li><a href="../docs/30/">30 -&nbsp;Composition</a></li>
+		<li><a href="../docs/31/">31 -&nbsp;Texture Tsl Examples</a></li>
+		<li><a href="../docs/32/">32 -&nbsp;TSL Exercise</a></li>
+		<li><a href="../docs/33/">33 -&nbsp;Last Page (rubric)</a></li>
+    </ul>
+</main>
+
+                </div>
+                    <div class="sidebar">
+<h2 class="Side_Title">Workbook 6: Efficiency, Hardware and Shaders</h2>
+<p class="Side__Note">Pages:</p>
+<ul class="Side__List">
+    <li class="Side__Item Side__Unselected"><a href="../">Index (Graphics Hardware and Efficiency)</a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/01/">1: Recap: Appearance by Shading and Texturing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/02/">2: Practice: Cars </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/03/">3: Some Foundations </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/04/">4: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/05/">5: Anti Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/06/">6: Rasterization: How we draw </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/07/">7: Handling Occlusion </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/08/">8: The Pipeline </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/09/">9: Graphics Performance </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/1-hacks/10/">10: Texturing Hacks </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/11/">11: Using Multiple Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/12/">12: Multi-Pass Rendering </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/13/">13: Dynamic Environment Maps </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/14/">14: How Shadow Maps Work </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/15/">15: Shadow Maps in Three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/16/">16: Exercise: Texture Demo </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/17/">17: Shader Basics </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/18/">18: Shading Languages </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/19/">19: GLSL and three.js </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/20/">20: Simple Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/21/">21: Shading in Practice </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/22/">22: Lighting in Shaders </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/23/">23: Procedural Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/24/">24: Aliasing </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/25/">25: Noise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/26/">26: Procedural Texture Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/27/">27: Image-Based Textures </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/28/">28: GLSL Exercises 1 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/29/">29: GLSL Exercises 2 </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/30/">30: Composition </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/31/">31: Texture Tsl Examples </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/32/">32: TSL Exercise </a></li>
+        <li class="Side__Item Side__Unselected"> <a href="../docs/33/">33: Last Page (rubric) </a></li>
+        <li class="Side__Item Side__Unselected"><a href="../storepanels/">Local Storage Interface</a></li>
+</ul>
+</div>
+</div>
+<a id="localstore-json-file"href="../wb_localstore_save.json"></a>
+<script>
+     
+async function checkRootFile() {
+  try {
+    const response = await fetch('/wb_localstore_save.json', { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error('File not found at root');
+    }
+  } catch (error) {
+    alert('Configuration Error: The file "wb_localstore_save.json" must be located at the root of the domain. Make sure that you are running your server from the Workbook directory.');
+    console.error('Root check failed:', error);
+  }
+}
+checkRootFile();
+     
+        const WORKBOOK_CONFIG = {
+            localstorename: "wbsp26",  
+            workbookId: "wbsp26_06",  
+            pageId:     "np",            
+            savefilename: "wb_localstore_save.json",
+            savefilepath: "\/wb_localstore_save.json", 
+            sheetsURL: "https:\/\/script.google.com\/a\/macros\/wisc.edu\/s\/AKfycbzHki6o6swxZjbpZ4sYVMT5fqEjsPJtQJG440ouFr-pRy-q9Il4loO3Y9sP4tUsfFxSYg\/exec",
+            bookname2char: "06",
+            pageType: "\u003cnil\u003e",
+            solution: false
+        };
+</script><script src="../js/localstore.js"></script><script src="../js/check-protocol.js"></script>
+    </body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Shadow Map Visualizer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: system-ui, sans-serif;
+      width: 640px;
+    }
+
+    /* ── Title bar ─────────────────────────────────────────── */
+    #title-bar {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    #title-bar strong { color: #f1f5f9; font-size: 13px; }
+    #title-bar span   { color: #64748b; }
+    .chip {
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; white-space: nowrap;
+    }
+    .chip-blue  { background: #1e3a8a; color: #93c5fd; }
+    .chip-green { background: #14532d; color: #86efac; }
+
+    /* ── Two-panel canvas area ─────────────────────────────── */
+    #views {
+      display: flex;
+      width: 640px;
+      height: 290px;   /* label (28px) + canvas (262px) */
+    }
+    .view {
+      display: flex;
+      flex-direction: column;
+      width: 319px;    /* (640 - 2px divider) / 2 */
+    }
+    .view + .view { border-left: 2px solid #0f172a; }
+
+    .view-label {
+      height: 28px;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .label-camera { background: #1e3a8a; color: #93c5fd; }
+    .label-light  { background: #14532d; color: #86efac; }
+
+    canvas {
+      display: block;
+      width: 319px;
+      height: 262px;
+    }
+
+    /* ── Controls row ──────────────────────────────────────── */
+    #controls {
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      color: #94a3b8;
+      flex-wrap: wrap;
+    }
+    #controls label { color: #64748b; }
+    input[type=range] { accent-color: #22c55e; vertical-align: middle; }
+    #val-angle, #val-height { color: #86efac; font-weight: 600; min-width: 28px; display: inline-block; }
+
+    .toggle-btn {
+      padding: 4px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .toggle-btn:hover  { background: #334155; color: #e2e8f0; }
+    .toggle-btn.active { background: #14532d; border-color: #22c55e; color: #86efac; }
+  </style>
+</head>
+<body>
+
+<div id="title-bar">
+  <strong>Shadow Map Visualizer</strong>
+  <span class="chip chip-blue">📷 Camera</span>
+  <span style="color:#475569">vs</span>
+  <span class="chip chip-green">💡 Light depth</span>
+  <span style="margin-left:auto; font-size:10px;">white = near · black = far</span>
+</div>
+
+<div id="views">
+  <div class="view">
+    <div class="view-label label-camera">📷 Camera View</div>
+    <canvas id="canvas-camera" width="319" height="262"></canvas>
+  </div>
+  <div class="view">
+    <div class="view-label label-light">💡 Light View (shadow map depth)</div>
+    <canvas id="canvas-light" width="319" height="262"></canvas>
+  </div>
+</div>
+
+<div id="controls">
+  <div>
+    <label>Angle:</label>
+    <input type="range" id="light-angle" min="0" max="360" step="2" value="40" style="width:90px"/>
+    <span id="val-angle">40°</span>
+  </div>
+  <div>
+    <label>Height:</label>
+    <input type="range" id="light-height" min="2" max="18" step="0.5" value="9" style="width:80px"/>
+    <span id="val-height">9</span>
+  </div>
+  <button class="toggle-btn active" id="btn-rotate">⟳ Auto-rotate</button>
+  <span style="margin-left:auto; color:#334155;">orbit: left-drag</span>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Fixed canvas dimensions ───────────────────────────────────────────────────
+const CW = 319, CH = 262;   // pixels — must match the canvas width/height attrs
+
+// ── Two renderers ─────────────────────────────────────────────────────────────
+const canvasC = document.getElementById('canvas-camera');
+const canvasL = document.getElementById('canvas-light');
+
+const rendererC = new THREE.WebGLRenderer({ canvas: canvasC, antialias: true });
+rendererC.setSize(CW, CH, false);
+rendererC.setPixelRatio(Math.min(devicePixelRatio, 2));
+rendererC.shadowMap.enabled   = true;
+rendererC.shadowMap.type      = THREE.PCFSoftShadowMap;
+rendererC.toneMapping         = THREE.ACESFilmicToneMapping;
+rendererC.toneMappingExposure = 1.1;
+
+const rendererL = new THREE.WebGLRenderer({ canvas: canvasL, antialias: false });
+rendererL.setSize(CW, CH, false);
+rendererL.setPixelRatio(Math.min(devicePixelRatio, 2));
+rendererL.setClearColor(0x000000, 1);
+
+// ── Scene ──────────────────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x8caabb);
+scene.fog = new THREE.Fog(0x8caabb, 30, 70);
+scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+
+// Spotlight
+const spot = new THREE.SpotLight(0xfff8e7, 130);
+spot.castShadow            = true;
+spot.angle                 = Math.PI / 8;
+spot.penumbra              = 0.15;
+spot.decay                 = 1.8;
+spot.shadow.mapSize.width  = 1024;
+spot.shadow.mapSize.height = 1024;
+spot.shadow.camera.near    = 1;
+spot.shadow.camera.far     = 45;
+spot.shadow.bias           = 0.0008;
+spot.shadow.normalBias     = 0.04;
+
+const spotTarget = new THREE.Object3D();
+scene.add(spotTarget);
+spot.target = spotTarget;
+scene.add(spot);
+
+// ── Ground ─────────────────────────────────────────────────────────────────────
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(28, 28),
+  new THREE.MeshLambertMaterial({ color: 0xb4c89c })
+);
+ground.rotation.x    = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+scene.add(new THREE.GridHelper(28, 28, 0x778866, 0x889977));
+
+// ── Objects ────────────────────────────────────────────────────────────────────
+function addObj(geo, color, x, y, z, ry = 0) {
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
+  m.position.set(x, y, z);
+  m.rotation.y    = ry;
+  m.castShadow    = true;
+  m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+addObj(new THREE.BoxGeometry(1.5, 1.5, 1.5),          0x4a8ded, -2.5, 0.75,  0.2);
+addObj(new THREE.BoxGeometry(1.0, 3.2, 1.0),          0x4caf78,  0.8, 1.6,  -2.0);
+addObj(new THREE.SphereGeometry(0.85, 32, 16),         0xe07040,  2.0, 0.85,  1.0);
+addObj(new THREE.CylinderGeometry(0.5, 0.7, 2.0, 32), 0x9070c0, -0.5, 1.0,   2.0);
+const torus = addObj(new THREE.TorusGeometry(0.75, 0.26, 16, 48), 0xe8d070, 1.5, 0.3, -0.5, 0.3);
+
+// ── Main camera + controls ─────────────────────────────────────────────────────
+const cameraMain = new THREE.PerspectiveCamera(48, CW / CH, 0.1, 100);
+cameraMain.position.set(9, 7, 11);
+
+const controls = new OrbitControls(cameraMain, canvasC);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.target.set(0, 1, 0);
+
+// ── Depth visualization material ───────────────────────────────────────────────
+const depthMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uNear: { value: spot.shadow.camera.near },
+    uFar:  { value: spot.shadow.camera.far  }
+  },
+  vertexShader: `
+    varying float vDepth;
+    void main() {
+      vec4 vp = modelViewMatrix * vec4(position, 1.0);
+      vDepth   = -vp.z;
+      gl_Position = projectionMatrix * vp;
+    }
+  `,
+  fragmentShader: `
+    uniform float uNear;
+    uniform float uFar;
+    varying float vDepth;
+    void main() {
+      float d = clamp((vDepth - uNear) / (uFar - uNear), 0.0, 1.0);
+      float b = 1.0 - d;   // near = white, far = black
+      gl_FragColor = vec4(b, b, b, 1.0);
+    }
+  `
+});
+
+// ── Light position ─────────────────────────────────────────────────────────────
+let lAngle = 40, lHeight = 9, autoRotate = true;
+function updateLightPos() {
+  const r = (lAngle * Math.PI) / 180;
+  spot.position.set(8 * Math.sin(r), lHeight, 8 * Math.cos(r));
+}
+updateLightPos();
+
+// ── Animation loop ─────────────────────────────────────────────────────────────
+let lastT = 0;
+function animate(t) {
+  requestAnimationFrame(animate);
+  const dt = t - lastT; lastT = t;
+
+  torus.rotation.z += 0.004;
+  controls.update();
+
+  if (autoRotate) {
+    lAngle = (lAngle + dt * 0.015) % 360;
+    document.getElementById('light-angle').value = Math.round(lAngle);
+    document.getElementById('val-angle').textContent  = Math.round(lAngle) + '°';
+    updateLightPos();
+  }
+
+  // Pass 1: camera view (also triggers Three.js shadow map pass,
+  //         which updates spot.shadow.camera matrices)
+  rendererC.render(scene, cameraMain);
+
+  // Pass 2: depth view from the light's shadow camera
+  depthMat.uniforms.uNear.value = spot.shadow.camera.near;
+  depthMat.uniforms.uFar.value  = spot.shadow.camera.far;
+  scene.overrideMaterial = depthMat;
+  rendererL.render(scene, spot.shadow.camera);
+  scene.overrideMaterial = null;
+}
+animate(0);
+
+// ── UI event handlers ──────────────────────────────────────────────────────────
+document.getElementById('light-angle').addEventListener('input', e => {
+  lAngle = parseFloat(e.target.value);
+  document.getElementById('val-angle').textContent = lAngle + '°';
+  updateLightPos();
+});
+document.getElementById('light-height').addEventListener('input', e => {
+  lHeight = parseFloat(e.target.value);
+  document.getElementById('val-height').textContent = lHeight;
+  updateLightPos();
+});
+document.getElementById('btn-rotate').addEventListener('click', e => {
+  autoRotate = !autoRotate;
+  e.target.classList.toggle('active', autoRotate);
+  e.target.textContent = autoRotate ? '⟳ Auto-rotate' : '⟳ Manual';
+});
+</script>
+</body>
+</html>
