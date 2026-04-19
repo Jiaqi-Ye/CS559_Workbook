@@ -341,36 +341,46 @@ class IsometricSchoolBus extends GrObject {
         body.position.set(0, 0.68, 0);
         bus.add(body);
 
-        const roof = new T.Mesh(new T.BoxGeometry(3.1, 0.24, 1.1), busYellowDark);
+        const roof = new T.Mesh(new T.BoxGeometry(3.04, 0.20, 1.12), busYellowDark);
         roof.position.set(0, 1.2, 0);
         bus.add(roof);
+        const roofStripeMat = new T.MeshPhongMaterial({ color: "#c79d22", shininess: 18, flatShading: true });
+        const roofStripeCenter = new T.Mesh(new T.BoxGeometry(2.9, 0.01, 0.06), roofStripeMat);
+        roofStripeCenter.position.set(0, 1.305, 0);
+        bus.add(roofStripeCenter);
+        const roofStripeL = new T.Mesh(new T.BoxGeometry(2.9, 0.01, 0.045), roofStripeMat);
+        roofStripeL.position.set(0, 1.305, 0.23);
+        bus.add(roofStripeL);
+        const roofStripeR = roofStripeL.clone();
+        roofStripeR.position.z = -0.23;
+        bus.add(roofStripeR);
         // Rounded roof edges/corners for softer school-bus silhouette.
         const roofRoundMat = busYellowDark;
-        const roofFrontEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 1.1, 28), roofRoundMat);
+        const roofFrontEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 1.12, 28), roofRoundMat);
         roofFrontEdge.rotation.x = Math.PI / 2;
-        roofFrontEdge.position.set(1.55, 1.2, 0);
+        roofFrontEdge.position.set(1.52, 1.2, 0);
         bus.add(roofFrontEdge);
         const roofBackEdge = roofFrontEdge.clone();
-        roofBackEdge.position.x = -1.55;
+        roofBackEdge.position.x = -1.52;
         bus.add(roofBackEdge);
-        const roofLeftEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 3.1, 28), roofRoundMat);
+        const roofLeftEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 3.04, 28), roofRoundMat);
         roofLeftEdge.rotation.z = Math.PI / 2;
-        roofLeftEdge.position.set(0, 1.2, 0.55);
+        roofLeftEdge.position.set(0, 1.2, 0.56);
         bus.add(roofLeftEdge);
         const roofRightEdge = roofLeftEdge.clone();
-        roofRightEdge.position.z = -0.55;
+        roofRightEdge.position.z = -0.56;
         bus.add(roofRightEdge);
         const roofCornerFL = new T.Mesh(new T.SphereGeometry(0.13, 24, 18), roofRoundMat);
-        roofCornerFL.position.set(1.55, 1.2, 0.55);
+        roofCornerFL.position.set(1.52, 1.2, 0.56);
         bus.add(roofCornerFL);
         const roofCornerFR = roofCornerFL.clone();
-        roofCornerFR.position.z = -0.55;
+        roofCornerFR.position.z = -0.56;
         bus.add(roofCornerFR);
         const roofCornerBL = roofCornerFL.clone();
-        roofCornerBL.position.x = -1.55;
+        roofCornerBL.position.x = -1.52;
         bus.add(roofCornerBL);
         const roofCornerBR = roofCornerBL.clone();
-        roofCornerBR.position.z = -0.55;
+        roofCornerBR.position.z = -0.56;
         bus.add(roofCornerBR);
 
         const nose = new T.Mesh(new T.BoxGeometry(0.55, 0.52, 1.08), busYellowDark);
@@ -382,7 +392,7 @@ class IsometricSchoolBus extends GrObject {
         bus.add(frontSign);
         // Front windshield in the same style as the truck.
         const frontWindshield = new T.Mesh(new T.BoxGeometry(0.03, 0.26, 0.74), windowMat);
-        frontWindshield.position.set(2.045, 0.79, 0);
+        frontWindshield.position.set(1.615, 0.95, 0);
         bus.add(frontWindshield);
 
         const grill = new T.Mesh(new T.BoxGeometry(0.04, 0.22, 0.86), lightGray);
@@ -449,6 +459,28 @@ class IsometricSchoolBus extends GrObject {
         const headR = headL.clone();
         headR.position.z = -0.38;
         bus.add(headR);
+        const headHousingL = new T.Mesh(new T.CylinderGeometry(0.1, 0.1, 0.03, 14), blackTrim);
+        headHousingL.rotation.z = Math.PI / 2;
+        headHousingL.position.set(2.03, 0.40, 0.38);
+        bus.add(headHousingL);
+        const headHousingR = headHousingL.clone();
+        headHousingR.position.z = -0.38;
+        bus.add(headHousingR);
+
+        // Rear tail lights.
+        const tailMat = new T.MeshPhongMaterial({
+            color: "#e14646",
+            emissive: "#8d1717",
+            emissiveIntensity: 0.5,
+            shininess: 50,
+            flatShading: true
+        });
+        const tailL = new T.Mesh(new T.SphereGeometry(0.07, 12, 10), tailMat);
+        tailL.position.set(-1.62, 0.47, 0.43);
+        bus.add(tailL);
+        const tailR = tailL.clone();
+        tailR.position.z = -0.43;
+        bus.add(tailR);
 
         const markerMat = new T.MeshPhongMaterial({ color: "#ff8d35", emissive: "#a74a12", emissiveIntensity: 0.35, shininess: 40, flatShading: true });
         const marker1 = new T.Mesh(new T.SphereGeometry(0.045, 10, 8), markerMat);
