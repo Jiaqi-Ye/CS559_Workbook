@@ -42,5 +42,5 @@ void main()
 
     // choose a color based on how close we are
     gl_FragColor = vec4(mix(light,dotColor,dc), 1.);
-}
+} 
 //@@Snippet:end
