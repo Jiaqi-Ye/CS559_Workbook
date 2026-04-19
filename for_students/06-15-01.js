@@ -54,6 +54,31 @@ async function test() {
    * it's about 15 lines (with a recursive "loop" to enable shadows for all objects)
    * but you can also just turn things on as you make objects
    */
+  world.renderer.shadowMap.enabled = true;
+  world.renderer.shadowMap.type = T.PCFSoftShadowMap;
+
+  if (world.ambient) world.ambient.intensity = 0.12;
+  world.scene.traverse(obj => {
+    if (obj instanceof T.DirectionalLight) obj.intensity = 0.35;
+  });
+
+  let spot = new T.SpotLight("white", 70, 30, Math.PI / 9, 0.05);
+  spot.position.set(-1.0, 9, 3.4);
+  spot.castShadow = true;
+  spot.shadow.bias = -0.0002;
+  spot.shadow.mapSize.set(2048, 2048);
+  spot.shadow.camera.near = 0.5;
+  spot.shadow.camera.far = 40;
+  spot.target.position.set(0, 1.0, 0);
+  world.scene.add(spot);
+  world.scene.add(spot.target);
+
+  world.scene.traverse(obj => {
+    if (obj instanceof T.Mesh) {
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+    }
+  });
 
   world.go();
 }

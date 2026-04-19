@@ -27,7 +27,10 @@ void main()
     // without using `reflect`, alignment can be computed by taking the halfway vetor H and evaluating dot(N,H)
     vec3 reflDir = reflect(-lightDir,normal);
     float alignment = max(dot(viewDir,reflDir),0.);
-    // specular highlight color
-    vec3 specular = baseColor * pow(alignment,pow(2.,shininess));
-    gl_FragColor = vec4(specular, 1);
+    // diffuse + specular (plastic-like: colored diffuse, white highlight)
+    float diffuseAmount = max(dot(normal, lightDir), 0.);
+    vec3 diffuse = baseColor * diffuseAmount;
+    vec3 specular = vec3(1., 1., 1.) * pow(alignment,pow(2.,shininess));
+    vec3 color = clamp(diffuse + specular, 0., 1.);
+    gl_FragColor = vec4(color, 1);
 }

@@ -34,7 +34,13 @@ void main()
     // determine if we're close enough to the center
     float dc = 1.0 - step(radius,d);
 
+    // alternate dot color by tile: some dots blue, some green
+    float which = mod(xc + yc, 2.0);
+    vec3 blueDot = vec3(0.1, 0.3, 1.0);
+    vec3 greenDot = vec3(0.1, 0.9, 0.2);
+    vec3 dotColor = mix(blueDot, greenDot, which);
+
     // choose a color based on how close we are
-    gl_FragColor = vec4(mix(light,dark,dc), 1.);
+    gl_FragColor = vec4(mix(light,dotColor,dc), 1.);
 }
 //@@Snippet:end
