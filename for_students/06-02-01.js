@@ -212,7 +212,294 @@ class IsometricSedan extends GrObject {
     }
 }
 
-const world = await GrWorld.new();
+// Added per request: a different car model kept "unused" by default.
+class IsometricRoadster extends GrObject {
+    constructor(name, x, z) {
+        const roadster = new T.Group();
+        const bodyMain = new T.MeshPhongMaterial({ color: "#b31919", shininess: 40, flatShading: true });
+        const bodyAccent = new T.MeshPhongMaterial({ color: "#d62828", shininess: 35, flatShading: true });
+        const cockpitMat = new T.MeshPhongMaterial({ color: "#0c1118", shininess: 5, flatShading: true });
+        const seatMat = new T.MeshPhongMaterial({ color: "#1a1a1a", shininess: 8, flatShading: true });
+        const stripeMat = new T.MeshPhongMaterial({ color: "#f8f9fc", shininess: 20, flatShading: true });
+
+        const floor = new T.Mesh(new T.BoxGeometry(2.34, 0.2, 1.08), bodyMain);
+        floor.position.set(0, 0.24, 0);
+        roadster.add(floor);
+
+        const frontNose = new T.Mesh(new T.BoxGeometry(0.92, 0.13, 0.9), bodyAccent);
+        frontNose.position.set(-0.92, 0.36, 0);
+        frontNose.rotation.z = -0.12;
+        roadster.add(frontNose);
+        const noseTip = new T.Mesh(new T.BoxGeometry(0.26, 0.1, 0.84), bodyAccent);
+        noseTip.position.set(-1.26, 0.3, 0);
+        noseTip.rotation.z = -0.2;
+        roadster.add(noseTip);
+
+        const rearDeck = new T.Mesh(new T.BoxGeometry(1.12, 0.2, 1.18), bodyAccent);
+        rearDeck.position.set(0.74, 0.44, 0);
+        roadster.add(rearDeck);
+
+        const cockpit = new T.Mesh(new T.BoxGeometry(1.02, 0.14, 0.72), cockpitMat);
+        cockpit.position.set(0.12, 0.51, 0);
+        roadster.add(cockpit);
+
+        const windscreen = new T.Mesh(new T.BoxGeometry(0.06, 0.2, 0.72), windowMat);
+        windscreen.position.set(-0.36, 0.66, 0);
+        windscreen.rotation.z = -0.52;
+        roadster.add(windscreen);
+
+        const seatL = new T.Mesh(new T.BoxGeometry(0.22, 0.14, 0.26), seatMat);
+        seatL.position.set(0.2, 0.62, 0.2);
+        roadster.add(seatL);
+        const seatR = seatL.clone();
+        seatR.position.z = -0.2;
+        roadster.add(seatR);
+
+        const headrestL = new T.Mesh(new T.BoxGeometry(0.12, 0.12, 0.12), seatMat);
+        headrestL.position.set(0.45, 0.7, 0.2);
+        roadster.add(headrestL);
+        const headrestR = headrestL.clone();
+        headrestR.position.z = -0.2;
+        roadster.add(headrestR);
+
+        const rearHumpL = new T.Mesh(new T.BoxGeometry(0.42, 0.12, 0.22), bodyAccent);
+        rearHumpL.position.set(0.72, 0.62, 0.22);
+        roadster.add(rearHumpL);
+        const rearHumpR = rearHumpL.clone();
+        rearHumpR.position.z = -0.22;
+        roadster.add(rearHumpR);
+
+        const centerStripe = new T.Mesh(new T.BoxGeometry(2.26, 0.01, 0.16), stripeMat);
+        centerStripe.position.set(0.02, 0.38, 0);
+        roadster.add(centerStripe);
+        const sideSill = new T.Mesh(new T.BoxGeometry(2.24, 0.06, 0.06), stripeMat);
+        sideSill.position.set(0.03, 0.28, 0.54);
+        roadster.add(sideSill);
+        const sideSill2 = sideSill.clone();
+        sideSill2.position.z = -0.54;
+        roadster.add(sideSill2);
+
+        const wheelGeo = new T.CylinderGeometry(0.27, 0.27, 0.22, 20);
+        const addWheel = (wx, wz) => {
+            const wg = new T.Group();
+            const tire = new T.Mesh(wheelGeo, wheelMat);
+            tire.rotation.x = Math.PI / 2;
+            wg.add(tire);
+            const hub = new T.Mesh(new T.CylinderGeometry(0.12, 0.12, 0.24, 12), wheelCapMat);
+            hub.rotation.x = Math.PI / 2;
+            wg.add(hub);
+            wg.position.set(wx, 0.27, wz);
+            roadster.add(wg);
+        };
+        addWheel(-0.86, 0.62);
+        addWheel(0.86, 0.62);
+        addWheel(-0.86, -0.62);
+        addWheel(0.86, -0.62);
+
+        const rearLightMat = new T.MeshPhongMaterial({
+            color: "#d33f3f",
+            emissive: "#8a1212",
+            emissiveIntensity: 0.5,
+            shininess: 45,
+            flatShading: true
+        });
+        const rearL = new T.Mesh(new T.BoxGeometry(0.05, 0.09, 0.17), rearLightMat);
+        rearL.position.set(1.16, 0.36, 0.38);
+        roadster.add(rearL);
+        const rearR = rearL.clone();
+        rearR.position.z = -0.38;
+        roadster.add(rearR);
+
+        const frontLightMat = new T.MeshPhongMaterial({
+            color: "#fff3bf",
+            emissive: "#ffe79a",
+            emissiveIntensity: 0.55,
+            shininess: 90,
+            flatShading: true
+        });
+        const frontL = new T.Mesh(new T.BoxGeometry(0.05, 0.08, 0.17), frontLightMat);
+        frontL.position.set(-1.40, 0.30, 0.38);
+        roadster.add(frontL);
+        const frontR = frontL.clone();
+        frontR.position.z = -0.38;
+        roadster.add(frontR);
+
+        super(name, roadster);
+        this.setPos(x, 0, z);
+    }
+}
+
+class IsometricSchoolBus extends GrObject {
+    constructor(name, x, z) {
+        const bus = new T.Group();
+        const busYellow = new T.MeshPhongMaterial({ color: "#f2c230", shininess: 28, flatShading: true });
+        const busYellowDark = new T.MeshPhongMaterial({ color: "#d8aa24", shininess: 18, flatShading: true });
+        const blackTrim = new T.MeshPhongMaterial({ color: "#1e1e1e", shininess: 4, flatShading: true });
+        const lightGray = new T.MeshPhongMaterial({ color: "#bcc1c7", shininess: 20, flatShading: true });
+
+        const body = new T.Mesh(new T.BoxGeometry(3.2, 0.8, 1.18), busYellow);
+        body.position.set(0, 0.68, 0);
+        bus.add(body);
+
+        const roof = new T.Mesh(new T.BoxGeometry(3.1, 0.24, 1.1), busYellowDark);
+        roof.position.set(0, 1.2, 0);
+        bus.add(roof);
+        // Rounded roof edges/corners for softer school-bus silhouette.
+        const roofRoundMat = busYellowDark;
+        const roofFrontEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 1.1, 28), roofRoundMat);
+        roofFrontEdge.rotation.x = Math.PI / 2;
+        roofFrontEdge.position.set(1.55, 1.2, 0);
+        bus.add(roofFrontEdge);
+        const roofBackEdge = roofFrontEdge.clone();
+        roofBackEdge.position.x = -1.55;
+        bus.add(roofBackEdge);
+        const roofLeftEdge = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 3.1, 28), roofRoundMat);
+        roofLeftEdge.rotation.z = Math.PI / 2;
+        roofLeftEdge.position.set(0, 1.2, 0.55);
+        bus.add(roofLeftEdge);
+        const roofRightEdge = roofLeftEdge.clone();
+        roofRightEdge.position.z = -0.55;
+        bus.add(roofRightEdge);
+        const roofCornerFL = new T.Mesh(new T.SphereGeometry(0.13, 24, 18), roofRoundMat);
+        roofCornerFL.position.set(1.55, 1.2, 0.55);
+        bus.add(roofCornerFL);
+        const roofCornerFR = roofCornerFL.clone();
+        roofCornerFR.position.z = -0.55;
+        bus.add(roofCornerFR);
+        const roofCornerBL = roofCornerFL.clone();
+        roofCornerBL.position.x = -1.55;
+        bus.add(roofCornerBL);
+        const roofCornerBR = roofCornerBL.clone();
+        roofCornerBR.position.z = -0.55;
+        bus.add(roofCornerBR);
+
+        const nose = new T.Mesh(new T.BoxGeometry(0.55, 0.52, 1.08), busYellowDark);
+        nose.position.set(1.86, 0.45, 0);
+        bus.add(nose);
+
+        const frontSign = new T.Mesh(new T.BoxGeometry(0.06, 0.2, 0.9), new T.MeshPhongMaterial({ color: "#1d1d1d", shininess: 5, flatShading: true }));
+        frontSign.position.set(2.045, 0.79, 0);
+        bus.add(frontSign);
+        // Front windshield in the same style as the truck.
+        const frontWindshield = new T.Mesh(new T.BoxGeometry(0.03, 0.26, 0.74), windowMat);
+        frontWindshield.position.set(2.045, 0.79, 0);
+        bus.add(frontWindshield);
+
+        const grill = new T.Mesh(new T.BoxGeometry(0.04, 0.22, 0.86), lightGray);
+        grill.position.set(2.13, 0.42, 0);
+        bus.add(grill);
+        for (let i = -3; i <= 3; i++) {
+            const slit = new T.Mesh(new T.BoxGeometry(0.01, 0.2, 0.05), blackTrim);
+            slit.position.set(2.16, 0.42, i * 0.11);
+            bus.add(slit);
+        }
+
+        const stripe = new T.Mesh(new T.BoxGeometry(3.18, 0.08, 0.06), blackTrim);
+        stripe.position.set(0, 0.76, 0.545);
+        bus.add(stripe);
+        const stripe2 = stripe.clone();
+        stripe2.position.z = -0.545;
+        bus.add(stripe2);
+
+        // Side windows: square-ish panes with black frames.
+        const sideWindowXs = [-1.0, -0.64, -0.28, 0.08, 0.44, 0.8];
+        for (const wx of sideWindowXs) {
+            const frameL = new T.Mesh(new T.BoxGeometry(0.29, 0.29, 0.03), blackTrim);
+            frameL.position.set(wx, 1.0, 0.615);
+            bus.add(frameL);
+            const paneL = new T.Mesh(new T.BoxGeometry(0.23, 0.23, 0.02), windowMat);
+            paneL.position.set(wx, 1.0, 0.631);
+            bus.add(paneL);
+
+            const frameR = frameL.clone();
+            frameR.position.z = -0.615;
+            bus.add(frameR);
+            const paneR = paneL.clone();
+            paneR.position.z = -0.631;
+            bus.add(paneR);
+        }
+
+        const driverFrameL = new T.Mesh(new T.BoxGeometry(0.31, 0.29, 0.03), blackTrim);
+        driverFrameL.position.set(1.34, 0.94, 0.615);
+        bus.add(driverFrameL);
+        const driverPaneL = new T.Mesh(new T.BoxGeometry(0.25, 0.23, 0.02), windowMat);
+        driverPaneL.position.set(1.34, 0.94, 0.631);
+        bus.add(driverPaneL);
+        const driverFrameR = driverFrameL.clone();
+        driverFrameR.position.z = -0.615;
+        bus.add(driverFrameR);
+        const driverPaneR = driverPaneL.clone();
+        driverPaneR.position.z = -0.631;
+        bus.add(driverPaneR);
+
+        const door = new T.Mesh(new T.BoxGeometry(0.05, 0.5, 0.62), lightGray);
+        door.position.set(1.18, 0.52, 0.28);
+        bus.add(door);
+
+        const headMat = new T.MeshPhongMaterial({
+            color: "#fff1bd",
+            emissive: "#ffdd8c",
+            emissiveIntensity: 0.55,
+            shininess: 80,
+            flatShading: true
+        });
+        const headL = new T.Mesh(new T.SphereGeometry(0.09, 14, 10), headMat);
+        headL.position.set(2.045, 0.40, 0.38);
+        bus.add(headL);
+        const headR = headL.clone();
+        headR.position.z = -0.38;
+        bus.add(headR);
+
+        const markerMat = new T.MeshPhongMaterial({ color: "#ff8d35", emissive: "#a74a12", emissiveIntensity: 0.35, shininess: 40, flatShading: true });
+        const marker1 = new T.Mesh(new T.SphereGeometry(0.045, 10, 8), markerMat);
+        marker1.position.set(2.07, 0.90, -0.2);
+        bus.add(marker1);
+        const marker2 = marker1.clone();
+        marker2.position.z = 0.0;
+        bus.add(marker2);
+        const marker3 = marker1.clone();
+        marker3.position.z = 0.2;
+        bus.add(marker3);
+
+        // Front side mirrors (left/right).
+        const mirrorMat = new T.MeshPhongMaterial({ color: "#2a2a2a", shininess: 20, flatShading: true });
+        const mirrorStemL = new T.Mesh(new T.CylinderGeometry(0.015, 0.015, 0.22, 12), mirrorMat);
+        mirrorStemL.position.set(1.84, 0.67, 0.58);
+        mirrorStemL.rotation.z = -0.38;
+        bus.add(mirrorStemL);
+        const mirrorHeadL = new T.Mesh(new T.SphereGeometry(0.07, 14, 10), mirrorMat);
+        mirrorHeadL.position.set(1.79, 0.72, 0.64);
+        bus.add(mirrorHeadL);
+        const mirrorStemR = mirrorStemL.clone();
+        mirrorStemR.position.z = -0.58;
+        bus.add(mirrorStemR);
+        const mirrorHeadR = mirrorHeadL.clone();
+        mirrorHeadR.position.z = -0.64;
+        bus.add(mirrorHeadR);
+
+        const wheelGeo = new T.CylinderGeometry(0.28, 0.28, 0.24, 18);
+        const addWheel = (wx, wz) => {
+            const wg = new T.Group();
+            const tire = new T.Mesh(wheelGeo, wheelMat);
+            tire.rotation.x = Math.PI / 2;
+            wg.add(tire);
+            const hub = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 0.26, 14), wheelCapMat);
+            hub.rotation.x = Math.PI / 2;
+            wg.add(hub);
+            wg.position.set(wx, 0.28, wz);
+            bus.add(wg);
+        };
+        addWheel(-1.1, 0.64);
+        addWheel(1.15, 0.64);
+        addWheel(-1.1, -0.64);
+        addWheel(1.15, -0.64);
+
+        super(name, bus);
+        this.setPos(x, 0, z);
+    }
+}
+
+const world = await GrWorld.new({ groundplanecolor: "lightgray" });
 const ambientLight = new T.AmbientLight(0xffffff, 0.9);
 world.scene.add(ambientLight);
 const keyLight = new T.DirectionalLight(0xffffff, 0.65);
@@ -220,4 +507,6 @@ keyLight.position.set(3, 5, 2);
 world.scene.add(keyLight);
 world.add(new IsometricTruck("IsometricTruck", -1.8, 0));
 world.add(new IsometricSedan("IsometricSedan", 1.8, 0));
+world.add(new IsometricRoadster("IsometricRoadster", 0, 2));
+world.add(new IsometricSchoolBus("IsometricSchoolBus", 0, -2.3));
 world.go();
