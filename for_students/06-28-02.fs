@@ -13,7 +13,14 @@ uniform float checks;
 
 void main()
 {
-    float dc = .5;
+    // checker pattern over UV space
+    float x = v_uv.x * checks;
+    float y = v_uv.y * checks;
+    float pattern = sin(3.14159265 * x) * sin(3.14159265 * y);
+
+    // anti-aliased transition near checker boundaries
+    float a = fwidth(pattern);
+    float dc = smoothstep(-a, a, pattern);
 
     gl_FragColor = vec4(mix(light,dark,dc), 1.);
 }

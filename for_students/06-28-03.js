@@ -14,8 +14,25 @@ import { shaderMaterial } from "CS559-Framework/shaderHelper.js";
   
   let shaderMat = shaderMaterial("./06-28-03.vs", "./06-28-03.fs", {
     side: T.DoubleSide,
-    uniforms: {},
+    uniforms: {
+      checks: { value: 10.0 },
+    },
   });
+
+  let s1 = new InputHelpers.LabelSlider("checks", {
+    width: 400,
+    min: 4,
+    max: 24,
+    step: 0.5,
+    initial: 10,
+    where: mydiv,
+  });
+
+  function onchange() {
+    shaderMat.uniforms.checks.value = s1.value();
+  }
+  s1.oninput = onchange;
+  onchange();
 
   world.add(new SimpleObjects.GrSphere({ x: -2, y: 1, material: shaderMat }));
   world.add(

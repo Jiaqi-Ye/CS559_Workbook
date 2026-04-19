@@ -6,6 +6,8 @@
 
 /* pass interpolated variables to the fragment */
 varying vec2 v_uv;
+varying vec3 v_worldNormal;
+varying vec3 v_worldPos;
 
 /* the vertex shader just passes stuff to the fragment shader after doing the
  * appropriate transformations of the vertex information
@@ -13,6 +15,9 @@ varying vec2 v_uv;
 void main() {
     // pass the texture coordinate to the fragment
     v_uv = uv;
+    // pass normal and position in world coordinates
+    v_worldNormal = normalize(mat3(modelMatrix) * normal);
+    v_worldPos = (modelMatrix * vec4(position, 1.0)).xyz;
 
     // the main output of the shader (the vertex position)
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );

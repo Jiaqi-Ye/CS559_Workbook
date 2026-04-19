@@ -13,7 +13,14 @@ uniform float checks;
 
 void main()
 {
-    float dc = .5;
+    // scale UVs to checker space
+    float x = v_uv.x * checks;
+    float y = v_uv.y * checks;
+
+    // choose one of two colors based on tile parity
+    float xodd = mod(floor(x), 2.0);
+    float yodd = mod(floor(y), 2.0);
+    float dc = step(0.5, abs(xodd - yodd));
 
     gl_FragColor = vec4(mix(light,dark,dc), 1.);
 }
