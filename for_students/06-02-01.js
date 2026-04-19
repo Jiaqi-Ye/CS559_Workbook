@@ -12,6 +12,52 @@ const windowMat = new T.MeshPhongMaterial({
 });
 const wheelCapMat = new T.MeshPhongMaterial({ color: "#8b8f96", shininess: 5, flatShading: true });
 
+function makeSchoolBusSignTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#1d1d1d";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "bold 42px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("SCHOOL BUS", canvas.width / 2, canvas.height / 2 + 1);
+    const tex = new T.CanvasTexture(canvas);
+    tex.wrapS = T.ClampToEdgeWrapping;
+    tex.wrapT = T.ClampToEdgeWrapping;
+    return tex;
+}
+
+function makeSchoolBusSideTextTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 768;
+    canvas.height = 160;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const label = "SCHOOL BUS";
+    // Fit text to canvas to avoid clipping on both sides.
+    let fontSize = 100;
+    do {
+        ctx.font = `900 ${fontSize}px Arial`;
+        fontSize -= 2;
+    } while (ctx.measureText(label).width > canvas.width * 0.86 && fontSize > 40);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    // Solid bold black text.
+    ctx.fillStyle = "#000000";
+    ctx.fillText(label, cx, cy);
+    const tex = new T.CanvasTexture(canvas);
+    tex.wrapS = T.ClampToEdgeWrapping;
+    tex.wrapT = T.ClampToEdgeWrapping;
+    return tex;
+}
+
 function makeCargoPrintTexture() {
     const canvas = document.createElement("canvas");
     canvas.width = 256;
@@ -344,11 +390,11 @@ class IsometricSchoolBus extends GrObject {
         const roof = new T.Mesh(new T.BoxGeometry(3.04, 0.20, 1.12), busYellowDark);
         roof.position.set(0, 1.2, 0);
         bus.add(roof);
-        const roofStripeMat = new T.MeshPhongMaterial({ color: "#c79d22", shininess: 18, flatShading: true });
-        const roofStripeCenter = new T.Mesh(new T.BoxGeometry(2.9, 0.01, 0.06), roofStripeMat);
+        const roofStripeMat = new T.MeshPhongMaterial({ color: "#c79d22", shininess: 18, flatShading: false });
+        const roofStripeCenter = new T.Mesh(new T.BoxGeometry(2.35, 0.01, 0.06), roofStripeMat);
         roofStripeCenter.position.set(0, 1.305, 0);
         bus.add(roofStripeCenter);
-        const roofStripeL = new T.Mesh(new T.BoxGeometry(2.9, 0.01, 0.045), roofStripeMat);
+        const roofStripeL = new T.Mesh(new T.BoxGeometry(2.3, 0.01, 0.045), roofStripeMat);
         roofStripeL.position.set(0, 1.305, 0.23);
         bus.add(roofStripeL);
         const roofStripeR = roofStripeL.clone();
@@ -387,12 +433,15 @@ class IsometricSchoolBus extends GrObject {
         nose.position.set(1.86, 0.45, 0);
         bus.add(nose);
 
-        const frontSign = new T.Mesh(new T.BoxGeometry(0.06, 0.2, 0.9), new T.MeshPhongMaterial({ color: "#1d1d1d", shininess: 5, flatShading: true }));
-        frontSign.position.set(2.045, 0.79, 0);
+        const signMat = new T.MeshPhongMaterial({ color: "#1d1d1d", shininess: 5, flatShading: true });
+        signMat.map = makeSchoolBusSignTexture();
+        signMat.needsUpdate = true;
+        const frontSign = new T.Mesh(new T.BoxGeometry(0.06, 0.09, 0.9), signMat);
+        frontSign.position.set(2.045, 0.72, 0);
         bus.add(frontSign);
         // Front windshield in the same style as the truck.
         const frontWindshield = new T.Mesh(new T.BoxGeometry(0.03, 0.26, 0.74), windowMat);
-        frontWindshield.position.set(1.615, 0.95, 0);
+        frontWindshield.position.set(1.615, 0.88, 0);
         bus.add(frontWindshield);
 
         const grill = new T.Mesh(new T.BoxGeometry(0.04, 0.22, 0.86), lightGray);
@@ -410,15 +459,30 @@ class IsometricSchoolBus extends GrObject {
         const stripe2 = stripe.clone();
         stripe2.position.z = -0.545;
         bus.add(stripe2);
+        const sideSignMat = new T.MeshPhongMaterial({
+            color: "#ffffff",
+            shininess: 5,
+            transparent: true,
+            opacity: 1,
+            flatShading: true
+        });
+        sideSignMat.map = makeSchoolBusSideTextTexture();
+        sideSignMat.needsUpdate = true;
+        const sideSignL = new T.Mesh(new T.BoxGeometry(1.02, 0.16, 0.005), sideSignMat);
+        sideSignL.position.set(0.62, 0.62, 0.61);
+        bus.add(sideSignL);
+        const sideSignR = sideSignL.clone();
+        sideSignR.position.z = -0.61;
+        bus.add(sideSignR);
 
         // Side windows: square-ish panes with black frames.
         const sideWindowXs = [-1.0, -0.64, -0.28, 0.08, 0.44, 0.8];
         for (const wx of sideWindowXs) {
             const frameL = new T.Mesh(new T.BoxGeometry(0.29, 0.29, 0.03), blackTrim);
-            frameL.position.set(wx, 1.0, 0.615);
+            frameL.position.set(wx, 0.92, 0.615);
             bus.add(frameL);
             const paneL = new T.Mesh(new T.BoxGeometry(0.23, 0.23, 0.02), windowMat);
-            paneL.position.set(wx, 1.0, 0.631);
+            paneL.position.set(wx, 0.92, 0.631);
             bus.add(paneL);
 
             const frameR = frameL.clone();
@@ -430,10 +494,10 @@ class IsometricSchoolBus extends GrObject {
         }
 
         const driverFrameL = new T.Mesh(new T.BoxGeometry(0.31, 0.29, 0.03), blackTrim);
-        driverFrameL.position.set(1.34, 0.94, 0.615);
+        driverFrameL.position.set(1.34, 0.86, 0.615);
         bus.add(driverFrameL);
         const driverPaneL = new T.Mesh(new T.BoxGeometry(0.25, 0.23, 0.02), windowMat);
-        driverPaneL.position.set(1.34, 0.94, 0.631);
+        driverPaneL.position.set(1.34, 0.86, 0.631);
         bus.add(driverPaneL);
         const driverFrameR = driverFrameL.clone();
         driverFrameR.position.z = -0.615;
@@ -484,7 +548,7 @@ class IsometricSchoolBus extends GrObject {
 
         const markerMat = new T.MeshPhongMaterial({ color: "#ff8d35", emissive: "#a74a12", emissiveIntensity: 0.35, shininess: 40, flatShading: true });
         const marker1 = new T.Mesh(new T.SphereGeometry(0.045, 10, 8), markerMat);
-        marker1.position.set(2.07, 0.90, -0.2);
+        marker1.position.set(2.07, 0.82, -0.2);
         bus.add(marker1);
         const marker2 = marker1.clone();
         marker2.position.z = 0.0;
@@ -531,7 +595,7 @@ class IsometricSchoolBus extends GrObject {
     }
 }
 
-const world = await GrWorld.new({ groundplanecolor: "lightgray" });
+const world = await GrWorld.new({ groundplanecolor: "lightgray", antialias: true });
 const ambientLight = new T.AmbientLight(0xffffff, 0.9);
 world.scene.add(ambientLight);
 const keyLight = new T.DirectionalLight(0xffffff, 0.65);
